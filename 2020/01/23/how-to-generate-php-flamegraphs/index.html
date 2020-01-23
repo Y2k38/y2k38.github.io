@@ -55,19 +55,21 @@
   };
 </script>
 
-  <meta name="description" content="工欲善其事必先利其器，xdebug是php开发者的一个常用的debug工具。这几天在重新配置开发环境时，出现xdebug连不上的异常情况，花了很长时间才找到问题并解决，因此也决定将这个问题记录下来，希望能帮助到一些人">
-<meta name="keywords" content="php,vagrant,php7.3,xdebug">
+  <meta name="description" content="flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间">
+<meta name="keywords" content="php,flamegraphs,debug,profiling">
 <meta property="og:type" content="article">
-<meta property="og:title" content="记一次xdebug异常">
-<meta property="og:url" content="https://y2k38.github.io/2019/09/05/vagrant-xdebug-not-working/index.html">
+<meta property="og:title" content="生成火焰图分析php代码">
+<meta property="og:url" content="https://y2k38.github.io/2020/01/23/how-to-generate-php-flamegraphs/index.html">
 <meta property="og:site_name" content="Y2k38&#39;s Blog">
-<meta property="og:description" content="工欲善其事必先利其器，xdebug是php开发者的一个常用的debug工具。这几天在重新配置开发环境时，出现xdebug连不上的异常情况，花了很长时间才找到问题并解决，因此也决定将这个问题记录下来，希望能帮助到一些人">
+<meta property="og:description" content="flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-09-05T15:31:05.998Z">
+<meta property="og:image" content="https://y2k38.github.io/images/yii2-flamegraph-example.svg">
+<meta property="og:updated_time" content="2020-01-23T04:47:05.935Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="记一次xdebug异常">
-<meta name="twitter:description" content="工欲善其事必先利其器，xdebug是php开发者的一个常用的debug工具。这几天在重新配置开发环境时，出现xdebug连不上的异常情况，花了很长时间才找到问题并解决，因此也决定将这个问题记录下来，希望能帮助到一些人">
-  <link rel="canonical" href="https://y2k38.github.io/2019/09/05/vagrant-xdebug-not-working/">
+<meta name="twitter:title" content="生成火焰图分析php代码">
+<meta name="twitter:description" content="flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间">
+<meta name="twitter:image" content="https://y2k38.github.io/images/yii2-flamegraph-example.svg">
+  <link rel="canonical" href="https://y2k38.github.io/2020/01/23/how-to-generate-php-flamegraphs/">
 
 
 <script id="page-configurations">
@@ -81,7 +83,7 @@
   };
 </script>
 
-  <title>记一次xdebug异常 | Y2k38's Blog</title>
+  <title>生成火焰图分析php代码 | Y2k38's Blog</title>
   
 
 
@@ -196,7 +198,7 @@
   
   
   <div class="post-block post">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2019/09/05/vagrant-xdebug-not-working/">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2020/01/23/how-to-generate-php-flamegraphs/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="y2k38">
@@ -208,7 +210,7 @@
       <meta itemprop="name" content="Y2k38's Blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">记一次xdebug异常
+        <h1 class="post-title" itemprop="name headline">生成火焰图分析php代码
 
           
         </h1>
@@ -224,7 +226,7 @@
                 
               
 
-              <time title="创建时间：2019-09-05 18:54:25 / 修改时间：23:31:05" itemprop="dateCreated datePublished" datetime="2019-09-05T18:54:25+08:00">2019-09-05</time>
+              <time title="创建时间：2020-01-23 11:31:25 / 修改时间：12:47:05" itemprop="dateCreated datePublished" datetime="2020-01-23T11:31:25+08:00">2020-01-23</time>
             </span>
           
             
@@ -243,31 +245,20 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>工欲善其事必先利其器，xdebug是php开发者的一个常用的debug工具。这几天在重新配置开发环境时，出现xdebug连不上的异常情况，花了很长时间才找到问题并解决，因此也决定将这个问题记录下来，希望能帮助到一些人</p>
+        <p>flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间</p>
 <a id="more"></a>
 
-<h2 id="xdebug异常"><a href="#xdebug异常" class="headerlink" title="xdebug异常"></a>xdebug异常</h2><p>简单介绍，服务器是vagrant + ubuntu 18.04 + PHP 7.3，客户端是Windows 10，编辑器是vscode</p>
-<p>初始xdebug配置如下</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[xdebug]</span></span><br><span class="line"><span class="attr">xdebug.remote_enable</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_autostart</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_port</span> = <span class="number">9001</span></span><br><span class="line"><span class="attr">xdebug.remote_handler</span> = <span class="string">"dbgp"</span></span><br><span class="line"><span class="attr">xdebug.remote_mode</span> = req</span><br><span class="line"><span class="attr">xdebug.remote_connect_back</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.overload_var_dump</span>=<span class="number">0</span></span><br></pre></td></tr></table></figure>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>配置xdebug参数</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">xdebug.trace_output_name</span> = xdebug.trace.%t.%s</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.trace_output_dir</span> = /tmp</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger_value</span> = <span class="string">"&lt;secret key&gt;"</span></span><br><span class="line"><span class="attr">xdebug.trace_format</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
 
-<p>vscode配置launch.json如下</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"version"</span>: <span class="string">"0.2.0"</span>,</span><br><span class="line">    <span class="attr">"configurations"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"Listen for XDebug"</span>,</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"php"</span>,</span><br><span class="line">            <span class="attr">"request"</span>: <span class="string">"launch"</span>,</span><br><span class="line">            <span class="attr">"port"</span>: <span class="number">9001</span>,</span><br><span class="line">            <span class="attr">"pathMappings"</span>: &#123;</span><br><span class="line">                <span class="attr">"/data/example"</span>: <span class="string">"D:\\data\\example"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">"log"</span>: <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下载flamegraph，<code>git clone https://github.com/brendangregg/FlameGraph.git</code>，可放置在任意位置</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><h3 id="获取堆栈数据"><a href="#获取堆栈数据" class="headerlink" title="获取堆栈数据"></a>获取堆栈数据</h3><p>请求页面url，获取php调用堆栈数据 <code>curl http://youdomain.com?XDEBUG_TRACE=&lt;secret key&gt;</code></p>
+<h3 id="转换堆栈数据"><a href="#转换堆栈数据" class="headerlink" title="转换堆栈数据"></a>转换堆栈数据</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./stackcollapse-xdebug.php /tmp/xdebug.trace.1579703170._data_www_yii2_web_index_php.xt &gt; out.folded</span><br></pre></td></tr></table></figure>
 
-<p>xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错</p>
-<p>在网上查了一下，发现原来xdebug还有日志记录这个功能，囧rz</p>
-<p>php.ini添加</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">xdebug.remote_log</span>=/tmp/xdebug.log</span><br></pre></td></tr></table></figure>
+<h3 id="生成火焰图"><a href="#生成火焰图" class="headerlink" title="生成火焰图"></a>生成火焰图</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; out.svg</span><br></pre></td></tr></table></figure>
 
-<p>再次请求，获取日志数据如下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[140114918627520] Log opened at 2019-09-04 11:49:00</span><br><span class="line">[140114918627520] I: Checking remote connect back address.</span><br><span class="line">[140114918627520] I: Checking header &apos;HTTP_X_FORWARDED_FOR&apos;.</span><br><span class="line">[140114918627520] I: Checking header &apos;REMOTE_ADDR&apos;.</span><br><span class="line">[140114918627520] I: Remote address found, connecting to 192.168.33.1:9001.</span><br><span class="line">[140114918627520] E: Time-out connecting to client (Waited: 200 ms). :-(</span><br><span class="line">[140114918627520] Log closed at 2019-09-04 11:49:00</span><br></pre></td></tr></table></figure>
-
-<p>日志显示服务端有正常向客户端9001端口发起连接，但客户端无响应导致超时，检查客户端防火墙无异常</p>
-<p>最后，在谷歌上找到一个类似的问题，发现问题与vagrant有关，具体问题描述见参考文档链接</p>
-<p>解决方法</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">; 移除 xdebug.remote_connect_back = 1</span></span><br><span class="line"><span class="comment">; 添加</span></span><br><span class="line"><span class="attr">xdebug.remote_host</span>=<span class="number">10.0</span>.<span class="number">2.2</span></span><br></pre></td></tr></table></figure>
-
-<p>重启php-fpm，再次测试，vscode可连接xdebug，问题解决</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://danemacmillan.com/how-to-configure-xdebug-in-phpstorm-through-vagrant/" target="_blank" rel="noopener">How to configure Xdebug in PhpStorm through Vagrant</a><br><a href="https://stackoverflow.com/questions/24831707/xdebug-time-out-connecting-to-client-using-phpstorm-7-1-3-vagrant-virtualbo" target="_blank" rel="noopener">xdebug Time-out connecting to client. :-( using phpstorm 7.1.3/vagrant/virtualbox/magento</a></p>
+<h3 id="结果展示"><a href="#结果展示" class="headerlink" title="结果展示"></a>结果展示</h3><p><img src="/images/yii2-flamegraph-example.svg" alt="yii2 flamegraph example"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://daniellockyer.com/php-flame-graphs/" target="_blank" rel="noopener">How to generate PHP Flamegraphs</a><br><a href="https://github.com/brendangregg/FlameGraph" target="_blank" rel="noopener">Flame Graphs visualize profiled code</a></p>
 
     </div>
 
@@ -285,11 +276,11 @@
             
               <a href="/tags/php/" rel="tag"># php</a>
             
-              <a href="/tags/vagrant/" rel="tag"># vagrant</a>
+              <a href="/tags/flamegraphs/" rel="tag"># flamegraphs</a>
             
-              <a href="/tags/php7-3/" rel="tag"># php7.3</a>
+              <a href="/tags/debug/" rel="tag"># debug</a>
             
-              <a href="/tags/xdebug/" rel="tag"># xdebug</a>
+              <a href="/tags/profiling/" rel="tag"># profiling</a>
             
           </div>
         
@@ -299,8 +290,8 @@
           <div class="post-nav">
             <div class="post-nav-next post-nav-item">
               
-                <a href="/2019/09/03/php-extension-writing-part1/" rel="next" title="PHP扩展开发 - Part 1">
-                  <i class="fa fa-chevron-left"></i> PHP扩展开发 - Part 1
+                <a href="/2019/11/24/linux-monofonts-render-incorrectly/" rel="next" title="解决ubuntu系统monospace字体显示异常的问题">
+                  <i class="fa fa-chevron-left"></i> 解决ubuntu系统monospace字体显示异常的问题
                 </a>
               
             </div>
@@ -308,10 +299,6 @@
             <span class="post-nav-divider"></span>
 
             <div class="post-nav-prev post-nav-item">
-              
-                <a href="/2019/11/24/linux-monofonts-render-incorrectly/" rel="prev" title="解决ubuntu系统monospace字体显示异常的问题">
-                  解决ubuntu系统monospace字体显示异常的问题 <i class="fa fa-chevron-right"></i>
-                </a>
               
             </div>
           </div>
@@ -363,7 +350,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#xdebug异常"><span class="nav-number">1.</span> <span class="nav-text">xdebug异常</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文档"><span class="nav-number">2.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置"><span class="nav-number">1.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用"><span class="nav-number">2.</span> <span class="nav-text">使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#获取堆栈数据"><span class="nav-number">2.1.</span> <span class="nav-text">获取堆栈数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#转换堆栈数据"><span class="nav-number">2.2.</span> <span class="nav-text">转换堆栈数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成火焰图"><span class="nav-number">2.3.</span> <span class="nav-text">生成火焰图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结果展示"><span class="nav-number">2.4.</span> <span class="nav-text">结果展示</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
         
       </div>
       <!--/noindex-->
@@ -487,7 +474,7 @@
       repo: 'y2k38.github.io',
       owner: 'y2k38',
       admin: ['Y2k38'],
-      id: '9ec42acf2d062006a324a76f348fec76',
+      id: '5604db029296c9f080179c286a04af25',
         language: 'zh-CN',
       
       distractionFreeMode: 'true'
