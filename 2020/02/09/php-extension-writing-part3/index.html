@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.0">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.0" color="#222">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.0">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文将简单介绍资源类型、资源的创建、访问、销毁操作。不再建议使用资源类型，使用类更为合适">
+<meta name="keywords" content="php,php extension,resource,pointer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP扩展开发 - Part 3">
+<meta property="og:url" content="https://y2k38.github.io/2020/02/09/php-extension-writing-part3/index.html">
+<meta property="og:site_name" content="Y2k38&#39;s Blog">
+<meta property="og:description" content="本文将简单介绍资源类型、资源的创建、访问、销毁操作。不再建议使用资源类型，使用类更为合适">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-02-10T03:35:52.072Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP扩展开发 - Part 3">
+<meta name="twitter:description" content="本文将简单介绍资源类型、资源的创建、访问、销毁操作。不再建议使用资源类型，使用类更为合适">
+  <link rel="canonical" href="https://y2k38.github.io/2020/02/09/php-extension-writing-part3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>PHP扩展开发 - Part 3 | Y2k38's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Y2k38's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+      
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+      
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+  </ul>
+
+    
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+      <article itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block post">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2020/02/09/php-extension-writing-part3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="y2k38">
+      <meta itemprop="description" content="y2k38's blog">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Y2k38's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">PHP扩展开发 - Part 3
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2020-02-09 17:05:48" itemprop="dateCreated datePublished" datetime="2020-02-09T17:05:48+08:00">2020-02-09</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-02-10 11:35:52" itemprop="dateModified" datetime="2020-02-10T11:35:52+08:00">2020-02-10</time>
+              </span>
+            
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文将简单介绍资源类型、资源的创建、访问、销毁操作。不再建议使用资源类型，使用类更为合适</p>
+<a id="more"></a>
+
+<h1 id="资源类型"><a href="#资源类型" class="headerlink" title="资源类型"></a>资源类型</h1><p><code>zval</code>可以表示大部分的PHP数据类型，但有一样不能很好的表示其结构：指针。由于不透明的结构、无法使用传统运算符进行操作等，使得指针的表示在PHP显得困难。PHP用一个特殊的标记表示指针：资源。为了使资源标记具有意义，必须先注册到zend engine才能使用。</p>
+<p>在头文件定义结构体<code>php_test_person</code>以及资源名称，放置在<code>#define</code>语句后，<code>PHP_MINIT_FUNCTION(test);</code>之前</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    zend_string *name;</span><br><span class="line">    zend_long age;</span><br><span class="line">&#125; php_test_person;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PHP_TEST_PERSON_RES_NAME <span class="meta-string">"Person Data"</span></span></span><br></pre></td></tr></table></figure>
+
+<p>源文件定义<code>le_*</code>全局变量，MINIT阶段注册，用于获取资源类型、字面意义名称、析构函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> le_test_person;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(<span class="literal">NULL</span>, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="初始化资源"><a href="#初始化资源" class="headerlink" title="初始化资源"></a>初始化资源</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_new)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">"Nonsense age (%ld) given, person resource not created."</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = emalloc(<span class="keyword">sizeof</span>(php_test_person));</span><br><span class="line">    person-&gt;name = zend_string_copy(name); <span class="comment">// estrndup + zend_string =&gt; zend_string_copy</span></span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数接收一个name以及一个age，参数进行校验通过后，申请一段内存空间并写入数据，<code>return_value</code>返回该资源。PHP不需要知道资源的具体内部表示，只需要获取该资源存储的指针以及资源类型</p>
+<h1 id="函数接收资源参数"><a href="#函数接收资源参数" class="headerlink" title="函数接收资源参数"></a>函数接收资源参数</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_greet)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person;</span><br><span class="line">    zval *zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    person = (php_test_person *) zend_fetch_resource(Z_RES_P(zperson), PHP_TEST_PERSON_RES_NAME, le_test_person);</span><br><span class="line"></span><br><span class="line">    php_printf(<span class="string">"Hello "</span>);</span><br><span class="line">    PHPWRITE(ZSTR_VAL(person-&gt;name), ZSTR_LEN(person-&gt;name));</span><br><span class="line">    php_printf(<span class="string">"!\nAccording to my records, you are %ld years old.\n"</span>, person-&gt;age);</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>ZEND_FETCH_RESOURCE</code>在PHP7中已被删除，目前获取资源的函数是<code>zend_fetch_resource</code>，该函数需要一个资源变量、字面意义名称、资源类型，返回一个指针。函数内部切记不要<code>free</code>该指针</p>
+<h1 id="销毁资源"><a href="#销毁资源" class="headerlink" title="销毁资源"></a>销毁资源</h1><p>PHP中使用<code>fopen</code>打开文件并获得一个资源变量<code>$fp</code>，接下来unset <code>$fp</code>时文件被关闭，即使没有使用<code>fclose</code>函数。其中的奥秘在<code>zend_register_list_destructors_ex</code>，该函数第一个参数为常规资源的析构函数，第二个为持久化资源的析构函数，当离开资源变量所在作用域时，自动调用清理/析构函数，释放内存、关闭连接或执行其他清理操作</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">php_test_person_dtor</span><span class="params">(zend_resource *res)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name); <span class="comment">// efree zend_string =&gt; zend_string_release</span></span><br><span class="line">        &#125;</span><br><span class="line">        efree(person);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="强制销毁资源"><a href="#强制销毁资源" class="headerlink" title="强制销毁资源"></a>强制销毁资源</h1><p>使用<code>zend_list_delete</code>销毁资源，该函数可销毁任何资源类型变量</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_delete)</span><br><span class="line">&#123;</span><br><span class="line">    zval * zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    zend_list_delete(Z_RES_P(zperson));</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="持久化资源"><a href="#持久化资源" class="headerlink" title="持久化资源"></a>持久化资源</h1><p>持久化资源与常规资源不同的地方在析构函数注册的位置，数据内存申请使用<code>pemalloc</code>代替<code>emalloc</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> le_test_person_persist;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">    le_test_person_persist = zend_register_list_destructors_ex(<span class="literal">NULL</span>, php_test_person_persist_dtor, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通常情况下，<code>php_test_person_dtor</code>会在请求结束后调用，<code>php_test_person_persist_dtor</code>在扩展shutdown阶段调用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">php_test_person_persist_dtor</span><span class="params">(zend_resource *res)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name);</span><br><span class="line">        &#125;</span><br><span class="line">        pefree(person, <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建函数<code>test_person_pnew</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">"Nonsense age (%ld) given, person resource not created."</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_dup(name, <span class="number">1</span>);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person_persist));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>test_person_pnew</code>与<code>test_person_new</code>仅在数据初始化、资源类型有区别</p>
+<h1 id="查找已存在的持久化资源"><a href="#查找已存在的持久化资源" class="headerlink" title="查找已存在的持久化资源"></a>查找已存在的持久化资源</h1><p>为了可以重用持久化资源，需要将其保存在一个安全的地方，zend engine提供了一个executor global通过<code>EG(persistent_list)</code>访问，该变量类型为<code>HashTable</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew2)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    <span class="keyword">char</span> * key_raw;</span><br><span class="line">    <span class="keyword">size_t</span> key_len;</span><br><span class="line">    zend_string * name, * key;</span><br><span class="line">    zend_long age;</span><br><span class="line">    zval * zperson = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">"Nonsense age (%ld) given, person resource not created."</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    key_len = spprintf(&amp;key_raw, <span class="number">0</span>, <span class="string">"test_person_%s_%ld\n"</span>, ZSTR_VAL(name), age);</span><br><span class="line">    key = zend_string_init(key_raw, key_len, <span class="number">1</span>);</span><br><span class="line">    efree(key_raw);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((zperson = zend_hash_find(&amp;EG(persistent_list), key)) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        person = (php_test_person *) zend_fetch_resource(Z_RES_P(zperson), PHP_TEST_PERSON_RES_NAME, le_test_person_persist);</span><br><span class="line"></span><br><span class="line">        ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">        zend_string_release(key);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_copy(name);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">    zend_string_release(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>test_person_pnew2</code>先确定<code>EG(persistent_list)</code>是否已经存在，已存在则直接使用，不存在则申请内存初始化资源</p>
+<h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><p><del><a href="https://devzone.zend.com/446/extension-writing-part-iii-resources/" target="_blank" rel="noopener">Extension Writing Part III: Resources</a></del><br><a href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-III:-Resources" target="_blank" rel="noopener">Extension Writing Part III: Resources</a><br><a href="https://wiki.php.net/phpng-upgrading" target="_blank" rel="noopener">Upgrading PHP extensions from PHP5 to NG</a><br><a href="http://www.phpinternalsbook.com/" target="_blank" rel="noopener">PHP Internals Book</a></p>
+
+    </div>
+
+    
+    
+    
+        
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/php/" rel="tag"># php</a>
+            
+              <a href="/tags/php-extension/" rel="tag"># php extension</a>
+            
+              <a href="/tags/resource/" rel="tag"># resource</a>
+            
+              <a href="/tags/pointer/" rel="tag"># pointer</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2020/02/01/php-extension-writing-part2/" rel="next" title="PHP扩展开发 - Part 2">
+                  <i class="fa fa-chevron-left"></i> PHP扩展开发 - Part 2
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </div>
+  
+  
+  
+  </article>
+
+  </div>
+
+
+          </div>
+          
+    
+    <div class="comments" id="gitalk-container"></div>
+  
+
+        </div>
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#资源类型"><span class="nav-number">1.</span> <span class="nav-text">资源类型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#初始化资源"><span class="nav-number">2.</span> <span class="nav-text">初始化资源</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#函数接收资源参数"><span class="nav-number">3.</span> <span class="nav-text">函数接收资源参数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#销毁资源"><span class="nav-number">4.</span> <span class="nav-text">销毁资源</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#强制销毁资源"><span class="nav-number">5.</span> <span class="nav-text">强制销毁资源</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#持久化资源"><span class="nav-number">6.</span> <span class="nav-text">持久化资源</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#查找已存在的持久化资源"><span class="nav-number">7.</span> <span class="nav-text">查找已存在的持久化资源</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考文档"><span class="nav-number">8.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">y2k38</p>
+  <div class="site-description" itemprop="description">y2k38's blog</div>
+</div>
+  <nav class="site-state motion-element">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+        
+      </div>
+    
+  </nav>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">y2k38</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.4.0</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+
+
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.0"></script><script src="/js/motion.js?v=7.4.0"></script>
+<script src="/js/schemes/muse.js?v=7.4.0"></script>
+
+<script src="/js/next-boot.js?v=7.4.0"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '2183a22a46a8e1a4f24f',
+      clientSecret: '92b221460776ade504a42198c60f791315105e5d',
+      repo: 'y2k38.github.io',
+      owner: 'y2k38',
+      admin: ['Y2k38'],
+      id: 'c11a254a0e95cf3803b6b6c358e873e0',
+        language: 'zh-CN',
+      
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>
