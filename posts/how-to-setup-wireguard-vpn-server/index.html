@@ -28,7 +28,7 @@
 <meta property="og:site_name" content="Y2k38&#39;s Blog">
 <meta property="og:description" content="从19年开始，ss流量已经能被gfw识别并屏蔽，原本打算切换到v2ray，但配置混淆需要域名反而会暴露出更多信息，此外，网上一篇文章指出v2ray开发者失联的同时一项v2ray流量识别的专利被注册，因此决定放弃v2ray并转向另一个被linus盛赞的wireguard。 wireguard是非常简单、现代化、快速的vpn，使用最新的加密技术，udp传输，支持ip漫游等。wireguard没有服务端">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-04-06T13:36:21.399Z">
+<meta property="og:updated_time" content="2020-04-06T13:52:06.590Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="如何配置wireguard服务端及客户端">
 <meta name="twitter:description" content="从19年开始，ss流量已经能被gfw识别并屏蔽，原本打算切换到v2ray，但配置混淆需要域名反而会暴露出更多信息，此外，网上一篇文章指出v2ray开发者失联的同时一项v2ray流量识别的专利被注册，因此决定放弃v2ray并转向另一个被linus盛赞的wireguard。 wireguard是非常简单、现代化、快速的vpn，使用最新的加密技术，udp传输，支持ip漫游等。wireguard没有服务端">
@@ -174,7 +174,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 21:36:21" itemprop="dateModified" datetime="2020-04-06T21:36:21+08:00">2020-04-06</time>
+                <time title="修改时间：2020-04-06 21:52:06" itemprop="dateModified" datetime="2020-04-06T21:52:06+08:00">2020-04-06</time>
               </span>
 
           
@@ -192,7 +192,6 @@
 <p>wireguard是非常简单、现代化、快速的vpn，使用最新的加密技术，udp传输，支持ip漫游等。wireguard没有服务端、客户端的区分，每一台设备都是一个<code>peer</code>。</p>
 <a id="more"></a>
 
-<p>系统默认使用ubuntu</p>
 <h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>添加wireguard的PPA源</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo add-apt-repository ppa:wireguard/wireguard</span><br><span class="line">sudo apt update</span><br><span class="line">sudo apt install wireguard</span><br></pre></td></tr></table></figure>
 
