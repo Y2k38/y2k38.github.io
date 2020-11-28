@@ -13,11 +13,11 @@
 <link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"y2k38.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    var CONFIG = {"hostname":"y2k38.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
   <meta name="description" content="y2k38&apos;s blog">
@@ -38,8 +38,9 @@
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome: true,
-    isPost: false
+    isHome : true,
+    isPost : false,
+    lang   : 'zh-CN'
   };
 </script>
 
@@ -82,17 +83,6 @@
 
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-container">
-  <div class="site-meta">
-
-    <div>
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Y2k38's Blog</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-  </div>
-
   <div class="site-nav-toggle">
     <div class="toggle" aria-label="切换导航栏">
       <span class="toggle-line toggle-line-first"></span>
@@ -100,25 +90,43 @@
       <span class="toggle-line toggle-line-last"></span>
     </div>
   </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Y2k38's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
 </div>
 
 
+
+
 <nav class="site-nav">
-  
-  <ul id="menu" class="menu">
+  <ul id="menu" class="main-menu menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
 
   </li>
   </ul>
-
 </nav>
+
+
+
+
 </div>
     </header>
 
@@ -134,14 +142,84 @@
         <div class="content-wrap">
           
 
-          <div class="content">
+          <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/posts/php-extension-writing-classes/">
 
-  <div class="posts-expand">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+      <meta itemprop="description" content="y2k38's blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Y2k38's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/posts/php-extension-writing-classes/" class="post-title-link" itemprop="url">PHP扩展开发 - 类</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-26 19:31:05" itemprop="dateCreated datePublished" datetime="2020-11-26T19:31:05+08:00">2020-11-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-28 10:29:35" itemprop="dateModified" datetime="2020-11-28T10:29:35+08:00">2020-11-28</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>以下简单介绍如何在C语言层面使用PHP类</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/posts/php-extension-writing-classes/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
         
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/posts/how-to-setup-wireguard-vpn-server/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -154,15 +232,15 @@
       <meta itemprop="name" content="Y2k38's Blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
           
             <a href="/posts/how-to-setup-wireguard-vpn-server/" class="post-title-link" itemprop="url">如何配置wireguard服务端及客户端</a>
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -170,10 +248,10 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 22:01:45" itemprop="dateModified" datetime="2020-04-06T22:01:45+08:00">2020-04-06</time>
+                <time title="修改时间：2020-04-06 22:12:29" itemprop="dateModified" datetime="2020-04-06T22:12:29+08:00">2020-04-06</time>
               </span>
 
           
@@ -211,10 +289,10 @@
   
   
 
-        
+      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/posts/php-extension-writing-part3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -227,15 +305,15 @@
       <meta itemprop="name" content="Y2k38's Blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
           
             <a href="/posts/php-extension-writing-part3/" class="post-title-link" itemprop="url">PHP扩展开发 - Part 3</a>
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -243,7 +321,7 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
                 <time title="修改时间：2020-02-10 13:49:22" itemprop="dateModified" datetime="2020-02-10T13:49:22+08:00">2020-02-10</time>
@@ -283,10 +361,10 @@
   
   
 
-        
+      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/posts/php-extension-writing-part2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -299,15 +377,15 @@
       <meta itemprop="name" content="Y2k38's Blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
           
             <a href="/posts/php-extension-writing-part2/" class="post-title-link" itemprop="url">PHP扩展开发 - Part 2</a>
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -315,7 +393,7 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
                 <time title="修改时间：2020-02-10 11:53:47" itemprop="dateModified" datetime="2020-02-10T11:53:47+08:00">2020-02-10</time>
@@ -355,10 +433,10 @@
   
   
 
-        
+      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/posts/how-to-generate-php-flamegraphs/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -371,15 +449,15 @@
       <meta itemprop="name" content="Y2k38's Blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
           
             <a href="/posts/how-to-generate-php-flamegraphs/" class="post-title-link" itemprop="url">生成火焰图分析php代码</a>
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -387,7 +465,7 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
                 <time title="修改时间：2020-02-02 16:38:58" itemprop="dateModified" datetime="2020-02-02T16:38:58+08:00">2020-02-02</time>
@@ -427,10 +505,10 @@
   
   
 
-        
+      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/posts/linux-monofonts-render-incorrectly/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -443,15 +521,15 @@
       <meta itemprop="name" content="Y2k38's Blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
           
             <a href="/posts/linux-monofonts-render-incorrectly/" class="post-title-link" itemprop="url">解决ubuntu系统monospace字体显示异常的问题</a>
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -459,7 +537,7 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
                 <time title="修改时间：2020-02-01 23:34:03" itemprop="dateModified" datetime="2020-02-01T23:34:03+08:00">2020-02-01</time>
@@ -499,10 +577,10 @@
   
   
 
-        
+      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/posts/vagrant-xdebug-not-working/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -515,15 +593,15 @@
       <meta itemprop="name" content="Y2k38's Blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
           
             <a href="/posts/vagrant-xdebug-not-working/" class="post-title-link" itemprop="url">记一次xdebug异常</a>
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -531,7 +609,7 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
                 <time title="修改时间：2020-02-02 15:35:10" itemprop="dateModified" datetime="2020-02-02T15:35:10+08:00">2020-02-02</time>
@@ -571,10 +649,10 @@
   
   
 
-        
+      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/posts/php-extension-writing-part1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -587,15 +665,15 @@
       <meta itemprop="name" content="Y2k38's Blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
           
             <a href="/posts/php-extension-writing-part1/" class="post-title-link" itemprop="url">PHP扩展开发 - Part 1</a>
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -603,10 +681,10 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-10 11:53:32" itemprop="dateModified" datetime="2020-02-10T11:53:32+08:00">2020-02-10</time>
+                <time title="修改时间：2020-04-11 13:00:02" itemprop="dateModified" datetime="2020-04-11T13:00:02+08:00">2020-04-11</time>
               </span>
 
           
@@ -647,10 +725,10 @@
   
   
 
-        
+      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/posts/personal-blog-using-github-pages/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -663,15 +741,15 @@
       <meta itemprop="name" content="Y2k38's Blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
           
             <a href="/posts/personal-blog-using-github-pages/" class="post-title-link" itemprop="url">使用github pages搭建个人博客</a>
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -679,7 +757,7 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
                 <time title="修改时间：2020-02-06 12:27:28" itemprop="dateModified" datetime="2020-02-06T12:27:28+08:00">2020-02-06</time>
@@ -719,10 +797,10 @@
   
   
 
-        
+      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/posts/configure-nginx-with-https/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -735,15 +813,15 @@
       <meta itemprop="name" content="Y2k38's Blog">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
           
             <a href="/posts/configure-nginx-with-https/" class="post-title-link" itemprop="url">Nginx配置HTTPS访问</a>
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -751,7 +829,7 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
                 <time title="修改时间：2020-02-02 14:01:25" itemprop="dateModified" datetime="2020-02-02T14:01:25+08:00">2020-02-02</time>
@@ -791,7 +869,6 @@
   
   
 
-  </div>
 
   
 
@@ -802,7 +879,7 @@
 
 <script>
   window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
+    let { activeClass } = CONFIG.comments;
     if (CONFIG.comments.storage) {
       activeClass = localStorage.getItem('comments_active') || activeClass;
     }
@@ -858,7 +935,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-count">10</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -885,19 +962,18 @@
       <div class="footer-inner">
         
 
+        
+
 <div class="copyright">
   
   &copy; 
   <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
-    <i class="fa fa-user"></i>
+    <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">y2k38</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0
-  </div>
-  <span class="post-meta-divider">|</span>
-  <div class="theme-info">主题 – <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.1
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
   </div>
 
         

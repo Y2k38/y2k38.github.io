@@ -13,11 +13,11 @@
 <link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"y2k38.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    var CONFIG = {"hostname":"y2k38.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
   <meta name="description" content="从19年开始，ss流量已经能被gfw识别并屏蔽，原本打算切换到v2ray，但配置混淆需要域名反而会暴露出更多信息，此外，网上一篇文章指出v2ray开发者失联的同时一项v2ray流量识别的专利被注册，因此决定放弃v2ray并转向另一个被linus盛赞的wireguard。 wireguard是非常简单、现代化、快速的vpn，使用最新的加密技术，udp传输，支持ip漫游等。wireguard没有服务端">
@@ -28,7 +28,7 @@
 <meta property="og:site_name" content="Y2k38&#39;s Blog">
 <meta property="og:description" content="从19年开始，ss流量已经能被gfw识别并屏蔽，原本打算切换到v2ray，但配置混淆需要域名反而会暴露出更多信息，此外，网上一篇文章指出v2ray开发者失联的同时一项v2ray流量识别的专利被注册，因此决定放弃v2ray并转向另一个被linus盛赞的wireguard。 wireguard是非常简单、现代化、快速的vpn，使用最新的加密技术，udp传输，支持ip漫游等。wireguard没有服务端">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-04-06T14:01:45.845Z">
+<meta property="og:updated_time" content="2020-04-06T14:12:29.857Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="如何配置wireguard服务端及客户端">
 <meta name="twitter:description" content="从19年开始，ss流量已经能被gfw识别并屏蔽，原本打算切换到v2ray，但配置混淆需要域名反而会暴露出更多信息，此外，网上一篇文章指出v2ray开发者失联的同时一项v2ray流量识别的专利被注册，因此决定放弃v2ray并转向另一个被linus盛赞的wireguard。 wireguard是非常简单、现代化、快速的vpn，使用最新的加密技术，udp传输，支持ip漫游等。wireguard没有服务端">
@@ -40,8 +40,9 @@
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome: false,
-    isPost: true
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
   };
 </script>
 
@@ -84,17 +85,6 @@
 
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-container">
-  <div class="site-meta">
-
-    <div>
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Y2k38's Blog</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-  </div>
-
   <div class="site-nav-toggle">
     <div class="toggle" aria-label="切换导航栏">
       <span class="toggle-line toggle-line-first"></span>
@@ -102,25 +92,43 @@
       <span class="toggle-line toggle-line-last"></span>
     </div>
   </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Y2k38's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
 </div>
 
 
+
+
 <nav class="site-nav">
-  
-  <ul id="menu" class="menu">
+  <ul id="menu" class="main-menu menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
 
   </li>
   </ul>
-
 </nav>
+
+
+
+
 </div>
     </header>
 
@@ -136,14 +144,13 @@
         <div class="content-wrap">
           
 
-          <div class="content">
+          <div class="content post posts-expand">
             
 
-  <div class="posts-expand">
-      
+    
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/posts/how-to-setup-wireguard-vpn-server/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -163,7 +170,7 @@
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -171,10 +178,10 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 22:01:45" itemprop="dateModified" datetime="2020-04-06T22:01:45+08:00">2020-04-06</time>
+                <time title="修改时间：2020-04-06 22:12:29" itemprop="dateModified" datetime="2020-04-06T22:12:29+08:00">2020-04-06</time>
               </span>
 
           
@@ -209,7 +216,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[Interface]</span><br><span class="line">PrivateKey = &lt;your server private key here&gt;</span><br><span class="line">Address = 10.10.0.1/24</span><br><span class="line">Address = fd86:ea04:1111::1/64</span><br><span class="line">SaveConfig = true</span><br><span class="line">PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE; ip6tables -A FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE</span><br><span class="line">PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o enp0s3 -j MASQUERADE; ip6tables -D FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -D POSTROUTING -o enp0s3 -j MASQUERADE</span><br><span class="line">ListenPort = 51820</span><br></pre></td></tr></table></figure>
 
 <p><code>PrivateKey</code>填上一步生成的私钥，填入你选择的<code>Address</code>，这里配置了两个IP4/6的地址，<code>enp0s3</code>是你服务器主要的网络设备，使用<code>ifconfig</code>或<code>ip a</code>查看你的主设备名，<code>ListenPort</code>默认为51820，建议修改</p>
-<p>要注意的是<code>SaveConfig</code>设置，wireguard配置后不需要<code>restart</code>或<code>reload</code>，使用<code>wg</code>命令添加<code>peer</code>即可立即生效。但是，这些操作都是直接写入到内存中而不是磁盘，因此如果你重启系统或服务，那么你就会失去添加的配置，所以这里设置为<code>true</code>，自动保存配置。但这个配置有时候也会让你非常困扰，你可能添加配置后重启服务，然后你发现你添加的配置不见了，因此需要先停止服务再添加配置、重启。</p>
+<p>要注意的是<code>SaveConfig</code>设置，wireguard配置后不需要<code>restart</code>或<code>reload</code>，使用<code>wg</code>命令添加<code>peer</code>即可立即生效。但是，这些操作都是直接写入到内存中而不是磁盘，因此如果你重启系统或服务，那么你就会失去添加的配置，所以这里设置为<code>true</code>，自动保存配置。但这个配置有时候也会让人非常困扰，你可能添加配置后重启服务，然后你发现添加的配置不见了，需要先停止服务再添加配置最后重启。</p>
 <p>添加网络配置，使得内核可以正确路由我们的NAT流量</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo bash -c <span class="string">'cat &lt;&lt; EOF &gt;&gt; /etc/sysctl.conf</span></span><br><span class="line"><span class="string">net.ipv4.ip_forward=1</span></span><br><span class="line"><span class="string">net.ipv6.conf.all.forwarding=1</span></span><br><span class="line"><span class="string">EOF'</span></span><br><span class="line">sudo sysctl -p</span><br></pre></td></tr></table></figure>
 
@@ -226,7 +233,8 @@
 <p>在服务端添加客户端配置</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo wg <span class="built_in">set</span> wg0 peer &lt;client-public-key&gt; allowed-ips 10.10.0.2/32,fd86:ea04:1111::2/128</span><br></pre></td></tr></table></figure>
 
-<h1 id="设置开机启动"><a href="#设置开机启动" class="headerlink" title="设置开机启动"></a>设置开机启动</h1><p>如果你的系统使用systemd如ubuntu，设置wireguard开机启动命令如下</p>
+<p>以上的操作针对的是linux系统，官方推出了可用的iOS/MacOS/Android/Windows图形界面软件，其中有一个选项要注意的是<code>On-Demand</code>，有<code>Ethernet</code>和<code>Wi-Fi</code>选项，如果勾选，那么会在选中网络中会自动开启vpn</p>
+<h1 id="设置开机启动"><a href="#设置开机启动" class="headerlink" title="设置开机启动"></a>设置开机启动</h1><p>如果你的系统使用systemd,如ubuntu，设置wireguard开机启动命令如下</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> wg-quick@wg0</span><br></pre></td></tr></table></figure>
 
 <h1 id="开放防火墙"><a href="#开放防火墙" class="headerlink" title="开放防火墙"></a>开放防火墙</h1><h2 id="UFW"><a href="#UFW" class="headerlink" title="UFW"></a>UFW</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw allow 51820/udp</span><br></pre></td></tr></table></figure>
@@ -255,7 +263,10 @@
     <a href="/posts/php-extension-writing-part3/" rel="prev" title="PHP扩展开发 - Part 3">
       <i class="fa fa-chevron-left"></i> PHP扩展开发 - Part 3
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/posts/php-extension-writing-classes/" rel="next" title="PHP扩展开发 - 类">
+      PHP扩展开发 - 类 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -264,7 +275,6 @@
   
   
 
-  </div>
 
 
           </div>
@@ -273,7 +283,7 @@
 
 <script>
   window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
+    let { activeClass } = CONFIG.comments;
     if (CONFIG.comments.storage) {
       activeClass = localStorage.getItem('comments_active') || activeClass;
     }
@@ -330,7 +340,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-count">10</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -357,19 +367,18 @@
       <div class="footer-inner">
         
 
+        
+
 <div class="copyright">
   
   &copy; 
   <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
-    <i class="fa fa-user"></i>
+    <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">y2k38</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0
-  </div>
-  <span class="post-meta-divider">|</span>
-  <div class="theme-info">主题 – <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.1
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
   </div>
 
         
