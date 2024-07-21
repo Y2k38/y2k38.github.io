@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="以下简单介绍如何在C语言层面使用PHP类">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP扩展开发 - 类">
+<meta property="og:url" content="https://y2k38.github.io/2020/11/26/php-extension-writing-classes/index.html">
+<meta property="og:site_name" content="Y2k38&#39;s Blog">
+<meta property="og:description" content="以下简单介绍如何在C语言层面使用PHP类">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-11-26T11:31:05.000Z">
+<meta property="article:modified_time" content="2020-11-28T02:29:35.000Z">
+<meta property="article:author" content="y2k38">
+<meta property="article:tag" content="php">
+<meta property="article:tag" content="php extension">
+<meta property="article:tag" content="class">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://y2k38.github.io/2020/11/26/php-extension-writing-classes/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/2020/11/26/php-extension-writing-classes/","path":"2020/11/26/php-extension-writing-classes/","title":"PHP扩展开发 - 类"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>PHP扩展开发 - 类 | Y2k38's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Y2k38's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1"><span class="nav-number">1.</span> <span class="nav-text">对象</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B1%BB"><span class="nav-number">2.</span> <span class="nav-text">类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E7%B1%BB%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">调用类方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#this"><span class="nav-number">4.</span> <span class="nav-text">this</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B3%E8%81%94%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">5.</span> <span class="nav-text">关联结构体</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8"><span class="nav-number">6.</span> <span class="nav-text">异常</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81"><span class="nav-number">7.</span> <span class="nav-text">完整代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="nav-number">8.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">y2k38</p>
+  <div class="site-description" itemprop="description">y2k38's blog</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2020/11/26/php-extension-writing-classes/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Y2k38's Blog">
+      <meta itemprop="description" content="y2k38's blog">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="PHP扩展开发 - 类 | Y2k38's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PHP扩展开发 - 类
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-11-26 19:31:05" itemprop="dateCreated datePublished" datetime="2020-11-26T19:31:05+08:00">2020-11-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2020-11-28 10:29:35" itemprop="dateModified" datetime="2020-11-28T10:29:35+08:00">2020-11-28</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>以下简单介绍如何在C语言层面使用PHP类</p>
+<span id="more"></span>
+
+<h1 id="对象"><a href="#对象" class="headerlink" title="对象"></a>对象</h1><p>创建一个PHP对象，对象类似关联数组，对象之上可关联任意多个函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PHP_FUNCTION(makeObject) &#123;</span><br><span class="line">    object_init(return_value);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加属性</span></span><br><span class="line">    zend_update_property_string(<span class="literal">NULL</span>, return_value, <span class="string">&quot;prop1&quot;</span>, <span class="built_in">strlen</span>(<span class="string">&quot;prop1&quot;</span>), <span class="string">&quot;val1&quot;</span>);</span><br><span class="line">    zend_update_property_long(<span class="literal">NULL</span>, return_value, <span class="string">&quot;prop2&quot;</span>, <span class="built_in">strlen</span>(<span class="string">&quot;prop2&quot;</span>), <span class="number">123</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用函数并打印结果<code>var_dump(makeObject());</code>，输出如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">object(stdClass)#1 (2) &#123;</span><br><span class="line">    [<span class="string">&quot;prop1&quot;</span>]=&gt;</span><br><span class="line">    string(3) <span class="string">&quot;val1&quot;</span></span><br><span class="line">    [<span class="string">&quot;prop2&quot;</span>]=&gt;</span><br><span class="line">    int(123)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="类"><a href="#类" class="headerlink" title="类"></a>类</h1><p>创建一个类模板</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// class定义存储于zend_class_entry</span></span><br><span class="line">zend_class_entry *test_ce_myclass;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_methods[] = &#123;</span><br><span class="line">    <span class="comment">// 类方法使用宏指令PHP_ME</span></span><br><span class="line">    <span class="comment">// public function hello()</span></span><br><span class="line">    PHP_ME(MyClass, hello, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC)</span><br><span class="line">    <span class="comment">// 与函数定义相同</span></span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 主菜，注册并加载类</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">test_init_myclass</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    zend_class_entry ce;</span><br><span class="line">    INIT_CLASS_ENTRY(ce, <span class="string">&quot;MyClass&quot;</span>, test_methods);</span><br><span class="line">    <span class="comment">// 注册MyClass类</span></span><br><span class="line">    test_ce_myclass = zend_register_internal_class(&amp;ce);</span><br><span class="line">    <span class="comment">// 添加属性/常量等</span></span><br><span class="line">    <span class="comment">// public $success = true;</span></span><br><span class="line">    zend_declare_property_bool(test_ce_myclass, <span class="string">&quot;success&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;success&quot;</span>)<span class="number">-1</span>, <span class="number">1</span>, ZEND_ACC_PUBLIC);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 类方法hello</span></span><br><span class="line">PHP_METHOD(MyClass, hello)</span><br><span class="line">&#123;</span><br><span class="line">    RETURN_STRING(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，函数<code>test_init_myclass</code>的最后一个参数<code>ZEND_ACC_PUBLIC</code>为访问控制标记之一公共访问，常用的访问控制标记还有以下几个</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ZEND_ACC_STATIC</span><br><span class="line">ZEND_ACC_PUBLIC</span><br><span class="line">ZEND_ACC_PROTECTED</span><br><span class="line">ZEND_ACC_PRIVATE</span><br><span class="line">ZEND_ACC_CTOR</span><br><span class="line">ZEND_ACC_DTOR</span><br><span class="line">ZEND_ACC_DEPRECATED</span><br></pre></td></tr></table></figure>
+
+<p>一个class定义注册相关逻辑已经完成，要在PHP中使用类MyClass还需要在模块初始化<code>MINIT</code>中添加运行<code>test_init_myclass</code>以加载类MyClass</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    test_init_myclass();</span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译<code>test</code>模块并开启后，运行<code>var_dump(new MyClass());</code>，将得到以下类似输出</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">object(MyClass)#1 (1) &#123;</span><br><span class="line">    [<span class="string">&quot;success&quot;</span>]=&gt;</span><br><span class="line">    bool(<span class="literal">true</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们也可以直接在C层面初始化并生成一个实例化类对象，增加一个工厂方法<code>factory</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_methods[] = &#123;</span><br><span class="line">    PHP_ME(MyClass, hello, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC)</span><br><span class="line">    PHP_ME(MyClass, factory, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)</span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">PHP_METHOD(MyClass, factory)</span><br><span class="line">&#123;</span><br><span class="line">    object_init_ex(return_value, test_ce_myclass);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时，我们可以使用<code>MyClass::factory()</code>获取一个新的MyClass对象</p>
+<p>如果需要对MyClass进行一些操作，像在PHP使用构造方法，在test_methods里添加<code>__construct</code>，如此，PHP在<code>new MyClass()</code>将自动调用构造方法<code>__construct</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_methods[] = &#123;</span><br><span class="line">    <span class="comment">// ZEND_ACC_CTOR</span></span><br><span class="line">    PHP_ME(MyClass, __construct, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)</span><br><span class="line">    PHP_ME(MyClass, hello, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC)</span><br><span class="line">    PHP_ME(MyClass, factory, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)</span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">PHP_METHOD(MyClass, __construct)</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="调用类方法"><a href="#调用类方法" class="headerlink" title="调用类方法"></a>调用类方法</h1><p>上面，虽然对象在new时会自动调用<code>__construct</code>函数进行初始化，但<code>factory</code>不会自动调用构造函数，仅返回包含默认值的新对象，为此，我们需要在<code>factory</code>内调用构造方法</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;zend_interfaces.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">PHP_METHOD(MyClass, factory)</span><br><span class="line">&#123;</span><br><span class="line">    zval *myzval;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_ZVAL(myzval)</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    object_init_ex(return_value, test_ce_myclass);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// zend_call_method，其他的还有</span></span><br><span class="line">    <span class="comment">// zend_call_method_with_0_params</span></span><br><span class="line">    <span class="comment">// zend_call_method_with_1_params</span></span><br><span class="line">    <span class="comment">// zend_call_method_with_2_params</span></span><br><span class="line">    <span class="comment">// ZEND_API zval* zend_call_method(zval *object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval, int param_count, zval* arg1, zval* arg2);</span></span><br><span class="line">    zend_call_method(return_value, test_ce_myclass, <span class="literal">NULL</span>, <span class="string">&quot;__construct&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;__construct&quot;</span>)<span class="number">-1</span>, <span class="literal">NULL</span>, <span class="number">1</span>, myzval, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="this"><a href="#this" class="headerlink" title="this"></a>this</h1><p>先前我们已经了解函数返回值<code>return_value</code>的使用，现在，我们来看如何在方法内访问<code>$this</code>，PHP提供<code>getThis()</code>函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">PHP_METHOD(MyClass, __construct)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> *msg;</span><br><span class="line">    <span class="type">size_t</span> msg_len;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_STRING(msg, msg_len)</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    zend_update_property_string(test_ce_myclass, getThis(), <span class="string">&quot;msg&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;msg&quot;</span>)<span class="number">-1</span>, msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="关联结构体"><a href="#关联结构体" class="headerlink" title="关联结构体"></a>关联结构体</h1><p>我们构建一个结构体，这个结构体在PHP是无法访问的，但可以在扩展内访问对该结构体</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 还不是特别了解</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">test_struct</span> &#123;</span></span><br><span class="line">    zend_object <span class="built_in">std</span>;</span><br><span class="line">    <span class="type">int</span> unknown_id;</span><br><span class="line">    <span class="type">char</span> *unknown_str;</span><br><span class="line">&#125; test_struct;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> zend_object *<span class="title function_">create_test_struct</span><span class="params">(zend_class_entry *class_type)</span> &#123;</span><br><span class="line">    test_struct *intern;</span><br><span class="line"></span><br><span class="line">    intern = ecalloc(<span class="number">1</span>, <span class="keyword">sizeof</span>(test_struct) + zend_object_properties_size(class_type));</span><br><span class="line"></span><br><span class="line">    zend_object_std_init(&amp;intern-&gt;<span class="built_in">std</span>, class_type);</span><br><span class="line">    object_properties_init(&amp;intern-&gt;<span class="built_in">std</span>, class_type);</span><br><span class="line"></span><br><span class="line">    intern-&gt;<span class="built_in">std</span>.handlers = zend_get_std_object_handlers();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &amp;intern-&gt;<span class="built_in">std</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">free_test_struct</span><span class="params">(<span class="type">void</span> *object)</span> &#123;</span><br><span class="line">    test_struct *secrets = (test_struct*)object;</span><br><span class="line">    <span class="keyword">if</span> (secrets-&gt;unknown_str) &#123;</span><br><span class="line">        efree(secrets-&gt;unknown_str);</span><br><span class="line">    &#125;</span><br><span class="line">    efree(secrets);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>访问结构体<code>test_struct</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">PHP_METHOD(MyClass, attachStruct) &#123;</span><br><span class="line">    test_struct *secrets;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// </span></span><br><span class="line">    secrets = (test_struct*)getThis();</span><br><span class="line"></span><br><span class="line">    RETURN_LONG(secrets-&gt;unknown_id);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h1><p>PHP的异常继承自<code>Exception</code>，所以下面除了新增一个异常类，还涉及了类的继承</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;zend_exceptions.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">zend_class_entry *test_ce_exception;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">test_init_exception</span><span class="params">()</span> &#123;</span><br><span class="line">    zend_class_entry ce;</span><br><span class="line">    <span class="comment">// 设置第三个参数为NULL，继承Exception所有方法，无自定义行为</span></span><br><span class="line">    INIT_CLASS_ENTRY(ce, <span class="string">&quot;MyException&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    test_ce_exception = zend_register_internal_class_ex(&amp;ce, (zend_class_entry*)zend_exception_get_default());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    test_init_myclass();</span><br><span class="line">    <span class="comment">// </span></span><br><span class="line">    test_init_exception();</span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在方法&#x2F;函数中抛出异常</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PHP_METHOD(MyClass, throwExcept) &#123;</span><br><span class="line">    zend_throw_exception(test_ce_exception, <span class="string">&quot;custom exception throw&quot;</span>, <span class="number">1024</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h1><p><a target="_blank" rel="noopener" href="https://github.com/Y2k38/php_ext_tutorial">php_ext_tutorial</a></p>
+<h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><p><a target="_blank" rel="noopener" href="https://github.com/bigbes/bigbes.github.io/wiki/PHP-Extensions-Made-Eldrich:-Classes">PHP Extensions Made Eldrich: Classes</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/php/" rel="tag"># php</a>
+              <a href="/tags/php-extension/" rel="tag"># php extension</a>
+              <a href="/tags/class/" rel="tag"># class</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/04/05/how-to-setup-wireguard-vpn-server/" rel="prev" title="如何配置wireguard服务端及客户端">
+                  <i class="fa fa-angle-left"></i> 如何配置wireguard服务端及客户端
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/07/19/deploy-shadowsocks-service/" rel="next" title="搭建shadowsocks服务">
+                  搭建shadowsocks服务 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">y2k38</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

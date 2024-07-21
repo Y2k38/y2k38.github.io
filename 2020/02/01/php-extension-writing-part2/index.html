@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="PHP扩展开发第二章，主要介绍函数参数获取、zval数据类型、数组及数组遍历以及$GLOBALS全局变量访问">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP扩展开发 - Part 2">
+<meta property="og:url" content="https://y2k38.github.io/2020/02/01/php-extension-writing-part2/index.html">
+<meta property="og:site_name" content="Y2k38&#39;s Blog">
+<meta property="og:description" content="PHP扩展开发第二章，主要介绍函数参数获取、zval数据类型、数组及数组遍历以及$GLOBALS全局变量访问">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-02-01T14:53:16.000Z">
+<meta property="article:modified_time" content="2020-02-10T03:53:47.000Z">
+<meta property="article:author" content="y2k38">
+<meta property="article:tag" content="php">
+<meta property="article:tag" content="php extension">
+<meta property="article:tag" content="parameters">
+<meta property="article:tag" content="array">
+<meta property="article:tag" content="$GLOBALS">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://y2k38.github.io/2020/02/01/php-extension-writing-part2/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/2020/02/01/php-extension-writing-part2/","path":"2020/02/01/php-extension-writing-part2/","title":"PHP扩展开发 - Part 2"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>PHP扩展开发 - Part 2 | Y2k38's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Y2k38's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E5%8F%82%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">函数参数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ZVAL"><span class="nav-number">2.</span> <span class="nav-text">ZVAL</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E7%BB%84"><span class="nav-number">3.</span> <span class="nav-text">数组</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Symbol-Tables"><span class="nav-number">4.</span> <span class="nav-text">Symbol Tables</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81"><span class="nav-number">5.</span> <span class="nav-text">完整代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="nav-number">6.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">y2k38</p>
+  <div class="site-description" itemprop="description">y2k38's blog</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2020/02/01/php-extension-writing-part2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Y2k38's Blog">
+      <meta itemprop="description" content="y2k38's blog">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="PHP扩展开发 - Part 2 | Y2k38's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PHP扩展开发 - Part 2
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-02-01 22:53:16" itemprop="dateCreated datePublished" datetime="2020-02-01T22:53:16+08:00">2020-02-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2020-02-10 11:53:47" itemprop="dateModified" datetime="2020-02-10T11:53:47+08:00">2020-02-10</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>PHP扩展开发第二章，主要介绍函数参数获取、zval数据类型、数组及数组遍历以及$GLOBALS全局变量访问</p>
+<span id="more"></span>
+
+<h1 id="函数参数"><a href="#函数参数" class="headerlink" title="函数参数"></a>函数参数</h1><p>扩展自定义函数不需要声明形参，Zend Engine会给每个函数传递一个参数列表<code>zend_execute_data *execute_data</code>，函数参数通过宏块<code>ZEND_PARSE_PARAMETERS_START</code>、<code>ZEND_PARSE_PARAMETERS_END</code>获取，当然，旧的方法<code>zend_parse_parameters</code>也可以使用，只是会更麻烦点</p>
+<p>下面示例函数将接收参数name以及打印的次数t_param并打印name</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">PHP_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 参数1</span></span><br><span class="line">    zend_string *name;</span><br><span class="line">    <span class="comment">// 参数2</span></span><br><span class="line">    zend_long t_param = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> times = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 最低可接收1个参数，最多2个</span></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name)</span><br><span class="line">        Z_PARAM_OPTIONAL</span><br><span class="line">        <span class="title function_">Z_PARAM_LONG</span><span class="params">(t_param)</span></span><br><span class="line">    <span class="title function_">ZEND_PARSE_PARAMETERS_END</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断是否有传递默认值</span></span><br><span class="line">    <span class="keyword">if</span> (ZEND_NUM_ARGS() == <span class="number">2</span>) &#123;</span><br><span class="line">        times = (<span class="type">int</span>) (t_param &lt; <span class="number">1</span> ? <span class="number">1</span> : t_param);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打印</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; times; i++) &#123;</span><br><span class="line">        php_printf(<span class="string">&quot;Hello %s&quot;</span>, ZSTR_VAL(name));</span><br><span class="line">    &#125;</span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>常用的有数据类型以及参数获取方法有下</p>
+<table>
+<thead>
+<tr>
+<th align="left">Variable Type</th>
+<th align="left">Macro</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">zend_bool</td>
+<td align="left">Z_PARAM_BOOL</td>
+</tr>
+<tr>
+<td align="left">zend_long</td>
+<td align="left">Z_PARAM_LONG</td>
+</tr>
+<tr>
+<td align="left">double</td>
+<td align="left">Z_PARAM_DOUBLE</td>
+</tr>
+<tr>
+<td align="left">zend_string *</td>
+<td align="left">Z_PARAM_STR</td>
+</tr>
+<tr>
+<td align="left">char *</td>
+<td align="left">Z_PARAM_STRING</td>
+</tr>
+<tr>
+<td align="left">zval *</td>
+<td align="left">Z_PARAM_RESOURCE</td>
+</tr>
+<tr>
+<td align="left">zval *</td>
+<td align="left">Z_PARAM_ARRAY</td>
+</tr>
+<tr>
+<td align="left">zval *</td>
+<td align="left">Z_PARAM_OBJECT</td>
+</tr>
+<tr>
+<td align="left">zval *</td>
+<td align="left">Z_PARAM_ZVAL</td>
+</tr>
+</tbody></table>
+<h1 id="ZVAL"><a href="#ZVAL" class="headerlink" title="ZVAL"></a>ZVAL</h1><p>PHP7的zval相对PHP5做了比较大的改动，zval、zend_string、zend_array重构，bool类型分成了true、false两种类型直接存储在(zval).u1.type_info等</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// php7 zval变量结构</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">union</span> _<span class="title">zend_value</span> &#123;</span></span><br><span class="line">    zend_long         lval;                <span class="comment">/* long value */</span></span><br><span class="line">    <span class="type">double</span>            dval;                <span class="comment">/* double value */</span></span><br><span class="line">    zend_refcounted  *counted;</span><br><span class="line">    zend_string      *str;</span><br><span class="line">    zend_array       *arr;</span><br><span class="line">    zend_object      *obj;</span><br><span class="line">    zend_resource    *res;</span><br><span class="line">    zend_reference   *ref;</span><br><span class="line">    zend_ast_ref     *ast;</span><br><span class="line">    zval             *zv;</span><br><span class="line">    <span class="type">void</span>             *ptr;</span><br><span class="line">    zend_class_entry *ce;</span><br><span class="line">    zend_function    *func;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">        <span class="type">uint32_t</span> w1;</span><br><span class="line">        <span class="type">uint32_t</span> w2;</span><br><span class="line">    &#125; ww;</span><br><span class="line">&#125; zend_value;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">zval_struct</span> &#123;</span></span><br><span class="line">    zend_value        value;            <span class="comment">/* value */</span></span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">            ZEND_ENDIAN_LOHI_3(</span><br><span class="line">                zend_uchar    type,            <span class="comment">/* active type */</span></span><br><span class="line">                zend_uchar    type_flags,</span><br><span class="line">                <span class="keyword">union</span> &#123;</span><br><span class="line">                    <span class="type">uint16_t</span>  extra;        <span class="comment">/* not further specified */</span></span><br><span class="line">                &#125; u)</span><br><span class="line">        &#125; v;</span><br><span class="line">        <span class="type">uint32_t</span> type_info;</span><br><span class="line">    &#125; u1;</span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">        <span class="type">uint32_t</span>     next;                 <span class="comment">/* hash collision chain */</span></span><br><span class="line">        <span class="type">uint32_t</span>     cache_slot;           <span class="comment">/* cache slot (for RECV_INIT) */</span></span><br><span class="line">        <span class="type">uint32_t</span>     opline_num;           <span class="comment">/* opline number (for FAST_CALL) */</span></span><br><span class="line">        <span class="type">uint32_t</span>     lineno;               <span class="comment">/* line number (for ast nodes) */</span></span><br><span class="line">        <span class="type">uint32_t</span>     num_args;             <span class="comment">/* arguments number for EX(This) */</span></span><br><span class="line">        <span class="type">uint32_t</span>     fe_pos;               <span class="comment">/* foreach position */</span></span><br><span class="line">        <span class="type">uint32_t</span>     fe_iter_idx;          <span class="comment">/* foreach iterator index */</span></span><br><span class="line">        <span class="type">uint32_t</span>     access_flags;         <span class="comment">/* class constant access flags */</span></span><br><span class="line">        <span class="type">uint32_t</span>     property_guard;       <span class="comment">/* single property guard */</span></span><br><span class="line">        <span class="type">uint32_t</span>     constant_flags;       <span class="comment">/* constant flags */</span></span><br><span class="line">        <span class="type">uint32_t</span>     extra;                <span class="comment">/* not further specified */</span></span><br><span class="line">    &#125; u2;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>zval类型判断，一般情况下，如果参数与<code>Z_PARAM_*</code>的类型不一致，Zend Engine会进行转换</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 接收任意类型参数，最后输出其类型</span></span><br><span class="line">PHP_FUNCTION(test_type)</span><br><span class="line">&#123;</span><br><span class="line">    zval *uservar;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">        Z_PARAM_ZVAL(uservar);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> (Z_TYPE_P(uservar)) &#123;</span><br><span class="line">        <span class="keyword">case</span> IS_NULL:</span><br><span class="line">            php_printf(<span class="string">&quot;NULL&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_TRUE:</span><br><span class="line">            php_printf(<span class="string">&quot;Boolean: TRUE&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_FALSE:</span><br><span class="line">            php_printf(<span class="string">&quot;Boolean: FALSE&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_LONG:</span><br><span class="line">            php_printf(<span class="string">&quot;Long: %ld&quot;</span>, Z_LVAL_P(uservar));</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_DOUBLE:</span><br><span class="line">            php_printf(<span class="string">&quot;Double: %f&quot;</span>, Z_DVAL_P(uservar));</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_STRING:</span><br><span class="line">            php_printf(<span class="string">&quot;String: &quot;</span>);</span><br><span class="line">            PHPWRITE(Z_STRVAL_P(uservar), Z_STRLEN_P (uservar));</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_RESOURCE:</span><br><span class="line">            php_printf(<span class="string">&quot;Resource&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_ARRAY:</span><br><span class="line">            php_printf(<span class="string">&quot;Array&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_OBJECT:</span><br><span class="line">            php_printf(<span class="string">&quot;Object&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            php_printf(<span class="string">&quot;Unknown&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>打印数组内容</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">PHP_FUNCTION(test_again)</span><br><span class="line">&#123;</span><br><span class="line">    zval *zname;</span><br><span class="line">    </span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">        Z_PARAM_ZVAL(zname);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将改变原有参数类型</span></span><br><span class="line">    convert_to_string(zname);</span><br><span class="line">    php_printf(<span class="string">&quot;Hello &quot;</span>);</span><br><span class="line">    PHPWRITE(Z_STRVAL_P(zname), Z_STRLEN_P(zname));</span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>convert_to_*</code>会将参数转换成指定的类型，即改变原始参数类型、数据，在php代码中，原本以传参的形式传递的变量值会被修改。要解决这个问题，可以使用临时变量，也可以使用<code>convert_to_*_ex</code>，该类函数在转换类型前会先调用<code>SEPARATE_ZVAL_IF_NOT_REF</code>，避免修改原始变量</p>
+<h1 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h1><p>PHP的数组用途非常广泛，类对象属性的存储也依赖数组，数组的底层实现结构为HashTable</p>
+<p>下面函数创建一个数据并返回</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">PHP_FUNCTION(test_array)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// $arr = [];</span></span><br><span class="line">    array_init(return_value);</span><br><span class="line">    <span class="comment">// $arr[3] = 123;</span></span><br><span class="line">    add_index_long(return_value, <span class="number">3</span>, <span class="number">123</span>);</span><br><span class="line">    <span class="comment">// $arr[] = &quot;example&quot;;</span></span><br><span class="line">    add_next_index_string(return_value, <span class="string">&quot;example&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">char</span> *mystr = estrdup(<span class="string">&quot;five&quot;</span>);</span><br><span class="line">    add_next_index_string(return_value, mystr);</span><br><span class="line">    efree(mystr);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// $arr[&quot;pi&quot;] = 3.1415926;</span></span><br><span class="line">    add_assoc_double(return_value, <span class="string">&quot;pi&quot;</span>, <span class="number">3.1415926</span>);</span><br><span class="line">    </span><br><span class="line">    zval subarr;</span><br><span class="line">    array_init(&amp;subarr);</span><br><span class="line">    add_next_index_string(&amp;subarr, <span class="string">&quot;hello&quot;</span>);</span><br><span class="line">    add_assoc_zval(return_value, <span class="string">&quot;subarr&quot;</span>, &amp;subarr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>add_next_index_*</code>添加元素进数组，由系统分配一个递增的数字key</li>
+<li><code>add_index_*</code>添加元素进数组，由用户指定一个数字类型的key</li>
+<li><code>add_assoc_*</code>添加元素进数组，由用户指定的字符串类型key</li>
+</ul>
+<p>注意：<code>add_assoc_*</code>非二进制安全</p>
+<p>扩展函数返回值不使用<code>return</code>语句，配置<code>zval *return_value</code>即可，该变量由宏<code>PHP_FUNCTION</code>提供，返回值<code>RETURN_TRUE</code>也是通过设置<code>return_value</code>完成返回值赋值，默认设置为<code>IS_NULL</code>类型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 遍历并打印数组字符串值</span></span><br><span class="line">PHP_FUNCTION(test_array_strings)</span><br><span class="line">&#123;</span><br><span class="line">    zval *arr, *data;</span><br><span class="line">    HashTable *arr_hash;</span><br><span class="line">    HashPosition pointer;</span><br><span class="line">    <span class="type">int</span> array_count;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_ARRAY(arr);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// </span></span><br><span class="line">    arr_hash = Z_ARRVAL_P(arr);</span><br><span class="line">    array_count = zend_hash_num_elements(arr_hash);</span><br><span class="line"></span><br><span class="line">    php_printf(<span class="string">&quot;The array passed contains %d elements\n&quot;</span>, array_count);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * 可使用宏ZEND_HASH_FOREACH_VAL、ZEND_HASH_FOREACH_END</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">for</span> (</span><br><span class="line">        zend_hash_internal_pointer_reset_ex(arr_hash, &amp;pointer);</span><br><span class="line">        data = zend_hash_get_current_data_ex(arr_hash, &amp;pointer);</span><br><span class="line">        zend_hash_move_forward_ex(arr_hash, &amp;pointer)</span><br><span class="line">    ) &#123;</span><br><span class="line">        <span class="comment">// example 1</span></span><br><span class="line">        <span class="comment">// 如果是字符串就打印</span></span><br><span class="line">        <span class="comment">// if (Z_TYPE_P(data) == IS_STRING) &#123;</span></span><br><span class="line">        <span class="comment">//     PHPWRITE(Z_STRVAL_P(data), Z_STRLEN_P(data));</span></span><br><span class="line">        <span class="comment">//     php_printf(&quot;\n&quot;);</span></span><br><span class="line">        <span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// example 2</span></span><br><span class="line">        <span class="comment">// 将参数转为字符串打印</span></span><br><span class="line">        <span class="comment">// zval tmp;</span></span><br><span class="line">        <span class="comment">// tmp = *data;</span></span><br><span class="line">        <span class="comment">// zval_copy_ctor(&amp;tmp);</span></span><br><span class="line">        <span class="comment">// convert_to_string(&amp;tmp);</span></span><br><span class="line">        <span class="comment">// PHPWRITE(Z_STRVAL(tmp), Z_STRLEN(tmp));</span></span><br><span class="line">        <span class="comment">// php_printf(&quot;\n&quot;);</span></span><br><span class="line">        <span class="comment">// zval_dtor(&amp;tmp);</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// example 3</span></span><br><span class="line">        <span class="comment">// 打印数组key以及value</span></span><br><span class="line">        <span class="type">int</span> keytype;</span><br><span class="line">        zend_string * str_index;</span><br><span class="line">        zend_ulong num_index;</span><br><span class="line"></span><br><span class="line">        keytype = zend_hash_get_current_key_ex(arr_hash, &amp;str_index, &amp;num_index, &amp;pointer);</span><br><span class="line">        <span class="keyword">if</span> (HASH_KEY_IS_STRING == keytype) &#123;</span><br><span class="line">            <span class="comment">// 字符串类型key</span></span><br><span class="line">            PHPWRITE(ZSTR_VAL(str_index), ZSTR_LEN(str_index));</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (HASH_KEY_IS_LONG == keytype) &#123;</span><br><span class="line">            <span class="comment">// 数字key</span></span><br><span class="line">            php_printf(<span class="string">&quot;%ld&quot;</span>, num_index);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        php_printf(<span class="string">&quot; =&gt; &quot;</span>);</span><br><span class="line"></span><br><span class="line">        zval tmp;</span><br><span class="line">        tmp = *data;</span><br><span class="line">        zval_copy_ctor(&amp;tmp);</span><br><span class="line">        convert_to_string(&amp;tmp);</span><br><span class="line">        PHPWRITE(Z_STRVAL(tmp), Z_STRLEN(tmp));</span><br><span class="line">        php_printf(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">        zval_dtor(&amp;tmp);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>zend_hash_get_current_key_ex</code>返回的类型有</p>
+<ul>
+<li><code>HASH_KEY_IS_LONG</code>：整型key</li>
+<li><code>HASH_KEY_IS_STRING</code>：字符串型key</li>
+<li><code>HASH_KEY_NON_EXISTENT</code>：遍历完整个数组，没有更多元素</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 打印数组val</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">test_array_walk</span><span class="params">(zval *pDest)</span></span><br><span class="line">&#123;</span><br><span class="line">    zval tmp;</span><br><span class="line"></span><br><span class="line">    tmp = *pDest;</span><br><span class="line">    zval_copy_ctor(&amp;tmp);</span><br><span class="line">    convert_to_string(&amp;tmp);</span><br><span class="line">    PHPWRITE(Z_STRVAL(tmp), Z_STRLEN(tmp));</span><br><span class="line">    php_printf(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    zval_dtor(&amp;tmp);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> ZEND_HASH_APPLY_KEEP;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 打印prefix以及数组val</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">test_array_walk_arg</span><span class="params">(zval *pDest, <span class="type">void</span> *argument)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_printf(<span class="string">&quot;%s&quot;</span>, (<span class="type">char</span> *)argument);</span><br><span class="line">    test_array_walk(pDest);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> ZEND_HASH_APPLY_KEEP;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 打印prefix、数组val以及suffix</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">test_array_walk_args</span><span class="params">(zval *pDest, <span class="type">int</span> num_args, va_list args, zend_hash_key *hash_key)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_printf(<span class="string">&quot;%s&quot;</span>, va_arg(args, <span class="type">char</span> *));</span><br><span class="line">    test_array_walk(pDest);</span><br><span class="line">    php_printf(<span class="string">&quot;%s\n&quot;</span>, va_arg(args, <span class="type">char</span> *));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> ZEND_HASH_APPLY_KEEP;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 遍历数组</span></span><br><span class="line">PHP_FUNCTION(test_array_walk)</span><br><span class="line">&#123;</span><br><span class="line">    zval *arr;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_ARRAY(arr);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 简单的遍历数组处理</span></span><br><span class="line">    zend_hash_apply(Z_ARRVAL_P(arr), (<span class="type">apply_func_t</span>) test_array_walk);</span><br><span class="line">    <span class="comment">// 遍历数组，带一个参数</span></span><br><span class="line">    zend_hash_apply_with_argument(Z_ARRVAL_P(arr), (<span class="type">apply_func_arg_t</span>) test_array_walk_arg, <span class="string">&quot;Hello&quot;</span>);</span><br><span class="line">    <span class="comment">// 遍历数组，带多个参数</span></span><br><span class="line">    zend_hash_apply_with_arguments(Z_ARRVAL_P(arr), (<span class="type">apply_func_args_t</span>) test_array_walk_args, <span class="number">2</span>, <span class="string">&quot;Hello &quot;</span>, <span class="string">&quot;Welcome to my extension!&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面<code>test_array_walk</code>类似<code>array_map</code>，<code>test_array_walk</code>简单遍历数组，<code>test_array_walk_arg</code>遍历数组，可接收一个任意类型的额外参数，下面代码中用作数组元素的前缀，<code>test_array_walk_args</code>遍历数组，可接收任意多个参数，下面代码中用作数组元素的前缀、后缀</p>
+<p>返回值类型：</p>
+<ul>
+<li><code>ZEND_HASH_APPLY_KEEP</code>：维持原有元素，继续遍历数组剩余元素</li>
+<li><code>ZEND_HASH_APPLY_REMOVE</code>：删除原有元素，继续遍历数组剩余元素</li>
+<li><code>ZEND_HASH_APPLY_STOP</code>：维持原有元素，停止遍历数组</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 返回数组指定key的value</span></span><br><span class="line">PHP_FUNCTION(test_array_value)</span><br><span class="line">&#123;</span><br><span class="line">    zval *arr, *offset, *val;</span><br><span class="line">    <span class="type">char</span> * tmp;</span><br><span class="line">    zend_string *str_index = <span class="literal">NULL</span>;</span><br><span class="line">    zend_ulong num_index;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_ARRAY(arr);</span><br><span class="line">        Z_PARAM_ZVAL(offset);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 对非integer/string的key进行转换</span></span><br><span class="line">    <span class="keyword">switch</span> (Z_TYPE_P(offset)) &#123;</span><br><span class="line">        <span class="keyword">case</span> IS_NULL:</span><br><span class="line">        <span class="keyword">case</span> IS_FALSE:</span><br><span class="line">            num_index = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_TRUE:</span><br><span class="line">            num_index = <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_DOUBLE:</span><br><span class="line">            num_index = (<span class="type">long</span>) Z_DVAL_P(offset);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_LONG:</span><br><span class="line">        <span class="keyword">case</span> IS_RESOURCE:</span><br><span class="line">            num_index = Z_LVAL_P(offset);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_STRING:</span><br><span class="line">            str_index = zval_get_string(offset);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_ARRAY:</span><br><span class="line">            tmp = <span class="string">&quot;Array&quot;</span>;</span><br><span class="line">            str_index = zend_string_init(tmp, <span class="keyword">sizeof</span>(tmp) - <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> IS_OBJECT:</span><br><span class="line">            tmp = <span class="string">&quot;Object&quot;</span>;</span><br><span class="line">            str_index = zend_string_init(tmp, <span class="keyword">sizeof</span>(tmp) - <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            tmp = <span class="string">&quot;Unknown&quot;</span>;</span><br><span class="line">            str_index = zend_string_init(tmp, <span class="keyword">sizeof</span>(tmp) - <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (str_index &amp;&amp; (val = zend_hash_find(Z_ARRVAL_P(arr), str_index)) == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        RETURN_NULL();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!str_index &amp;&amp; (val = zend_hash_index_find(Z_ARRVAL_P(arr), num_index)) == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        RETURN_NULL();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    *return_value = *val;</span><br><span class="line">    zval_copy_ctor(return_value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>PHP7中zval在栈分配，函数执行完清理，需要深入复制一份给return_value</p>
+<h1 id="Symbol-Tables"><a href="#Symbol-Tables" class="headerlink" title="Symbol Tables"></a>Symbol Tables</h1><p>全局变量$GLOBALS的底层存储结构也是HashTable，存储在一个全局结构体Executor Globals(_zend_executor_globals)里，通过EG(symbol_table)访问相关数据</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 访问全局变量$GLOBALS</span></span><br><span class="line">PHP_FUNCTION(test_get_global_var)</span><br><span class="line">&#123;</span><br><span class="line">    zval *val;</span><br><span class="line">    zend_string *varname;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_STR(varname);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 全局变量符号表：EG(symbol_table)</span></span><br><span class="line">    <span class="keyword">if</span> ((val = zend_hash_find(&amp;EG(symbol_table), varname)) == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_NOTICE, <span class="string">&quot;Undefined variable: %s&quot;</span>, ZSTR_VAL(varname));</span><br><span class="line">        RETURN_NULL();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    *return_value = *val;</span><br><span class="line">    zval_copy_ctor(return_value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h1><p><a target="_blank" rel="noopener" href="https://github.com/Y2k38/php_ext_tutorial">php_ext_tutorial</a></p>
+<h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><p><del><a target="_blank" rel="noopener" href="https://devzone.zend.com/317/extension-writing-part-ii-parameters-arrays-and-zvals/">Extension Writing Part II: Parameters, Arrays, and ZVALs (Unable To Access)</a></del><br><del><a target="_blank" rel="noopener" href="https://devzone.zend.com/318/extension-writing-part-ii-parameters-arrays-and-zvals-continued/">Extension Writing Part II: Parameters, Arrays, and ZVALs [continued] (Unable To Access)</a></del><br><a target="_blank" rel="noopener" href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-II:-Parameters,-Arrays,-and-ZVALs">Extension Writing Part II: Parameters, Arrays, and ZVALs</a><br><a target="_blank" rel="noopener" href="https://wiki.php.net/phpng-upgrading">Upgrading PHP extensions from PHP5 to NG</a><br><a target="_blank" rel="noopener" href="http://www.phpinternalsbook.com/">PHP Internals Book</a><br><a target="_blank" rel="noopener" href="https://wiki.php.net/internals/references">References about Maintaining and Extending PHP</a><br><a target="_blank" rel="noopener" href="https://nikic.github.io/2015/05/05/Internal-value-representation-in-PHP-7-part-1.html">Internal value representation in PHP 7 - Part 1 </a><br><a target="_blank" rel="noopener" href="https://nikic.github.io/2015/06/19/Internal-value-representation-in-PHP-7-part-2.html">Internal value representation in PHP 7 - Part 2</a><br><a target="_blank" rel="noopener" href="https://nikic.github.io/2014/12/22/PHPs-new-hashtable-implementation.html">PHP’s new hashtable implementation</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/php/" rel="tag"># php</a>
+              <a href="/tags/php-extension/" rel="tag"># php extension</a>
+              <a href="/tags/parameters/" rel="tag"># parameters</a>
+              <a href="/tags/array/" rel="tag"># array</a>
+              <a href="/tags/GLOBALS/" rel="tag"># $GLOBALS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/01/23/how-to-generate-php-flamegraphs/" rel="prev" title="生成火焰图分析php代码">
+                  <i class="fa fa-angle-left"></i> 生成火焰图分析php代码
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/02/09/php-extension-writing-part3/" rel="next" title="PHP扩展开发 - Part 3">
+                  PHP扩展开发 - Part 3 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">y2k38</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
