@@ -1,33 +1,20 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang=zh>
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
-
-<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
-
-    <meta name="description" content="PHP扩展开发第二章，主要介绍函数参数获取、zval数据类型、数组及数组遍历以及$GLOBALS全局变量访问">
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="PHP扩展开发第二章，主要介绍函数参数获取、zval数据类型、数组及数组遍历以及$GLOBALS全局变量访问 函数参数扩展自定义函数不需要声明形参，Zend Engine会给每个函数传递一个参数列表zend_execute_data *execute_data，函数参数通过宏块ZEND_PARSE_PARAMETERS_START、ZEND_PARSE_PARAMETERS_END获取，当然，旧的">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PHP扩展开发 - Part 2">
 <meta property="og:url" content="https://y2k38.github.io/2020/02/01/php-extension-writing-part2/index.html">
 <meta property="og:site_name" content="Y2k38&#39;s Blog">
-<meta property="og:description" content="PHP扩展开发第二章，主要介绍函数参数获取、zval数据类型、数组及数组遍历以及$GLOBALS全局变量访问">
+<meta property="og:description" content="PHP扩展开发第二章，主要介绍函数参数获取、zval数据类型、数组及数组遍历以及$GLOBALS全局变量访问 函数参数扩展自定义函数不需要声明形参，Zend Engine会给每个函数传递一个参数列表zend_execute_data *execute_data，函数参数通过宏块ZEND_PARSE_PARAMETERS_START、ZEND_PARSE_PARAMETERS_END获取，当然，旧的">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-02-01T14:53:16.000Z">
-<meta property="article:modified_time" content="2020-02-10T03:53:47.000Z">
+<meta property="article:modified_time" content="2024-07-21T06:44:19.064Z">
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="php">
 <meta property="article:tag" content="php extension">
@@ -35,176 +22,145 @@
 <meta property="article:tag" content="array">
 <meta property="article:tag" content="$GLOBALS">
 <meta name="twitter:card" content="summary">
-
-
-<link rel="canonical" href="https://y2k38.github.io/2020/02/01/php-extension-writing-part2/">
-
-
-
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/2020/02/01/php-extension-writing-part2/","path":"2020/02/01/php-extension-writing-part2/","title":"PHP扩展开发 - Part 2"}</script>
-
-<script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>PHP扩展开发 - Part 2 | Y2k38's Blog</title>
-  
-
-
-
-
-
-
-
-
-  <noscript>
-    <link rel="stylesheet" href="/css/noscript.css">
-  </noscript>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
-
-  <main class="main">
-    <div class="column">
-      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏" role="button">
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <p class="site-title">Y2k38's Blog</p>
-      <i class="logo-line"></i>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="搜索" role="button">
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
-</header>
+    
+    
+      
         
-  
-  <aside class="sidebar">
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>PHP扩展开发 - Part 2</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     -->
       </ul>
-
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E5%8F%82%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">函数参数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ZVAL"><span class="nav-number">2.</span> <span class="nav-text">ZVAL</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E7%BB%84"><span class="nav-number">3.</span> <span class="nav-text">数组</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Symbol-Tables"><span class="nav-number">4.</span> <span class="nav-text">Symbol Tables</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81"><span class="nav-number">5.</span> <span class="nav-text">完整代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="nav-number">6.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
-        </div>
-        <!--/noindex-->
-
-        <div class="site-overview-wrap sidebar-panel">
-          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">y2k38</p>
-  <div class="site-description" itemprop="description">y2k38's blog</div>
-</div>
-<div class="site-state-wrap animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-        <a href="/archives/">
-          <span class="site-state-item-count">13</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">38</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
-</div>
-
-        </div>
-      </div>
-    </div>
-
-    
-  </aside>
-
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2020/02/09/php-extension-writing-part3/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2020/01/23/how-to-generate-php-flamegraphs/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&text=PHP扩展开发 - Part 2"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&title=PHP扩展开发 - Part 2"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&is_video=false&description=PHP扩展开发 - Part 2"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PHP扩展开发 - Part 2&body=Check out this article: https://y2k38.github.io/2020/02/01/php-extension-writing-part2/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&title=PHP扩展开发 - Part 2"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&title=PHP扩展开发 - Part 2"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&title=PHP扩展开发 - Part 2"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&title=PHP扩展开发 - Part 2"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&name=PHP扩展开发 - Part 2&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&t=PHP扩展开发 - Part 2"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
 
     </div>
-
-    <div class="main-inner post posts-expand">
-
-
-  
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2020/02/01/php-extension-writing-part2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Y2k38's Blog">
-      <meta itemprop="description" content="y2k38's blog">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="PHP扩展开发 - Part 2 | Y2k38's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          PHP扩展开发 - Part 2
-        </h1>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-02-01 22:53:16" itemprop="dateCreated datePublished" datetime="2020-02-01T22:53:16+08:00">2020-02-01</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2020-02-10 11:53:47" itemprop="dateModified" datetime="2020-02-10T11:53:47+08:00">2020-02-10</time>
-    </span>
-
-  
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8F%82%E6%95%B0"><span class="toc-number">1.</span> <span class="toc-text">函数参数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#ZVAL"><span class="toc-number">2.</span> <span class="toc-text">ZVAL</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E7%BB%84"><span class="toc-number">3.</span> <span class="toc-text">数组</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Symbol-Tables"><span class="toc-number">4.</span> <span class="toc-text">Symbol Tables</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81"><span class="toc-number">5.</span> <span class="toc-text">完整代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">6.</span> <span class="toc-text">参考文档</span></a></li></ol>
+      </div>
+    
+  </span>
 </div>
 
-        </div>
-      </header>
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        PHP扩展开发 - Part 2
+    </h1>
 
-    
-    
-    
-    <div class="post-body" itemprop="articleBody"><p>PHP扩展开发第二章，主要介绍函数参数获取、zval数据类型、数组及数组遍历以及$GLOBALS全局变量访问</p>
-<span id="more"></span>
 
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">y2k38</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-02-01T14:53:16.000Z" class="dt-published" itemprop="datePublished">2020-02-01</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/GLOBALS/" rel="tag">$GLOBALS</a>, <a class="p-category" href="/tags/array/" rel="tag">array</a>, <a class="p-category" href="/tags/parameters/" rel="tag">parameters</a>, <a class="p-category" href="/tags/php/" rel="tag">php</a>, <a class="p-category" href="/tags/php-extension/" rel="tag">php extension</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>PHP扩展开发第二章，主要介绍函数参数获取、zval数据类型、数组及数组遍历以及$GLOBALS全局变量访问</p>
 <h1 id="函数参数"><a href="#函数参数" class="headerlink" title="函数参数"></a>函数参数</h1><p>扩展自定义函数不需要声明形参，Zend Engine会给每个函数传递一个参数列表<code>zend_execute_data *execute_data</code>，函数参数通过宏块<code>ZEND_PARSE_PARAMETERS_START</code>、<code>ZEND_PARSE_PARAMETERS_END</code>获取，当然，旧的方法<code>zend_parse_parameters</code>也可以使用，只是会更麻烦点</p>
 <p>下面示例函数将接收参数name以及打印的次数t_param并打印name</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">PHP_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 参数1</span></span><br><span class="line">    zend_string *name;</span><br><span class="line">    <span class="comment">// 参数2</span></span><br><span class="line">    zend_long t_param = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> times = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 最低可接收1个参数，最多2个</span></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name)</span><br><span class="line">        Z_PARAM_OPTIONAL</span><br><span class="line">        <span class="title function_">Z_PARAM_LONG</span><span class="params">(t_param)</span></span><br><span class="line">    <span class="title function_">ZEND_PARSE_PARAMETERS_END</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断是否有传递默认值</span></span><br><span class="line">    <span class="keyword">if</span> (ZEND_NUM_ARGS() == <span class="number">2</span>) &#123;</span><br><span class="line">        times = (<span class="type">int</span>) (t_param &lt; <span class="number">1</span> ? <span class="number">1</span> : t_param);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打印</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; times; i++) &#123;</span><br><span class="line">        php_printf(<span class="string">&quot;Hello %s&quot;</span>, ZSTR_VAL(name));</span><br><span class="line">    &#125;</span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -301,97 +257,135 @@
 <h1 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h1><p><a target="_blank" rel="noopener" href="https://github.com/Y2k38/php_ext_tutorial">php_ext_tutorial</a></p>
 <h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><p><del><a target="_blank" rel="noopener" href="https://devzone.zend.com/317/extension-writing-part-ii-parameters-arrays-and-zvals/">Extension Writing Part II: Parameters, Arrays, and ZVALs (Unable To Access)</a></del><br><del><a target="_blank" rel="noopener" href="https://devzone.zend.com/318/extension-writing-part-ii-parameters-arrays-and-zvals-continued/">Extension Writing Part II: Parameters, Arrays, and ZVALs [continued] (Unable To Access)</a></del><br><a target="_blank" rel="noopener" href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-II:-Parameters,-Arrays,-and-ZVALs">Extension Writing Part II: Parameters, Arrays, and ZVALs</a><br><a target="_blank" rel="noopener" href="https://wiki.php.net/phpng-upgrading">Upgrading PHP extensions from PHP5 to NG</a><br><a target="_blank" rel="noopener" href="http://www.phpinternalsbook.com/">PHP Internals Book</a><br><a target="_blank" rel="noopener" href="https://wiki.php.net/internals/references">References about Maintaining and Extending PHP</a><br><a target="_blank" rel="noopener" href="https://nikic.github.io/2015/05/05/Internal-value-representation-in-PHP-7-part-1.html">Internal value representation in PHP 7 - Part 1 </a><br><a target="_blank" rel="noopener" href="https://nikic.github.io/2015/06/19/Internal-value-representation-in-PHP-7-part-2.html">Internal value representation in PHP 7 - Part 2</a><br><a target="_blank" rel="noopener" href="https://nikic.github.io/2014/12/22/PHPs-new-hashtable-implementation.html">PHP’s new hashtable implementation</a></p>
 
-    </div>
+  </div>
+</article>
 
-    
-    
-    
 
-    <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/php/" rel="tag"># php</a>
-              <a href="/tags/php-extension/" rel="tag"># php extension</a>
-              <a href="/tags/parameters/" rel="tag"># parameters</a>
-              <a href="/tags/array/" rel="tag"># array</a>
-              <a href="/tags/GLOBALS/" rel="tag"># $GLOBALS</a>
-          </div>
 
         
+          <div id="footer-post-container">
+  <div id="footer-post">
 
-          <div class="post-nav">
-            <div class="post-nav-item">
-                <a href="/2020/01/23/how-to-generate-php-flamegraphs/" rel="prev" title="生成火焰图分析php代码">
-                  <i class="fa fa-angle-left"></i> 生成火焰图分析php代码
-                </a>
-            </div>
-            <div class="post-nav-item">
-                <a href="/2020/02/09/php-extension-writing-part3/" rel="next" title="PHP扩展开发 - Part 3">
-                  PHP扩展开发 - Part 3 <i class="fa fa-angle-right"></i>
-                </a>
-            </div>
-          </div>
-    </footer>
-  </article>
-</div>
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+      </ul>
+    </div>
 
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8F%82%E6%95%B0"><span class="toc-number">1.</span> <span class="toc-text">函数参数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#ZVAL"><span class="toc-number">2.</span> <span class="toc-text">ZVAL</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E7%BB%84"><span class="toc-number">3.</span> <span class="toc-text">数组</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Symbol-Tables"><span class="toc-number">4.</span> <span class="toc-text">Symbol Tables</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81"><span class="toc-number">5.</span> <span class="toc-text">完整代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">6.</span> <span class="toc-text">参考文档</span></a></li></ol>
+      </div>
+    
 
-
-
-
-
-</div>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-inner">
-
-  <div class="copyright">
-    &copy; 
-    <span itemprop="copyrightYear">2024</span>
-    <span class="with-love">
-      <i class="fa fa-heart"></i>
-    </span>
-    <span class="author" itemprop="copyrightHolder">y2k38</span>
-  </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
-  </div>
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&text=PHP扩展开发 - Part 2"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&title=PHP扩展开发 - Part 2"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&is_video=false&description=PHP扩展开发 - Part 2"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PHP扩展开发 - Part 2&body=Check out this article: https://y2k38.github.io/2020/02/01/php-extension-writing-part2/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&title=PHP扩展开发 - Part 2"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&title=PHP扩展开发 - Part 2"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&title=PHP扩展开发 - Part 2"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&title=PHP扩展开发 - Part 2"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&name=PHP扩展开发 - Part 2&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://y2k38.github.io/2020/02/01/php-extension-writing-part2/&t=PHP扩展开发 - Part 2"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
 
     </div>
-  </footer>
 
-  
-  <div class="toggle sidebar-toggle" role="button">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
   </div>
-  <div class="sidebar-dimmer"></div>
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2019-2024
+    y2k38
   </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
 
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
+    </div>
+    <!-- styles -->
 
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
 
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
-<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
   
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
 
 
+<script src="/js/main.js"></script>
 
+<!-- search -->
 
+<!-- Baidu Analytics -->
 
+<!-- Cloudflare Analytics -->
 
-  
+<!-- Disqus Comments -->
 
-
-
-
+<!-- utterances Comments -->
 
 </body>
 </html>
