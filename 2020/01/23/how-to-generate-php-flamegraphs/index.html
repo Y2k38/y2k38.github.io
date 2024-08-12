@@ -15,10 +15,10 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://y2k38.github.io/images/yii2-flamegraph-example.svg">
 <meta property="article:published_time" content="2020-01-23T03:31:25.000Z">
-<meta property="article:modified_time" content="2024-07-21T06:45:22.257Z">
+<meta property="article:modified_time" content="2024-08-12T11:44:47.282Z">
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="php">
-<meta property="article:tag" content="flamegraphs">
+<meta property="article:tag" content="flamegraph">
 <meta property="article:tag" content="debug">
 <meta property="article:tag" content="profiling">
 <meta name="twitter:card" content="summary">
@@ -116,7 +116,7 @@
     
     
       <div id="toc">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">1.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8"><span class="toc-number">2.</span> <span class="toc-text">使用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">1.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#flamegraph"><span class="toc-number">2.</span> <span class="toc-text">flamegraph</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
       </div>
     
   </span>
@@ -152,7 +152,7 @@
       
     <div class="article-tag">
         <i class="fa-solid fa-tag"></i>
-        <a class="p-category" href="/tags/debug/" rel="tag">debug</a>, <a class="p-category" href="/tags/flamegraphs/" rel="tag">flamegraphs</a>, <a class="p-category" href="/tags/php/" rel="tag">php</a>, <a class="p-category" href="/tags/profiling/" rel="tag">profiling</a>
+        <a class="p-category" href="/tags/debug/" rel="tag">debug</a>, <a class="p-category" href="/tags/flamegraph/" rel="tag">flamegraph</a>, <a class="p-category" href="/tags/php/" rel="tag">php</a>, <a class="p-category" href="/tags/profiling/" rel="tag">profiling</a>
     </div>
 
 
@@ -162,11 +162,11 @@
 
   <div class="content e-content" itemprop="articleBody">
     <p>flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间。下面简单介绍如何使用xdebug以及flamegraph生成火焰图</p>
-<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>配置xdebug参数</p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>配置xdebug参数</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">xdebug.trace_output_name</span> = xdebug.trace.%t.%s</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.trace_output_dir</span> = /tmp</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger_value</span> = <span class="string">&quot;&lt;secret key&gt;&quot;</span></span><br><span class="line"><span class="attr">xdebug.trace_format</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
 
 <p>下载flamegraph，<code>git clone https://github.com/brendangregg/FlameGraph.git</code>，放置在任意位置</p>
-<h1 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h1><p>获取堆栈数据</p>
+<h2 id="flamegraph"><a href="#flamegraph" class="headerlink" title="flamegraph"></a>flamegraph</h2><p>获取堆栈数据</p>
 <p>请求页面&#x2F;接口url，在url后面增加<code>?XDEBUG_TRACE=&lt;secret key&gt;</code>，获取php堆栈数据 <code>curl http://youdomain.com?XDEBUG_TRACE=&lt;secret key&gt;</code>，如果是命令行命令，则在php命令后使用参数<code>php -d xdebug.auto_trace=1</code></p>
 <p>转换堆栈数据</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./stackcollapse-xdebug.php /tmp/xdebug.trace.1579703170._data_www_yii2_web_index_php.xt &gt; out.folded</span><br></pre></td></tr></table></figure>
@@ -176,7 +176,7 @@
 
 <p>示例</p>
 <p><img src="/images/yii2-flamegraph-example.svg" alt="yii2 flamegraph example"></p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://daniellockyer.com/php-flame-graphs/">How to generate PHP Flamegraphs</a><br><a target="_blank" rel="noopener" href="https://github.com/brendangregg/FlameGraph">Flame Graphs visualize profiled code</a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://daniellockyer.com/php-flame-graphs/">How to generate PHP Flamegraphs</a><br><a target="_blank" rel="noopener" href="https://github.com/brendangregg/FlameGraph">Flame Graphs visualize profiled code</a></p>
 
   </div>
 </article>
@@ -200,7 +200,7 @@
     
     
       <div id="toc-footer" style="display: none">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">1.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8"><span class="toc-number">2.</span> <span class="toc-text">使用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">1.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#flamegraph"><span class="toc-number">2.</span> <span class="toc-text">flamegraph</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
       </div>
     
 

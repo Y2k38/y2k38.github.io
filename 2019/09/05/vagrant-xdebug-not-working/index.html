@@ -6,15 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-    <meta name="description" content="工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴 问题及解决过程异常情况 xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错">
+    <meta name="description" content="工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴 问题及解决过程异常情况xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错；">
 <meta property="og:type" content="article">
 <meta property="og:title" content="记一次xdebug异常">
 <meta property="og:url" content="https://y2k38.github.io/2019/09/05/vagrant-xdebug-not-working/index.html">
 <meta property="og:site_name" content="Y2k38&#39;s Blog">
-<meta property="og:description" content="工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴 问题及解决过程异常情况 xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错">
+<meta property="og:description" content="工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴 问题及解决过程异常情况xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错；">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2019-09-05T10:54:25.000Z">
-<meta property="article:modified_time" content="2024-07-21T06:44:09.528Z">
+<meta property="article:modified_time" content="2024-08-12T11:43:11.437Z">
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="php">
 <meta property="article:tag" content="vagrant">
@@ -114,7 +114,7 @@
     
     
       <div id="toc">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E8%BF%87%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">问题及解决过程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">2.</span> <span class="toc-text">参考文档</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E8%BF%87%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">问题及解决过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E6%83%85%E5%86%B5"><span class="toc-number">1.1.</span> <span class="toc-text">异常情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF"><span class="toc-number">1.2.</span> <span class="toc-text">客户端&#x2F;服务器配置信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%90%AFxdebug%E6%97%A5%E5%BF%97%E7%9B%91%E6%B5%8B"><span class="toc-number">1.3.</span> <span class="toc-text">开启xdebug日志监测</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="toc-number">1.4.</span> <span class="toc-text">解决方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">2.</span> <span class="toc-text">参考文档</span></a></li></ol>
       </div>
     
   </span>
@@ -160,29 +160,25 @@
 
   <div class="content e-content" itemprop="articleBody">
     <p>工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴</p>
-<h1 id="问题及解决过程"><a href="#问题及解决过程" class="headerlink" title="问题及解决过程"></a>问题及解决过程</h1><p><strong>异常情况</strong></p>
-<p>xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错；监测网络数据，只有初次请求数据，无结果返回</p>
-<p><strong>客户端&#x2F;服务器配置信息</strong></p>
-<p>服务器是vagrant + ubuntu 18.04 + PHP 7.4，客户端是Windows 10，编辑器是vscode</p>
+<h2 id="问题及解决过程"><a href="#问题及解决过程" class="headerlink" title="问题及解决过程"></a>问题及解决过程</h2><h3 id="异常情况"><a href="#异常情况" class="headerlink" title="异常情况"></a>异常情况</h3><p>xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错；监测网络数据，只有初次请求数据，无结果返回</p>
+<h3 id="客户端-服务器配置信息"><a href="#客户端-服务器配置信息" class="headerlink" title="客户端&#x2F;服务器配置信息"></a>客户端&#x2F;服务器配置信息</h3><p>服务器是vagrant + ubuntu 18.04 + PHP 7.4，客户端是Windows 10，编辑器是vscode</p>
 <p>初始xdebug配置如下</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[xdebug]</span></span><br><span class="line"><span class="attr">xdebug.remote_enable</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_autostart</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_port</span> = <span class="number">9001</span></span><br><span class="line"><span class="attr">xdebug.remote_handler</span> = <span class="string">&quot;dbgp&quot;</span></span><br><span class="line"><span class="attr">xdebug.remote_mode</span> = req</span><br><span class="line"><span class="attr">xdebug.remote_connect_back</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.overload_var_dump</span>=<span class="number">0</span></span><br></pre></td></tr></table></figure>
 
 <p>vscode配置launch.json如下</p>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.2.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;configurations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Listen for XDebug&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;php&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">9001</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;pathMappings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;/data/example&quot;</span><span class="punctuation">:</span> <span class="string">&quot;D:\\data\\example&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;log&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
 
-<p><strong>开启xdebug日志监测</strong></p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">xdebug.remote_log</span>=/tmp/xdebug.log</span><br></pre></td></tr></table></figure>
+<h3 id="开启xdebug日志监测"><a href="#开启xdebug日志监测" class="headerlink" title="开启xdebug日志监测"></a>开启xdebug日志监测</h3><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">xdebug.remote_log</span>=/tmp/xdebug.log</span><br></pre></td></tr></table></figure>
 
 <p>再次请求，获取日志数据如下</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[140114918627520] Log opened at 2019-09-04 11:49:00</span><br><span class="line">[140114918627520] I: Checking remote connect back address.</span><br><span class="line">[140114918627520] I: Checking header &#x27;HTTP_X_FORWARDED_FOR&#x27;.</span><br><span class="line">[140114918627520] I: Checking header &#x27;REMOTE_ADDR&#x27;.</span><br><span class="line">[140114918627520] I: Remote address found, connecting to 192.168.33.1:9001.</span><br><span class="line">[140114918627520] E: Time-out connecting to client (Waited: 200 ms). :-(</span><br><span class="line">[140114918627520] Log closed at 2019-09-04 11:49:00</span><br></pre></td></tr></table></figure>
 
 <p>日志显示服务端有正常向客户端9001端口发起连接，但客户端无响应导致超时，检查客户端防火墙无异常</p>
 <p>最后，在谷歌上找到一个类似的问题，发现问题与vagrant有关，具体问题描述见参考文档链接</p>
-<p><strong>解决方法</strong></p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">; 移除 xdebug.remote_connect_back = 1</span></span><br><span class="line"><span class="comment">; 添加</span></span><br><span class="line"><span class="attr">xdebug.remote_host</span>=<span class="number">10.0</span>.<span class="number">2.2</span></span><br></pre></td></tr></table></figure>
+<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">; 移除 xdebug.remote_connect_back = 1</span></span><br><span class="line"><span class="comment">; 添加</span></span><br><span class="line"><span class="attr">xdebug.remote_host</span>=<span class="number">10.0</span>.<span class="number">2.2</span></span><br></pre></td></tr></table></figure>
 
 <p>重启php-fpm，再次测试，vscode可连接xdebug，问题解决</p>
-<h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><p><a target="_blank" rel="noopener" href="https://danemacmillan.com/how-to-configure-xdebug-in-phpstorm-through-vagrant/">How to configure Xdebug in PhpStorm through Vagrant</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/24831707/xdebug-time-out-connecting-to-client-using-phpstorm-7-1-3-vagrant-virtualbo">xdebug Time-out connecting to client. :-( using phpstorm 7.1.3&#x2F;vagrant&#x2F;virtualbox&#x2F;magento</a></p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://danemacmillan.com/how-to-configure-xdebug-in-phpstorm-through-vagrant/">How to configure Xdebug in PhpStorm through Vagrant</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/24831707/xdebug-time-out-connecting-to-client-using-phpstorm-7-1-3-vagrant-virtualbo">xdebug Time-out connecting to client</a></p>
 
   </div>
 </article>
@@ -206,7 +202,7 @@
     
     
       <div id="toc-footer" style="display: none">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E8%BF%87%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">问题及解决过程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">2.</span> <span class="toc-text">参考文档</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E8%BF%87%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">问题及解决过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E6%83%85%E5%86%B5"><span class="toc-number">1.1.</span> <span class="toc-text">异常情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF"><span class="toc-number">1.2.</span> <span class="toc-text">客户端&#x2F;服务器配置信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%90%AFxdebug%E6%97%A5%E5%BF%97%E7%9B%91%E6%B5%8B"><span class="toc-number">1.3.</span> <span class="toc-text">开启xdebug日志监测</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="toc-number">1.4.</span> <span class="toc-text">解决方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">2.</span> <span class="toc-text">参考文档</span></a></li></ol>
       </div>
     
 

@@ -15,7 +15,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://y2k38.github.io/images/kvm_with_cockpit.png">
 <meta property="article:published_time" content="2024-07-19T14:23:20.000Z">
-<meta property="article:modified_time" content="2024-07-23T15:32:48.053Z">
+<meta property="article:modified_time" content="2024-08-12T11:50:08.780Z">
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="kvm">
 <meta property="article:tag" content="cockpit">
@@ -114,7 +114,7 @@
     
     
       <div id="toc">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kvm%E5%AE%89%E8%A3%85"><span class="toc-number">2.</span> <span class="toc-text">kvm安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E5%B7%A5%E4%BD%9C"><span class="toc-number">2.1.</span> <span class="toc-text">前置工作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85kvm"><span class="toc-number">2.2.</span> <span class="toc-text">安装kvm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%90%8E%E5%B7%A5%E4%BD%9C"><span class="toc-number">2.3.</span> <span class="toc-text">安装后工作</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cockpit%E5%AE%89%E8%A3%85"><span class="toc-number">3.</span> <span class="toc-text">cockpit安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">4.</span> <span class="toc-text">参考文档</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#kvm%E5%AE%89%E8%A3%85"><span class="toc-number">2.</span> <span class="toc-text">kvm安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E5%B7%A5%E4%BD%9C"><span class="toc-number">2.1.</span> <span class="toc-text">前置工作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85kvm"><span class="toc-number">2.2.</span> <span class="toc-text">安装kvm</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%90%8E%E5%B7%A5%E4%BD%9C"><span class="toc-number">2.3.</span> <span class="toc-text">安装后工作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cockpit%E5%AE%89%E8%A3%85"><span class="toc-number">3.</span> <span class="toc-text">cockpit安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">4.</span> <span class="toc-text">参考文档</span></a></li></ol>
       </div>
     
   </span>
@@ -159,7 +159,7 @@
   
 
   <div class="content e-content" itemprop="articleBody">
-    <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>一般情况下，日常开发我只使用vagrant跟virtualbox，但后面想搭建一个k8s环境学习，需要一个免费、高性能、便于管理的虚拟机管理软件</p>
+    <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一般情况下，日常开发我只使用vagrant跟virtualbox，但后面想搭建一个k8s环境学习，需要一个免费、高性能、便于管理的虚拟机管理软件</p>
 <p>综合考虑了下现在市面上的虚拟机管理软件</p>
 <ol>
 <li>virtualbox 的磁盘性能太差，nat网络所有虚拟机都是同一个IP：10.0.2.15，其他方面也不考虑了</li>
@@ -170,23 +170,23 @@
 <p>最终我选择组装一台台式机，安装了ubuntu系统，并在上面安装使用kvm虚拟机</p>
 <p>cpu是amd 7700，8核心16线程；32GB内存；暂时不需要用到显卡；PC在路由器做了MAC跟IP的绑定，方便使用ssh</p>
 <p>由于virt-manager太难用，最后选择cockpit作为kvm虚拟机管理软件</p>
-<h1 id="kvm安装"><a href="#kvm安装" class="headerlink" title="kvm安装"></a>kvm安装</h1><h2 id="前置工作"><a href="#前置工作" class="headerlink" title="前置工作"></a>前置工作</h2><p>确认cpu开启虚拟化功能</p>
+<h2 id="kvm安装"><a href="#kvm安装" class="headerlink" title="kvm安装"></a>kvm安装</h2><h3 id="前置工作"><a href="#前置工作" class="headerlink" title="前置工作"></a>前置工作</h3><p>确认cpu开启虚拟化功能</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一般是cpu的核心数量</span></span><br><span class="line">egrep -c <span class="string">&#x27;(vmx|svm)&#x27;</span> /proc/cpuinfo</span><br></pre></td></tr></table></figure>
 
-<h2 id="安装kvm"><a href="#安装kvm" class="headerlink" title="安装kvm"></a>安装kvm</h2><p>安装kvm以及依赖软件</p>
+<h3 id="安装kvm"><a href="#安装kvm" class="headerlink" title="安装kvm"></a>安装kvm</h3><p>安装kvm以及依赖软件</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install qemu-system-x86 libvirt-daemon-system virtinst \</span><br><span class="line">  virt-manager virt-viewer ovmf swtpm qemu-utils guestfs-tools \</span><br><span class="line">  libosinfo-bin tuned</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> libvirtd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line"><span class="built_in">sudo</span> virt-host-validate qemu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果有使用window的需要，可以下载virtio</span></span><br><span class="line">wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso</span><br></pre></td></tr></table></figure>
 
-<h2 id="安装后工作"><a href="#安装后工作" class="headerlink" title="安装后工作"></a>安装后工作</h2><p>将用户添加到kvm跟libvirt组</p>
+<h3 id="安装后工作"><a href="#安装后工作" class="headerlink" title="安装后工作"></a>安装后工作</h3><p>将用户添加到kvm跟libvirt组</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> usermod -aG kvm <span class="variable">$USER</span></span><br><span class="line"><span class="built_in">sudo</span> usermod -aG libvirt <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
 
-<h1 id="cockpit安装"><a href="#cockpit安装" class="headerlink" title="cockpit安装"></a>cockpit安装</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install cockpit cockpit-machines</span><br></pre></td></tr></table></figure>
+<h2 id="cockpit安装"><a href="#cockpit安装" class="headerlink" title="cockpit安装"></a>cockpit安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install cockpit cockpit-machines</span><br></pre></td></tr></table></figure>
 
 <p>防火墙配置</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 9090/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
 
 <p>浏览器打开访问web管理页面 <a target="_blank" rel="noopener" href="https://192.168.0.105:9090/">https://192.168.0.105:9090</a></p>
 <p><img src="/images/kvm_with_cockpit.png" alt="kvm with cockpit preview"></p>
-<h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><p><a target="_blank" rel="noopener" href="https://www.tecmint.com/install-qemu-kvm-ubuntu-create-virtual-machines/">How to Install QEMU&#x2F;KVM on Ubuntu to Create Virtual Machines</a><br><a target="_blank" rel="noopener" href="https://www.tecmint.com/manage-kvm-virtual-machines-using-cockpit-web-console/">Managing KVM Virtual Machines with Cockpit Web Console in Linux</a><br><a target="_blank" rel="noopener" href="https://github.com/bryansteiner/gpu-passthrough-tutorial">gpu-passthrough-tutorial</a></p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://www.tecmint.com/install-qemu-kvm-ubuntu-create-virtual-machines/">How to Install QEMU&#x2F;KVM on Ubuntu to Create Virtual Machines</a><br><a target="_blank" rel="noopener" href="https://www.tecmint.com/manage-kvm-virtual-machines-using-cockpit-web-console/">Managing KVM Virtual Machines with Cockpit Web Console in Linux</a><br><a target="_blank" rel="noopener" href="https://github.com/bryansteiner/gpu-passthrough-tutorial">gpu-passthrough-tutorial</a></p>
 
   </div>
 </article>
@@ -210,7 +210,7 @@
     
     
       <div id="toc-footer" style="display: none">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kvm%E5%AE%89%E8%A3%85"><span class="toc-number">2.</span> <span class="toc-text">kvm安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E5%B7%A5%E4%BD%9C"><span class="toc-number">2.1.</span> <span class="toc-text">前置工作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85kvm"><span class="toc-number">2.2.</span> <span class="toc-text">安装kvm</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%90%8E%E5%B7%A5%E4%BD%9C"><span class="toc-number">2.3.</span> <span class="toc-text">安装后工作</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cockpit%E5%AE%89%E8%A3%85"><span class="toc-number">3.</span> <span class="toc-text">cockpit安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">4.</span> <span class="toc-text">参考文档</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#kvm%E5%AE%89%E8%A3%85"><span class="toc-number">2.</span> <span class="toc-text">kvm安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E5%B7%A5%E4%BD%9C"><span class="toc-number">2.1.</span> <span class="toc-text">前置工作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85kvm"><span class="toc-number">2.2.</span> <span class="toc-text">安装kvm</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%90%8E%E5%B7%A5%E4%BD%9C"><span class="toc-number">2.3.</span> <span class="toc-text">安装后工作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cockpit%E5%AE%89%E8%A3%85"><span class="toc-number">3.</span> <span class="toc-text">cockpit安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">4.</span> <span class="toc-text">参考文档</span></a></li></ol>
       </div>
     
 
