@@ -61,6 +61,43 @@
       </tags>
   </entry>
   <entry>
+    <title>安装kvm虚拟机</title>
+    <url>/2024/07/19/deploy-kvm-and-cockpit/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一般情况下，日常开发我只使用vagrant跟virtualbox，但后面想搭建一个k8s环境学习，需要一个免费、高性能、便于管理的虚拟机管理软件</p>
+<p>综合考虑了下现在市面上的虚拟机管理软件</p>
+<ol>
+<li>virtualbox 的磁盘性能太差，nat网络所有虚拟机都是同一个IP：10.0.2.15，其他方面也不考虑了</li>
+<li>parallel desktop 太贵太黑心</li>
+<li>vmware 价格也不便宜还很吃电脑资源</li>
+<li>hyper-v 管理界面太难用，同时无法固定虚拟机IP</li>
+</ol>
+<p>最终我选择组装一台台式机，安装了ubuntu系统，并在上面安装使用kvm虚拟机</p>
+<p>cpu是amd 7700，8核心16线程；32GB内存；暂时不需要用到显卡；PC在路由器做了MAC跟IP的绑定，方便使用ssh</p>
+<p>由于virt-manager太难用，最后选择cockpit作为kvm虚拟机管理软件</p>
+<h2 id="kvm安装"><a href="#kvm安装" class="headerlink" title="kvm安装"></a>kvm安装</h2><h3 id="前置工作"><a href="#前置工作" class="headerlink" title="前置工作"></a>前置工作</h3><p>确认cpu开启虚拟化功能</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一般是cpu的核心数量</span></span><br><span class="line">egrep -c <span class="string">&#x27;(vmx|svm)&#x27;</span> /proc/cpuinfo</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装kvm"><a href="#安装kvm" class="headerlink" title="安装kvm"></a>安装kvm</h3><p>安装kvm以及依赖软件</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install qemu-system-x86 libvirt-daemon-system virtinst \</span><br><span class="line">  virt-manager virt-viewer ovmf swtpm qemu-utils guestfs-tools \</span><br><span class="line">  libosinfo-bin tuned</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> libvirtd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line"><span class="built_in">sudo</span> virt-host-validate qemu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果有使用window的需要，可以下载virtio</span></span><br><span class="line">wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装后工作"><a href="#安装后工作" class="headerlink" title="安装后工作"></a>安装后工作</h3><p>将用户添加到kvm跟libvirt组</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> usermod -aG kvm <span class="variable">$USER</span></span><br><span class="line"><span class="built_in">sudo</span> usermod -aG libvirt <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="cockpit安装"><a href="#cockpit安装" class="headerlink" title="cockpit安装"></a>cockpit安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install cockpit cockpit-machines</span><br></pre></td></tr></table></figure>
+
+<p>防火墙配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 9090/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
+
+<p>浏览器打开访问web管理页面 <a href="https://192.168.0.105:9090/">https://192.168.0.105:9090</a></p>
+<p><img src="/images/kvm_with_cockpit.png" alt="kvm with cockpit preview"></p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.tecmint.com/install-qemu-kvm-ubuntu-create-virtual-machines/">How to Install QEMU&#x2F;KVM on Ubuntu to Create Virtual Machines</a><br><a href="https://www.tecmint.com/manage-kvm-virtual-machines-using-cockpit-web-console/">Managing KVM Virtual Machines with Cockpit Web Console in Linux</a><br><a href="https://github.com/bryansteiner/gpu-passthrough-tutorial">gpu-passthrough-tutorial</a></p>
+]]></content>
+      <tags>
+        <tag>kvm</tag>
+        <tag>cockpit</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>安装docker并部署registry服务</title>
     <url>/2024/07/20/deploy-docker-and-registry-service/</url>
     <content><![CDATA[<h2 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h2><p>当前仅展示apt方式安装，离线安装方式不展示</p>
@@ -137,43 +174,6 @@
       <tags>
         <tag>docker</tag>
         <tag>registry</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>安装kvm虚拟机</title>
-    <url>/2024/07/19/deploy-kvm-and-cockpit/</url>
-    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一般情况下，日常开发我只使用vagrant跟virtualbox，但后面想搭建一个k8s环境学习，需要一个免费、高性能、便于管理的虚拟机管理软件</p>
-<p>综合考虑了下现在市面上的虚拟机管理软件</p>
-<ol>
-<li>virtualbox 的磁盘性能太差，nat网络所有虚拟机都是同一个IP：10.0.2.15，其他方面也不考虑了</li>
-<li>parallel desktop 太贵太黑心</li>
-<li>vmware 价格也不便宜还很吃电脑资源</li>
-<li>hyper-v 管理界面太难用，同时无法固定虚拟机IP</li>
-</ol>
-<p>最终我选择组装一台台式机，安装了ubuntu系统，并在上面安装使用kvm虚拟机</p>
-<p>cpu是amd 7700，8核心16线程；32GB内存；暂时不需要用到显卡；PC在路由器做了MAC跟IP的绑定，方便使用ssh</p>
-<p>由于virt-manager太难用，最后选择cockpit作为kvm虚拟机管理软件</p>
-<h2 id="kvm安装"><a href="#kvm安装" class="headerlink" title="kvm安装"></a>kvm安装</h2><h3 id="前置工作"><a href="#前置工作" class="headerlink" title="前置工作"></a>前置工作</h3><p>确认cpu开启虚拟化功能</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一般是cpu的核心数量</span></span><br><span class="line">egrep -c <span class="string">&#x27;(vmx|svm)&#x27;</span> /proc/cpuinfo</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装kvm"><a href="#安装kvm" class="headerlink" title="安装kvm"></a>安装kvm</h3><p>安装kvm以及依赖软件</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install qemu-system-x86 libvirt-daemon-system virtinst \</span><br><span class="line">  virt-manager virt-viewer ovmf swtpm qemu-utils guestfs-tools \</span><br><span class="line">  libosinfo-bin tuned</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> libvirtd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line"><span class="built_in">sudo</span> virt-host-validate qemu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果有使用window的需要，可以下载virtio</span></span><br><span class="line">wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装后工作"><a href="#安装后工作" class="headerlink" title="安装后工作"></a>安装后工作</h3><p>将用户添加到kvm跟libvirt组</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> usermod -aG kvm <span class="variable">$USER</span></span><br><span class="line"><span class="built_in">sudo</span> usermod -aG libvirt <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="cockpit安装"><a href="#cockpit安装" class="headerlink" title="cockpit安装"></a>cockpit安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install cockpit cockpit-machines</span><br></pre></td></tr></table></figure>
-
-<p>防火墙配置</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 9090/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
-
-<p>浏览器打开访问web管理页面 <a href="https://192.168.0.105:9090/">https://192.168.0.105:9090</a></p>
-<p><img src="/images/kvm_with_cockpit.png" alt="kvm with cockpit preview"></p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.tecmint.com/install-qemu-kvm-ubuntu-create-virtual-machines/">How to Install QEMU&#x2F;KVM on Ubuntu to Create Virtual Machines</a><br><a href="https://www.tecmint.com/manage-kvm-virtual-machines-using-cockpit-web-console/">Managing KVM Virtual Machines with Cockpit Web Console in Linux</a><br><a href="https://github.com/bryansteiner/gpu-passthrough-tutorial">gpu-passthrough-tutorial</a></p>
-]]></content>
-      <tags>
-        <tag>kvm</tag>
-        <tag>cockpit</tag>
       </tags>
   </entry>
   <entry>
@@ -380,6 +380,67 @@
       </tags>
   </entry>
   <entry>
+    <title>解决ubuntu系统monospace字体显示异常的问题</title>
+    <url>/2019/11/24/linux-monofonts-render-incorrectly/</url>
+    <content><![CDATA[<p>很长的一段时间，被xubuntu下的一个monospace字体显示问题困扰着，在网上找了很多方法也没有解决问题，在一次误打误撞的情况下解决了，简单把自己问题的过程记录下来，希望给一些小伙伴们帮助</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>xubuntu下monospace在浏览器以及vscode下显示异常，具体如下图所示</p>
+<p>浏览器chrome&#x2F;firefox下的monospace</p>
+<p><img src="/images/monofont_display_incorrect_in_browser.png" alt="monofont display incorrect in browser"></p>
+<p>vscode下的monospace</p>
+<p><img src="/images/monofont_display_incorrect_in_vscode.png" alt="monofont display incorrect in vscode"></p>
+<p>网上搜索结果大部分指示，是由于libfreetype6 2.8.1-2ubuntu2的一个bug导致，需要升级到最新的libfreetype2.9或者降级到libfreetype2.8.0，按照搜索的文档进行libfreetype的升级&#x2F;降级后，显示效果依旧，问题没有得到解决</p>
+<h2 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h2><p>在我放弃治疗后过了一段时间，突然想起，一直以来都忽略了验证linux的字体信息。首先，获取显示异常的字体font-family，如下图</p>
+<p><img src="/images/browser_get_font_family.png" alt="browser get font family"></p>
+<p>使用fc-match验证字体</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ fc-match monospace</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match consolas</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match Menlo</span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;PingFang SC&quot;</span></span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;Microsoft YaHei&quot;</span></span><br><span class="line">NotoSansCJK-Regular.ttc: <span class="string">&quot;Noto Sans CJK SC&quot;</span> <span class="string">&quot;Regular&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到Menlo、”PingFang SC”、”Microsoft YaHei”的实际字体跟monospace并不一致，抱着死马当活马医的心态，编辑字体配置文件<code>~/.config/fontconfig/fonts.conf</code>，内容如下，</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&#x27;1.0&#x27;?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&#x27;fonts.dtd&#x27;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">alias</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">prefer</span>&gt;</span><span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span><span class="tag">&lt;/<span class="name">prefer</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>退出，重新登录，发现这个困扰了很久的问题终于解决，如下图</p>
+<p><img src="/images/monofont_the_correct_view.png" alt="monofont the correct view"></p>
+<p>vscode可以通过更改font-family恢复正常的显示效果</p>
+<p><strong>注意</strong></p>
+<p>ubuntu&#x2F;xubuntu、中文&#x2F;英文的系统默认的字体会有些许差异，以上的操作可能不一定生效，可以新增<code>~/.config/fontconfig/conf.d/00-menlo.conf</code></p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;fonts.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">alias</span> <span class="attr">binding</span>=<span class="string">&quot;same&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">accept</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">accept</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/adobe/brackets/issues/14290">[Ubuntu 18.04 LTS] Font not rendering properly</a><br><a href="https://stackoverflow.com/questions/50114376/ubuntu-18-04-lts-font-not-rendering-properly">Ubuntu 18.04 LTS Font not rendering properly</a><br><a href="https://superuser.com/questions/930572/why-doesnt-fc-match-respect-my-match-and-edit-rule-for-courier-when-it-does-for">Why doesn’t fc-match respect my match and edit rule for Courier when it does for Consolas?</a></p>
+]]></content>
+      <tags>
+        <tag>ubuntu</tag>
+        <tag>vscode</tag>
+        <tag>monospace fonts</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用github pages搭建个人博客</title>
+    <url>/2019/09/02/personal-blog-using-github-pages/</url>
+    <content><![CDATA[<p>简单介绍如何使用github pages服务以及hexo搭建一个免费的个人博客</p>
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><h3 id="创建仓库"><a href="#创建仓库" class="headerlink" title="创建仓库"></a>创建仓库</h3><p>创建一个空的仓库，名字固定格式为“username.github.io”，这个名字也是博客的访问的域名</p>
+<h3 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g hexo-cli           <span class="comment"># 安装hexo命令行工具</span></span><br><span class="line">hexo init blog                    <span class="comment"># 创建blog项目</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> blog</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/theme-next/hexo-theme-next themes/next <span class="comment"># 安装next主题，可选</span></span><br><span class="line"></span><br><span class="line">npm install hexo-deployer-git --save <span class="comment"># 安装github发布工具</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><h3 id="配置hexo"><a href="#配置hexo" class="headerlink" title="配置hexo"></a>配置hexo</h3><p>修改_config.yml</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基础配置</span></span><br><span class="line"><span class="comment"># Hexo Configuration</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/configuration.html</span></span><br><span class="line"><span class="comment">## Source: https://github.com/hexojs/hexo/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Site</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">Y2k38&#x27;s</span> <span class="string">Blog</span></span><br><span class="line"><span class="attr">subtitle:</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">y2k38&#x27;s</span> <span class="string">blog</span></span><br><span class="line"><span class="attr">keywords:</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">y2k38</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="attr">timezone:</span> </span><br><span class="line"></span><br><span class="line"><span class="comment"># URL </span></span><br><span class="line"><span class="comment">## If your site is put in a subdirectory, set url as &#x27;http://yoursite.com/child&#x27; and root as &#x27;/child/&#x27;</span></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://y2k38.github.io</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">:year/:month/:day/:title/</span></span><br><span class="line"><span class="attr">permalink_defaults:</span></span><br><span class="line"></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 博客主题配置</span></span><br><span class="line"><span class="comment"># Extensions</span></span><br><span class="line"><span class="comment">## Plugins: https://hexo.io/plugins/</span></span><br><span class="line"><span class="comment">## Themes: https://hexo.io/themes/</span></span><br><span class="line"><span class="attr">theme:</span> <span class="string">next</span> <span class="comment"># 可选，若没有安装next主题，则忽略</span></span><br><span class="line"></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># github部署配置</span></span><br><span class="line"><span class="comment"># Deployment</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/deployment.html</span></span><br><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">https://github.com/Y2k38/y2k38.github.io.git</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">master</span> <span class="comment"># 注意，分支固定位master</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="发布github"><a href="#发布github" class="headerlink" title="发布github"></a>发布github</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo clean &amp;&amp; hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>完成</p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="添加gitalk评论系统"><a href="#添加gitalk评论系统" class="headerlink" title="添加gitalk评论系统"></a>添加gitalk评论系统</h3><blockquote>
+<p>[Deprecated] github要求校验方式改为personal access token，待gitalk作者及theme-next作者更新</p>
+</blockquote>
+<p>新建OAuth application获取id、secret，<a href="https://github.com/settings/applications/new">https://github.com/settings/applications/new</a></p>
+<p><img src="/images/register_a_new_OAuth_application.png" alt="new oauth app"></p>
+<p>配置next主题 <code>themes/next/_config.yml</code></p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Gitalk</span></span><br><span class="line"><span class="comment"># Demo: https://gitalk.github.io</span></span><br><span class="line"><span class="comment"># For more information: https://github.com/gitalk/gitalk, https://github.com/emn178/js-md5</span></span><br><span class="line"><span class="attr">gitalk:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">github_id:</span> <span class="string">y2k38</span> <span class="comment"># GitHub repo owner</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">y2k38.github.io</span> <span class="comment"># Repository name to store issues</span></span><br><span class="line">  <span class="attr">client_id:</span> <span class="string">xxxxxxxxxxxxxxxx</span> <span class="comment"># GitHub Application Client ID</span></span><br><span class="line">  <span class="attr">client_secret:</span> <span class="string">yyyyyyyyyyyyyyyy</span> <span class="comment"># GitHub Application Client Secret</span></span><br><span class="line">  <span class="attr">admin_user:</span> <span class="string">Y2k38</span> <span class="comment"># GitHub repo owner and collaborators, only these guys can initialize gitHub issues</span></span><br><span class="line">  <span class="attr">distraction_free_mode:</span> <span class="literal">true</span> <span class="comment"># Facebook-like distraction free mode</span></span><br><span class="line">  <span class="comment"># Gitalk&#x27;s display language depends on user&#x27;s browser or system environment</span></span><br><span class="line">  <span class="comment"># If you want everyone visiting your site to see a uniform language, you can set a force language value</span></span><br><span class="line">  <span class="comment"># Available values: en | es-ES | fr | ru | zh-CN | zh-TW</span></span><br><span class="line">  <span class="attr">language:</span> <span class="string">zh-CN</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://pages.github.com/">GitHub Pages</a><br><a href="https://gist.github.com/btfak/18938572f5df000ebe06fbd1872e4e39">How to use Hexo and deploy to GitHub Pages</a><br><a href="https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line">Creating a personal access token for the command line</a></p>
+]]></content>
+      <tags>
+        <tag>github pages</tag>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>PHP扩展开发 - 类</title>
     <url>/2020/11/26/php-extension-writing-classes/</url>
     <content><![CDATA[<p>以下简单介绍如何在C语言层面使用PHP类</p>
@@ -432,34 +493,6 @@
       <tags>
         <tag>php</tag>
         <tag>php extension</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用github pages搭建个人博客</title>
-    <url>/2019/09/02/personal-blog-using-github-pages/</url>
-    <content><![CDATA[<p>简单介绍如何使用github pages服务以及hexo搭建一个免费的个人博客</p>
-<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><h3 id="创建仓库"><a href="#创建仓库" class="headerlink" title="创建仓库"></a>创建仓库</h3><p>创建一个空的仓库，名字固定格式为“username.github.io”，这个名字也是博客的访问的域名</p>
-<h3 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g hexo-cli           <span class="comment"># 安装hexo命令行工具</span></span><br><span class="line">hexo init blog                    <span class="comment"># 创建blog项目</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> blog</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/theme-next/hexo-theme-next themes/next <span class="comment"># 安装next主题，可选</span></span><br><span class="line"></span><br><span class="line">npm install hexo-deployer-git --save <span class="comment"># 安装github发布工具</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><h3 id="配置hexo"><a href="#配置hexo" class="headerlink" title="配置hexo"></a>配置hexo</h3><p>修改_config.yml</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基础配置</span></span><br><span class="line"><span class="comment"># Hexo Configuration</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/configuration.html</span></span><br><span class="line"><span class="comment">## Source: https://github.com/hexojs/hexo/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Site</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">Y2k38&#x27;s</span> <span class="string">Blog</span></span><br><span class="line"><span class="attr">subtitle:</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">y2k38&#x27;s</span> <span class="string">blog</span></span><br><span class="line"><span class="attr">keywords:</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">y2k38</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="attr">timezone:</span> </span><br><span class="line"></span><br><span class="line"><span class="comment"># URL </span></span><br><span class="line"><span class="comment">## If your site is put in a subdirectory, set url as &#x27;http://yoursite.com/child&#x27; and root as &#x27;/child/&#x27;</span></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://y2k38.github.io</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">:year/:month/:day/:title/</span></span><br><span class="line"><span class="attr">permalink_defaults:</span></span><br><span class="line"></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 博客主题配置</span></span><br><span class="line"><span class="comment"># Extensions</span></span><br><span class="line"><span class="comment">## Plugins: https://hexo.io/plugins/</span></span><br><span class="line"><span class="comment">## Themes: https://hexo.io/themes/</span></span><br><span class="line"><span class="attr">theme:</span> <span class="string">next</span> <span class="comment"># 可选，若没有安装next主题，则忽略</span></span><br><span class="line"></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># github部署配置</span></span><br><span class="line"><span class="comment"># Deployment</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/deployment.html</span></span><br><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">https://github.com/Y2k38/y2k38.github.io.git</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">master</span> <span class="comment"># 注意，分支固定位master</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="发布github"><a href="#发布github" class="headerlink" title="发布github"></a>发布github</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo clean &amp;&amp; hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>完成</p>
-<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="添加gitalk评论系统"><a href="#添加gitalk评论系统" class="headerlink" title="添加gitalk评论系统"></a>添加gitalk评论系统</h3><blockquote>
-<p>[Deprecated] github要求校验方式改为personal access token，待gitalk作者及theme-next作者更新</p>
-</blockquote>
-<p>新建OAuth application获取id、secret，<a href="https://github.com/settings/applications/new">https://github.com/settings/applications/new</a></p>
-<p><img src="/images/register_a_new_OAuth_application.png" alt="new oauth app"></p>
-<p>配置next主题 <code>themes/next/_config.yml</code></p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Gitalk</span></span><br><span class="line"><span class="comment"># Demo: https://gitalk.github.io</span></span><br><span class="line"><span class="comment"># For more information: https://github.com/gitalk/gitalk, https://github.com/emn178/js-md5</span></span><br><span class="line"><span class="attr">gitalk:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">github_id:</span> <span class="string">y2k38</span> <span class="comment"># GitHub repo owner</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">y2k38.github.io</span> <span class="comment"># Repository name to store issues</span></span><br><span class="line">  <span class="attr">client_id:</span> <span class="string">xxxxxxxxxxxxxxxx</span> <span class="comment"># GitHub Application Client ID</span></span><br><span class="line">  <span class="attr">client_secret:</span> <span class="string">yyyyyyyyyyyyyyyy</span> <span class="comment"># GitHub Application Client Secret</span></span><br><span class="line">  <span class="attr">admin_user:</span> <span class="string">Y2k38</span> <span class="comment"># GitHub repo owner and collaborators, only these guys can initialize gitHub issues</span></span><br><span class="line">  <span class="attr">distraction_free_mode:</span> <span class="literal">true</span> <span class="comment"># Facebook-like distraction free mode</span></span><br><span class="line">  <span class="comment"># Gitalk&#x27;s display language depends on user&#x27;s browser or system environment</span></span><br><span class="line">  <span class="comment"># If you want everyone visiting your site to see a uniform language, you can set a force language value</span></span><br><span class="line">  <span class="comment"># Available values: en | es-ES | fr | ru | zh-CN | zh-TW</span></span><br><span class="line">  <span class="attr">language:</span> <span class="string">zh-CN</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://pages.github.com/">GitHub Pages</a><br><a href="https://gist.github.com/btfak/18938572f5df000ebe06fbd1872e4e39">How to use Hexo and deploy to GitHub Pages</a><br><a href="https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line">Creating a personal access token for the command line</a></p>
-]]></content>
-      <tags>
-        <tag>github pages</tag>
-        <tag>hexo</tag>
       </tags>
   </entry>
   <entry>
@@ -670,39 +703,6 @@
       </tags>
   </entry>
   <entry>
-    <title>解决ubuntu系统monospace字体显示异常的问题</title>
-    <url>/2019/11/24/linux-monofonts-render-incorrectly/</url>
-    <content><![CDATA[<p>很长的一段时间，被xubuntu下的一个monospace字体显示问题困扰着，在网上找了很多方法也没有解决问题，在一次误打误撞的情况下解决了，简单把自己问题的过程记录下来，希望给一些小伙伴们帮助</p>
-<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>xubuntu下monospace在浏览器以及vscode下显示异常，具体如下图所示</p>
-<p>浏览器chrome&#x2F;firefox下的monospace</p>
-<p><img src="/images/monofont_display_incorrect_in_browser.png" alt="monofont display incorrect in browser"></p>
-<p>vscode下的monospace</p>
-<p><img src="/images/monofont_display_incorrect_in_vscode.png" alt="monofont display incorrect in vscode"></p>
-<p>网上搜索结果大部分指示，是由于libfreetype6 2.8.1-2ubuntu2的一个bug导致，需要升级到最新的libfreetype2.9或者降级到libfreetype2.8.0，按照搜索的文档进行libfreetype的升级&#x2F;降级后，显示效果依旧，问题没有得到解决</p>
-<h2 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h2><p>在我放弃治疗后过了一段时间，突然想起，一直以来都忽略了验证linux的字体信息。首先，获取显示异常的字体font-family，如下图</p>
-<p><img src="/images/browser_get_font_family.png" alt="browser get font family"></p>
-<p>使用fc-match验证字体</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ fc-match monospace</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match consolas</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match Menlo</span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;PingFang SC&quot;</span></span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;Microsoft YaHei&quot;</span></span><br><span class="line">NotoSansCJK-Regular.ttc: <span class="string">&quot;Noto Sans CJK SC&quot;</span> <span class="string">&quot;Regular&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>可以看到Menlo、”PingFang SC”、”Microsoft YaHei”的实际字体跟monospace并不一致，抱着死马当活马医的心态，编辑字体配置文件<code>~/.config/fontconfig/fonts.conf</code>，内容如下，</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&#x27;1.0&#x27;?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&#x27;fonts.dtd&#x27;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">alias</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">prefer</span>&gt;</span><span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span><span class="tag">&lt;/<span class="name">prefer</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>退出，重新登录，发现这个困扰了很久的问题终于解决，如下图</p>
-<p><img src="/images/monofont_the_correct_view.png" alt="monofont the correct view"></p>
-<p>vscode可以通过更改font-family恢复正常的显示效果</p>
-<p><strong>注意</strong></p>
-<p>ubuntu&#x2F;xubuntu、中文&#x2F;英文的系统默认的字体会有些许差异，以上的操作可能不一定生效，可以新增<code>~/.config/fontconfig/conf.d/00-menlo.conf</code></p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;fonts.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">alias</span> <span class="attr">binding</span>=<span class="string">&quot;same&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">accept</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">accept</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/adobe/brackets/issues/14290">[Ubuntu 18.04 LTS] Font not rendering properly</a><br><a href="https://stackoverflow.com/questions/50114376/ubuntu-18-04-lts-font-not-rendering-properly">Ubuntu 18.04 LTS Font not rendering properly</a><br><a href="https://superuser.com/questions/930572/why-doesnt-fc-match-respect-my-match-and-edit-rule-for-courier-when-it-does-for">Why doesn’t fc-match respect my match and edit rule for Courier when it does for Consolas?</a></p>
-]]></content>
-      <tags>
-        <tag>ubuntu</tag>
-        <tag>vscode</tag>
-        <tag>monospace fonts</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>PHP扩展开发 - Part 3</title>
     <url>/2020/02/09/php-extension-writing-part3/</url>
     <content><![CDATA[<p>本文将简单介绍资源类型、资源的创建、访问、销毁操作。不再建议使用资源类型，使用类更为合适</p>
@@ -796,6 +796,36 @@
 ]]></content>
       <tags>
         <tag>postgresql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>记一次xdebug异常</title>
+    <url>/2019/09/05/vagrant-xdebug-not-working/</url>
+    <content><![CDATA[<p>工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴</p>
+<h2 id="问题及解决过程"><a href="#问题及解决过程" class="headerlink" title="问题及解决过程"></a>问题及解决过程</h2><h3 id="异常情况"><a href="#异常情况" class="headerlink" title="异常情况"></a>异常情况</h3><p>xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错；监测网络数据，只有初次请求数据，无结果返回</p>
+<h3 id="客户端-服务器配置信息"><a href="#客户端-服务器配置信息" class="headerlink" title="客户端&#x2F;服务器配置信息"></a>客户端&#x2F;服务器配置信息</h3><p>服务器是vagrant + ubuntu 18.04 + PHP 7.4，客户端是Windows 10，编辑器是vscode</p>
+<p>初始xdebug配置如下</p>
+<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="section">[xdebug]</span></span><br><span class="line"><span class="attr">xdebug.remote_enable</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_autostart</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_port</span> = <span class="number">9001</span></span><br><span class="line"><span class="attr">xdebug.remote_handler</span> = <span class="string">&quot;dbgp&quot;</span></span><br><span class="line"><span class="attr">xdebug.remote_mode</span> = req</span><br><span class="line"><span class="attr">xdebug.remote_connect_back</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.overload_var_dump</span>=<span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>vscode配置launch.json如下</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.2.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;configurations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Listen for XDebug&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;php&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">9001</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;pathMappings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;/data/example&quot;</span><span class="punctuation">:</span> <span class="string">&quot;D:\\data\\example&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;log&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="开启xdebug日志监测"><a href="#开启xdebug日志监测" class="headerlink" title="开启xdebug日志监测"></a>开启xdebug日志监测</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.remote_log</span>=/tmp/xdebug.log</span><br></pre></td></tr></table></figure>
+
+<p>再次请求，获取日志数据如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[140114918627520] Log opened at 2019-09-04 11:49:00</span><br><span class="line">[140114918627520] I: Checking remote connect back address.</span><br><span class="line">[140114918627520] I: Checking header &#x27;HTTP_X_FORWARDED_FOR&#x27;.</span><br><span class="line">[140114918627520] I: Checking header &#x27;REMOTE_ADDR&#x27;.</span><br><span class="line">[140114918627520] I: Remote address found, connecting to 192.168.33.1:9001.</span><br><span class="line">[140114918627520] E: Time-out connecting to client (Waited: 200 ms). :-(</span><br><span class="line">[140114918627520] Log closed at 2019-09-04 11:49:00</span><br></pre></td></tr></table></figure>
+
+<p>日志显示服务端有正常向客户端9001端口发起连接，但客户端无响应导致超时，检查客户端防火墙无异常</p>
+<p>最后，在谷歌上找到一个类似的问题，发现问题与vagrant有关，具体问题描述见参考文档链接</p>
+<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="comment">; 移除 xdebug.remote_connect_back = 1</span></span><br><span class="line"><span class="comment">; 添加</span></span><br><span class="line"><span class="attr">xdebug.remote_host</span>=<span class="number">10.0</span>.<span class="number">2.2</span></span><br></pre></td></tr></table></figure>
+
+<p>重启php-fpm，再次测试，vscode可连接xdebug，问题解决</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://danemacmillan.com/how-to-configure-xdebug-in-phpstorm-through-vagrant/">How to configure Xdebug in PhpStorm through Vagrant</a><br><a href="https://stackoverflow.com/questions/24831707/xdebug-time-out-connecting-to-client-using-phpstorm-7-1-3-vagrant-virtualbo">xdebug Time-out connecting to client</a></p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>vagrant</tag>
+        <tag>xdebug</tag>
       </tags>
   </entry>
   <entry>
@@ -976,36 +1006,6 @@
       <tags>
         <tag>kubernetes</tag>
         <tag>kubeadm</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>记一次xdebug异常</title>
-    <url>/2019/09/05/vagrant-xdebug-not-working/</url>
-    <content><![CDATA[<p>工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴</p>
-<h2 id="问题及解决过程"><a href="#问题及解决过程" class="headerlink" title="问题及解决过程"></a>问题及解决过程</h2><h3 id="异常情况"><a href="#异常情况" class="headerlink" title="异常情况"></a>异常情况</h3><p>xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错；监测网络数据，只有初次请求数据，无结果返回</p>
-<h3 id="客户端-服务器配置信息"><a href="#客户端-服务器配置信息" class="headerlink" title="客户端&#x2F;服务器配置信息"></a>客户端&#x2F;服务器配置信息</h3><p>服务器是vagrant + ubuntu 18.04 + PHP 7.4，客户端是Windows 10，编辑器是vscode</p>
-<p>初始xdebug配置如下</p>
-<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="section">[xdebug]</span></span><br><span class="line"><span class="attr">xdebug.remote_enable</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_autostart</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_port</span> = <span class="number">9001</span></span><br><span class="line"><span class="attr">xdebug.remote_handler</span> = <span class="string">&quot;dbgp&quot;</span></span><br><span class="line"><span class="attr">xdebug.remote_mode</span> = req</span><br><span class="line"><span class="attr">xdebug.remote_connect_back</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.overload_var_dump</span>=<span class="number">0</span></span><br></pre></td></tr></table></figure>
-
-<p>vscode配置launch.json如下</p>
-<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.2.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;configurations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Listen for XDebug&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;php&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">9001</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;pathMappings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;/data/example&quot;</span><span class="punctuation">:</span> <span class="string">&quot;D:\\data\\example&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;log&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="开启xdebug日志监测"><a href="#开启xdebug日志监测" class="headerlink" title="开启xdebug日志监测"></a>开启xdebug日志监测</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.remote_log</span>=/tmp/xdebug.log</span><br></pre></td></tr></table></figure>
-
-<p>再次请求，获取日志数据如下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[140114918627520] Log opened at 2019-09-04 11:49:00</span><br><span class="line">[140114918627520] I: Checking remote connect back address.</span><br><span class="line">[140114918627520] I: Checking header &#x27;HTTP_X_FORWARDED_FOR&#x27;.</span><br><span class="line">[140114918627520] I: Checking header &#x27;REMOTE_ADDR&#x27;.</span><br><span class="line">[140114918627520] I: Remote address found, connecting to 192.168.33.1:9001.</span><br><span class="line">[140114918627520] E: Time-out connecting to client (Waited: 200 ms). :-(</span><br><span class="line">[140114918627520] Log closed at 2019-09-04 11:49:00</span><br></pre></td></tr></table></figure>
-
-<p>日志显示服务端有正常向客户端9001端口发起连接，但客户端无响应导致超时，检查客户端防火墙无异常</p>
-<p>最后，在谷歌上找到一个类似的问题，发现问题与vagrant有关，具体问题描述见参考文档链接</p>
-<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="comment">; 移除 xdebug.remote_connect_back = 1</span></span><br><span class="line"><span class="comment">; 添加</span></span><br><span class="line"><span class="attr">xdebug.remote_host</span>=<span class="number">10.0</span>.<span class="number">2.2</span></span><br></pre></td></tr></table></figure>
-
-<p>重启php-fpm，再次测试，vscode可连接xdebug，问题解决</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://danemacmillan.com/how-to-configure-xdebug-in-phpstorm-through-vagrant/">How to configure Xdebug in PhpStorm through Vagrant</a><br><a href="https://stackoverflow.com/questions/24831707/xdebug-time-out-connecting-to-client-using-phpstorm-7-1-3-vagrant-virtualbo">xdebug Time-out connecting to client</a></p>
-]]></content>
-      <tags>
-        <tag>php</tag>
-        <tag>vagrant</tag>
-        <tag>xdebug</tag>
       </tags>
   </entry>
 </search>
