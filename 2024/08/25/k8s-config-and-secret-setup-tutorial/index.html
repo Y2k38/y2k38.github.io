@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="简单的配置管理，可以把信息写入文件放在项目里，然后打包发布，但这样会有信息泄露的安全风险，经常会看到谁谁谁把项目上传到github，然后公司数据库&#x2F;敏感密钥泄漏等。所以，现在的公司一般会自建发布平台，通过发布平台管理配置，流程：配置修改-&gt;审核-&gt;发布。了解到这背景，我们就知道config跟secret在整个软件开发过程中扮演的角色，接下来就学习如何配置config&amp;#x2F">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s config和secret配置教程">
+<meta property="og:url" content="https://y2k38.github.io/2024/08/25/k8s-config-and-secret-setup-tutorial/index.html">
+<meta property="og:site_name" content="noname">
+<meta property="og:description" content="简单的配置管理，可以把信息写入文件放在项目里，然后打包发布，但这样会有信息泄露的安全风险，经常会看到谁谁谁把项目上传到github，然后公司数据库&#x2F;敏感密钥泄漏等。所以，现在的公司一般会自建发布平台，通过发布平台管理配置，流程：配置修改-&gt;审核-&gt;发布。了解到这背景，我们就知道config跟secret在整个软件开发过程中扮演的角色，接下来就学习如何配置config&amp;#x2F">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-08-25T11:32:30.000Z">
+<meta property="article:modified_time" content="2024-08-25T11:34:57.457Z">
+<meta property="article:author" content="y2k38">
+<meta property="article:tag" content="kubernetes">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://y2k38.github.io/2024/08/25/k8s-config-and-secret-setup-tutorial/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/2024/08/25/k8s-config-and-secret-setup-tutorial/","path":"2024/08/25/k8s-config-and-secret-setup-tutorial/","title":"k8s config和secret配置教程"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>k8s config和secret配置教程 | noname</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">noname</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Config"><span class="nav-number">1.</span> <span class="nav-text">Config</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Secret"><span class="nav-number">2.</span> <span class="nav-text">Secret</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">y2k38</p>
+  <div class="site-description" itemprop="description">个人笔记</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2024/08/25/k8s-config-and-secret-setup-tutorial/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="k8s config和secret配置教程 | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          k8s config和secret配置教程
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-08-25 19:32:30 / 修改时间：19:34:57" itemprop="dateCreated datePublished" datetime="2024-08-25T19:32:30+08:00">2024-08-25</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>简单的配置管理，可以把信息写入文件放在项目里，然后打包发布，但这样会有信息泄露的安全风险，经常会看到谁谁谁把项目上传到github，然后公司数据库&#x2F;敏感密钥泄漏等。所以，现在的公司一般会自建发布平台，通过发布平台管理配置，流程：配置修改-&gt;审核-&gt;发布。了解到这背景，我们就知道config跟secret在整个软件开发过程中扮演的角色，接下来就学习如何配置config&#x2F;secret并使用</p>
+<blockquote>
+<p>当然，一般情况下，配置管理没有那么简单，要考虑多种环境如dev&#x2F;test&#x2F;release以及地区区分，操作需小心谨慎，一不小心就出现遗漏、错配，此外，还有多人开发时配置冲突等，这些都是开发过程中要注意的问题</p>
+</blockquote>
+<h2 id="Config"><a href="#Config" class="headerlink" title="Config"></a>Config</h2><p>以下展示configMap的简单配置，必须字段apiVersion、kind、metadata、data&#x2F;binaryData。data可以是key-value键值对，也可以是文件名-文件内容，数据的大小不能超过1MB，具体可以查看官网api描述文档</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># game-demo.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">game-demo</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="comment"># 1. key-value</span></span><br><span class="line">  <span class="attr">player_initial_lives:</span> <span class="string">&quot;3&quot;</span></span><br><span class="line">  <span class="attr">ui_properties_file_name:</span> <span class="string">&quot;user-interface.properties&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 2. filename-content</span></span><br><span class="line">  <span class="attr">game.properties:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    enemy.types=aliens,monsters</span></span><br><span class="line"><span class="string">    player.maximum-lives=5    </span></span><br><span class="line"><span class="string"></span>  <span class="attr">user-interface.properties:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    color.good=purple</span></span><br><span class="line"><span class="string">    color.bad=yellow</span></span><br><span class="line"><span class="string">    allow.textmode=true </span></span><br></pre></td></tr></table></figure>
+
+<p>执行命令写入k8s，查看并验证配置信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 写入k8s</span></span><br><span class="line">kubectl apply -f game-demo.yam</span><br><span class="line"><span class="comment"># </span></span><br><span class="line">kubectl get cm game-demo</span><br><span class="line"><span class="comment"># 查看config数据</span></span><br><span class="line">kubectl describe cm game-demo</span><br></pre></td></tr></table></figure>
+
+<p>有了配置信息，怎么搭配container使用？有4种使用方式可供参考</p>
+<ol>
+<li>在容器命令和参数内</li>
+<li>容器的环境变量</li>
+<li>在只读卷里面添加一个文件，让应用来读取</li>
+<li>编写代码在 Pod 中运行，使用 Kubernetes API 来读取 ConfigMap</li>
+</ol>
+<p>以下启动一个pod，在启动时打印输出config信息，主要展示的是环境变量跟配置文件两种方式，也就是上面的2和3</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">configmap-demo-pod</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">demo</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">registry.noname.io:5000/alpine:3.20.1</span></span><br><span class="line">      <span class="attr">command:</span> </span><br><span class="line">        <span class="bullet">-</span> <span class="string">/bin/sh</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;-c&quot;</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">|</span></span><br><span class="line"><span class="string">          echo $PLAYER_INITIAL_LIVES;</span></span><br><span class="line"><span class="string">          echo $UI_PROPERTIES_FILE_NAME;</span></span><br><span class="line"><span class="string">          ls -l /config/game.properties;</span></span><br><span class="line"><span class="string">          cat /config/game.properties;</span></span><br><span class="line"><span class="string">          ls -l /config/user-interface.properties;</span></span><br><span class="line"><span class="string">          cat /config/user-interface.properties;</span></span><br><span class="line"><span class="string"></span>      <span class="comment"># 方式2：configMap-&gt;环境变量</span></span><br><span class="line">      <span class="attr">env:</span></span><br><span class="line">        <span class="comment"># 定义环境变量</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">PLAYER_INITIAL_LIVES</span>    <span class="comment"># 请注意这里和 ConfigMap 中的键名是不一样的</span></span><br><span class="line">          <span class="attr">valueFrom:</span></span><br><span class="line">            <span class="attr">configMapKeyRef:</span></span><br><span class="line">              <span class="attr">name:</span> <span class="string">game-demo</span>           <span class="comment"># 这个值来自 ConfigMap</span></span><br><span class="line">              <span class="attr">key:</span> <span class="string">player_initial_lives</span> <span class="comment"># 需要取值的键</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">UI_PROPERTIES_FILE_NAME</span></span><br><span class="line">          <span class="attr">valueFrom:</span></span><br><span class="line">            <span class="attr">configMapKeyRef:</span></span><br><span class="line">              <span class="attr">name:</span> <span class="string">game-demo</span></span><br><span class="line">              <span class="attr">key:</span> <span class="string">ui_properties_file_name</span></span><br><span class="line">      <span class="comment"># 方式3：configMap-&gt;文件</span></span><br><span class="line">      <span class="attr">volumeMounts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">config</span></span><br><span class="line">        <span class="attr">mountPath:</span> <span class="string">&quot;/config&quot;</span></span><br><span class="line">        <span class="attr">readOnly:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">  <span class="comment"># 你可以在 Pod 级别设置卷，然后将其挂载到 Pod 内的容器中</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">config</span></span><br><span class="line">    <span class="attr">configMap:</span></span><br><span class="line">      <span class="comment"># ConfigMap的名字</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">game-demo</span></span><br><span class="line">      <span class="comment"># 指定key创建为path文件</span></span><br><span class="line">      <span class="attr">items:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;game.properties&quot;</span></span><br><span class="line">        <span class="attr">path:</span> <span class="string">&quot;game.properties&quot;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;user-interface.properties&quot;</span></span><br><span class="line">        <span class="attr">path:</span> <span class="string">&quot;user-interface.properties&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>执行命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建pod</span></span><br><span class="line">kubectl apply -f configmap-demo-pod.yaml</span><br><span class="line"><span class="comment"># 查看configmap-demo-pod运行情况</span></span><br><span class="line">kubectl get pod | grep configmap-demo-pod</span><br><span class="line"><span class="comment"># pod是否有其他异常</span></span><br><span class="line">kubectl describe pod configmap-demo-pod</span><br><span class="line"><span class="comment"># 查看command输出日志</span></span><br><span class="line">kubectl logs configmap-demo-pod</span><br><span class="line"><span class="comment"># 清理config、pod</span></span><br><span class="line">kubectl delete -f game-demo.yaml</span><br><span class="line">kubectl delete -f configmap-demo-pod.yaml</span><br></pre></td></tr></table></figure>
+
+<h2 id="Secret"><a href="#Secret" class="headerlink" title="Secret"></a>Secret</h2><p>secret的应用场景想到的只有数据库密码，如果真的要跟数据库其他配置分离也挺蛋疼的，以下简单展示如何使用</p>
+<p>secret与config非常相似，有如下相同点</p>
+<ol>
+<li>key&#x2F;value 的形式</li>
+<li>属于某个特定的 namespace</li>
+<li>可以导出到环境变量</li>
+<li>可以通过目录&#x2F;文件形式挂载 (支持挂载所有 key 和部分 key)</li>
+</ol>
+<p>不同点：</p>
+<ol>
+<li>secret 可以被 ServerAccount 关联 (使用)</li>
+<li>secret 可以存储 register 的鉴权信息，用在 ImagePullSecret 参数中，用于拉取私有仓库的镜像</li>
+<li>secret 支持 Base64 加密</li>
+<li>secret 文件存储在 tmpfs 文件系统中，Pod删除后secret文件也会对应的删除</li>
+</ol>
+<p>配置secret</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># dotfile-secret.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Secret</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">dotfile-secret</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="string">.secret-file:</span> <span class="string">dmFsdWUtMg0KDQo=</span></span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get secret dotfile-secret -o json | jq <span class="string">&#x27;.data | map_values(@base64d)&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>使用secret，有以下几种方式</p>
+<ol>
+<li>作为挂载到一个或多个容器上的卷中的文件</li>
+<li>作为容器的环境变量</li>
+<li>由kubelet在为Pod拉取镜像时使用</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># secret-dotfiles-pod.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">secret-dotfiles-pod</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">secret-volume</span></span><br><span class="line">      <span class="attr">secret:</span></span><br><span class="line">        <span class="attr">secretName:</span> <span class="string">dotfile-secret</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">dotfile-test-container</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">registry.noname.io:5000/alpine:3.20.1</span></span><br><span class="line">      <span class="attr">command:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">ls</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;-la&quot;</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;/etc/secret-volume&quot;</span></span><br><span class="line">      <span class="comment"># /etc/secret-volume/.secret-file</span></span><br><span class="line">      <span class="attr">volumeMounts:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">secret-volume</span></span><br><span class="line">          <span class="attr">readOnly:</span> <span class="literal">true</span></span><br><span class="line">          <span class="attr">mountPath:</span> <span class="string">&quot;/etc/secret-volume&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>执行命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建pod</span></span><br><span class="line">kubectl apply -f secret-dotfiles-pod.yaml</span><br><span class="line"><span class="comment"># 查看secret-dotfiles-pod运行情况</span></span><br><span class="line">kubectl get pod | grep secret-dotfiles-pod</span><br><span class="line"><span class="comment"># pod是否有其他异常</span></span><br><span class="line">kubectl describe pod secret-dotfiles-pod</span><br><span class="line"><span class="comment"># 查看command输出日志</span></span><br><span class="line">kubectl logs secret-dotfiles-pod</span><br><span class="line"><span class="comment"># 清理config、pod</span></span><br><span class="line">kubectl delete -f dotfile-secret.yaml</span><br><span class="line">kubectl delete -f secret-dotfiles-pod.yaml</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMaps</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/secret/">Secrets</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/08/18/how-to-manage-wifi-on-ubuntu-server/" rel="prev" title="如何在ubuntu服务器上管理Wi-Fi">
+                  <i class="fa fa-angle-left"></i> 如何在ubuntu服务器上管理Wi-Fi
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/08/26/k8s-pv-setup-tutorial/" rel="next" title="k8s pv配置教程">
+                  k8s pv配置教程 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">y2k38</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">20k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:11</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
