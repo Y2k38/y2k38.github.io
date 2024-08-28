@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="默认情况下，k8s内创建的服务是无法对公网提供访问的，如果要从公网访问k8s服务，一般有三种方式，NodePort、LoadBalancer、Ingress，下面简单介绍NodePort、LoadBalancer，着重讲解Ingress 本文使用的deployment同官方教程nginx-deployment，图片是从ingress-nginx官方文档拷贝过来借用，如侵必删 NodePort 如上">
+<meta property="og:type" content="article">
+<meta property="og:title" content="怎样从公网访问k8s服务">
+<meta property="og:url" content="https://y2k38.github.io/how-to-access-k8s-service-from-public-network/index.html">
+<meta property="og:site_name" content="noname">
+<meta property="og:description" content="默认情况下，k8s内创建的服务是无法对公网提供访问的，如果要从公网访问k8s服务，一般有三种方式，NodePort、LoadBalancer、Ingress，下面简单介绍NodePort、LoadBalancer，着重讲解Ingress 本文使用的deployment同官方教程nginx-deployment，图片是从ingress-nginx官方文档拷贝过来借用，如侵必删 NodePort 如上">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://y2k38.github.io/images/nodeport.jpg">
+<meta property="og:image" content="https://y2k38.github.io/images/metallb.jpg">
+<meta property="article:published_time" content="2024-08-28T07:37:57.000Z">
+<meta property="article:modified_time" content="2024-08-28T08:00:31.539Z">
+<meta property="article:author" content="y2k38">
+<meta property="article:tag" content="kubernetes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://y2k38.github.io/images/nodeport.jpg">
+
+
+<link rel="canonical" href="https://y2k38.github.io/how-to-access-k8s-service-from-public-network/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/how-to-access-k8s-service-from-public-network/","path":"how-to-access-k8s-service-from-public-network/","title":"怎样从公网访问k8s服务"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>怎样从公网访问k8s服务 | noname</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">noname</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#NodePort"><span class="nav-number">1.</span> <span class="nav-text">NodePort</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LoadBalancer"><span class="nav-number">2.</span> <span class="nav-text">LoadBalancer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#metallb%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.</span> <span class="nav-text">metallb安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E8%B7%B5"><span class="nav-number">2.2.</span> <span class="nav-text">实践</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ingress"><span class="nav-number">3.</span> <span class="nav-text">Ingress</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ingress-nginx"><span class="nav-number">3.1.</span> <span class="nav-text">ingress-nginx</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E8%B7%B5-1"><span class="nav-number">3.2.</span> <span class="nav-text">实践</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">y2k38</p>
+  <div class="site-description" itemprop="description">个人笔记</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/how-to-access-k8s-service-from-public-network/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="怎样从公网访问k8s服务 | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          怎样从公网访问k8s服务
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-08-28 15:37:57 / 修改时间：16:00:31" itemprop="dateCreated datePublished" datetime="2024-08-28T15:37:57+08:00">2024-08-28</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>默认情况下，k8s内创建的服务是无法对公网提供访问的，如果要从公网访问k8s服务，一般有三种方式，NodePort、LoadBalancer、Ingress，下面简单介绍NodePort、LoadBalancer，着重讲解Ingress</p>
+<p>本文使用的deployment同官方教程<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/run-application/run-stateless-application-deployment/">nginx-deployment</a>，图片是从ingress-nginx官方文档拷贝过来借用，如侵必删</p>
+<h2 id="NodePort"><a href="#NodePort" class="headerlink" title="NodePort"></a>NodePort</h2><p><img src="/images/nodeport.jpg" alt="nodeport"></p>
+<p>如上图所示，客户端访问集群内任意机器端口30100，k8s自动将请求转发到对应的服务</p>
+<ol>
+<li>创建NodePort类型的service，不指定nodeport的情况下，默认从30000-32767中挑选一个端口使用</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment --<span class="built_in">type</span>=<span class="string">&quot;NodePort&quot;</span> --port 80</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看service <code>kubectl get svc</code>，输出如下</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NAME               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE</span><br><span class="line">kubernetes         ClusterIP   10.96.0.1        &lt;none&gt;        443/TCP        12d</span><br><span class="line">nginx-deployment   NodePort    10.110.255.135   &lt;none&gt;        80:31402/TCP   4s</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p>在物理机上访问服务<code>curl http://vm1:31402</code>，对比在虚拟机上执行<code>curl http://10.110.255.135</code>，你会发现输出是一样的</p>
+</li>
+<li><p>删除service</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete svc nginx-deployment</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意</strong>：考虑到线上一般是直接通过域名访问，如果不想以<code>www.noname.io:31402</code>的方式访问服务，那么你还需要使用nginx&#x2F;haproxy建立一个反向代理的网关进行管理</p>
+<h2 id="LoadBalancer"><a href="#LoadBalancer" class="headerlink" title="LoadBalancer"></a>LoadBalancer</h2><p><img src="/images/metallb.jpg" alt="metallb"></p>
+<p>如上图所示，客户端的请求会抵达LoadBalancer指定的IP，然后流量会转发到对应的服务</p>
+<p>一般情况下，各个云服务厂商有提供专门支持k8s的LoadBalancer，本文依赖的k8s是自建的裸集群（bare-metal），需要使用metallb</p>
+<h3 id="metallb安装"><a href="#metallb安装" class="headerlink" title="metallb安装"></a>metallb安装</h3><ol>
+<li>下载配置文件，修改image地址，然后使用kubectl执行</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f ./metallb-native.yaml</span><br><span class="line"><span class="comment"># 如果你的网络正常</span></span><br><span class="line"><span class="comment"># kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看pod运行状态</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -n metallb-system -o wide</span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">NAME                        READY   STATUS    RESTARTS   AGE   IP                NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">controller-f6d7bd7b-7kg47   1/1     Running   0          51s   10.0.2.19         vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-8fgzx               1/1     Running   0          51s   192.168.122.235   vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-bfbtk               1/1     Running   0          51s   192.168.122.11    vm1    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-t4lv8               1/1     Running   0          51s   192.168.122.126   vm2    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>配置IP池</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vi ip-address-pool.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">metallb.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">IPAddressPool</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">metallb-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">addresses:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.122</span><span class="number">.20</span><span class="number">-192.168</span><span class="number">.122</span><span class="number">.25</span></span><br><span class="line">  <span class="attr">autoAssign:</span> <span class="literal">true</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">metallb.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">L2Advertisement</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">metallb-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ipAddressPools:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">default</span></span><br></pre></td></tr></table></figure>
+
+<p>执行命令<code>kubectl apply -f ip-address-pool.yaml</code></p>
+<p>到这里就创建好了</p>
+<h3 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h3><ol>
+<li>创建LoadBalancer类型的service</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment --<span class="built_in">type</span>=<span class="string">&quot;LoadBalancer&quot;</span> --port 80</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看service <code>kubectl get svc</code>，输出如下</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NAME               TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)        AGE</span><br><span class="line">kubernetes         ClusterIP      10.96.0.1        &lt;none&gt;           443/TCP        12d</span><br><span class="line">nginx-deployment   LoadBalancer   10.111.110.163   192.168.122.20   80:30804/TCP   8s</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p>在物理机上访问服务<code>curl -D- http://192.168.122.20 -H &#39;Host: www.noname.io&#39;</code>，对比在虚拟机上执行<code>curl -D- http://10.111.110.163</code>，你会发现输出是一样的</p>
+</li>
+<li><p>删除service</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete svc nginx-deployment</span><br></pre></td></tr></table></figure>
+
+<h2 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h2><p>ingress在整个k8s架构中扮演着集群网关的角色，提供了如负载均衡、SSL终结和基于名称的虚拟托管功能，目前支持的协议是http，后续的继任者gateway支持更多协议、流量管理、更灵活的配置等</p>
+<p>本文使用的ingress是ingress-nginx，当然，你也可以选择envoy或higress等</p>
+<h3 id="ingress-nginx"><a href="#ingress-nginx" class="headerlink" title="ingress-nginx"></a>ingress-nginx</h3><p>ingress的运行方式有好几种，其中比较常见的是NodePort以及LoadBalancer，外部流量抵达ingress，ingress根据路由规则转发到指定的服务</p>
+<p>将repo下载到本地，地址：<a target="_blank" rel="noopener" href="https://github.com/kubernetes/ingress-nginx%EF%BC%8Ck8s%E4%BE%9D%E8%B5%96%E7%9A%84%E9%83%A8%E7%BD%B2%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60deploy/static/provider/%60%E7%9B%AE%E5%BD%95%E4%B8%8B%EF%BC%8CNodePort%E6%96%B9%E5%BC%8F%E7%9A%84%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60baremetal%60%EF%BC%8C%E8%80%8CLoadBalancer%E6%96%B9%E5%BC%8F%E7%9A%84%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60cloud">https://github.com/kubernetes/ingress-nginx，k8s依赖的部署文件放在`deploy/static/provider/`目录下，NodePort方式的文件放在`baremetal`，而LoadBalancer方式的文件放在`cloud</a></p>
+<ol>
+<li><p>拷贝文件夹<code>baremetal</code>或<code>cloud</code>，修改deploy.yaml中的image地址</p>
+</li>
+<li><p>执行命令<code>kubectl apply -k .</code></p>
+</li>
+<li><p>查看pod运行状况</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -o wide -n ingress-nginx</span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">NAME                                        READY   STATUS      RESTARTS   AGE     IP           NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">ingress-nginx-admission-create-6mmd6        0/1     Completed   0          2m33s   10.0.2.178   vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">ingress-nginx-admission-patch-clnr4         0/1     Completed   0          2m33s   10.0.1.235   vm2    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">ingress-nginx-controller-5989548bf5-tjv5t   1/1     Running     0          2m33s   10.0.2.12    vm3    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>查看controller运行状况</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get svc ingress-nginx-controller -n ingress-nginx</span><br></pre></td></tr></table></figure>
+
+<p><code>LoadBalancer</code>输出如下</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME                       TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)                      AGE</span><br><span class="line">ingress-nginx-controller   LoadBalancer   10.109.74.112   192.168.122.20   80:31608/TCP,443:30939/TCP   77m</span><br></pre></td></tr></table></figure>
+
+<p><code>NodePort</code>输出如下</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME                       TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE</span><br><span class="line">ingress-nginx-controller   NodePort   10.104.202.43   &lt;none&gt;        80:31880/TCP,443:30184/TCP   3m27s</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>验证</li>
+</ol>
+<p>访问<code>LoadBalancer</code>地址</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>或者，访问<code>NodePort</code>地址</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -D- http://vm1:31880 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 404 Not Found</span><br><span class="line">Date: Wed, 28 Aug 2024 04:09:19 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 146</span><br><span class="line">Connection: keep-alive</span><br><span class="line"></span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;&lt;title&gt;404 Not Found&lt;/title&gt;&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;center&gt;&lt;h1&gt;404 Not Found&lt;/h1&gt;&lt;/center&gt;</span><br><span class="line">&lt;hr&gt;&lt;center&gt;nginx&lt;/center&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>到这里，ingress安装完成</p>
+<h3 id="实践-1"><a href="#实践-1" class="headerlink" title="实践"></a>实践</h3><ol>
+<li>创建默认类型为ClusterIP的服务服务</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>查看service <code>kubectl get svc</code>，输出如下</p>
+</li>
+<li><p>配置ingress规则</p>
+</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># example-ingress.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"> <span class="attr">name:</span> <span class="string">example-ingress</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"> <span class="attr">rules:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">www.noname.io</span></span><br><span class="line">   <span class="attr">http:</span></span><br><span class="line">     <span class="attr">paths:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="attr">pathType:</span> <span class="string">Prefix</span></span><br><span class="line">       <span class="attr">path:</span> <span class="string">&quot;/&quot;</span></span><br><span class="line">       <span class="attr">backend:</span></span><br><span class="line">         <span class="attr">service:</span></span><br><span class="line">           <span class="attr">name:</span> <span class="string">nginx-deployment</span></span><br><span class="line">           <span class="attr">port:</span></span><br><span class="line">             <span class="attr">number:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>验证</li>
+</ol>
+<p>访问<code>LoadBalancer</code>地址</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://medium.com/@seanlinsanity/how-to-expose-applications-running-in-kubernetes-cluster-to-public-access-65c2fa959a3b">3 Ways to Expose Applications Running in Kubernetes Cluster to Public Access</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/ingress/">Ingress</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/tasks/access-application-cluster/ingress-minikube/">在 Minikube 环境中使用 NGINX Ingress 控制器配置 Ingress</a><br><a target="_blank" rel="noopener" href="https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/baremetal.md">Bare-metal considerations</a><br><a target="_blank" rel="noopener" href="https://medium.com/tektutor/using-nginx-ingress-controller-in-kubernetes-bare-metal-setup-890eb4e7772">Using Nginx Ingress Controller in Kubernetes bare-metal setup</a><br><a target="_blank" rel="noopener" href="https://medium.com/tektutor/using-metal-lb-on-a-bare-metal-onprem-kubernetes-setup-6d036af1d20c">Using Metal LB on a bare-metal(OnPrem) Kubernetes Setup</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/k8s-pv-setup-tutorial/" rel="prev" title="k8s pv配置教程">
+                  <i class="fa fa-angle-left"></i> k8s pv配置教程
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">y2k38</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">21k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:17</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

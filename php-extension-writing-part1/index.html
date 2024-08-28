@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="在网上找到几篇基于PHP5的扩展开发的文章，有些古老，与PHP7不完全兼容，自己做了些简单的翻译、修改。 建议开发者先阅读PHP Internals Book这份在线文档，里面对PHP做了比较全面的讲解。由于PHP扩展开发的资料比较少，也鲜有PHP开发者触及到这块，编写扩展时如果遇到问题，最好是先查找PHP源代码是否有相关的使用案例，再通过网上论坛、QQ等方式寻求帮助。 本文是PHP扩展开发系列的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP扩展开发 - Part 1">
+<meta property="og:url" content="https://y2k38.github.io/php-extension-writing-part1/index.html">
+<meta property="og:site_name" content="noname">
+<meta property="og:description" content="在网上找到几篇基于PHP5的扩展开发的文章，有些古老，与PHP7不完全兼容，自己做了些简单的翻译、修改。 建议开发者先阅读PHP Internals Book这份在线文档，里面对PHP做了比较全面的讲解。由于PHP扩展开发的资料比较少，也鲜有PHP开发者触及到这块，编写扩展时如果遇到问题，最好是先查找PHP源代码是否有相关的使用案例，再通过网上论坛、QQ等方式寻求帮助。 本文是PHP扩展开发系列的">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-09-03T03:09:06.000Z">
+<meta property="article:modified_time" content="2024-08-17T07:07:25.364Z">
+<meta property="article:author" content="y2k38">
+<meta property="article:tag" content="php">
+<meta property="article:tag" content="php extension">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://y2k38.github.io/php-extension-writing-part1/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/php-extension-writing-part1/","path":"php-extension-writing-part1/","title":"PHP扩展开发 - Part 1"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>PHP扩展开发 - Part 1 | noname</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">noname</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Hello-World"><span class="nav-number">1.</span> <span class="nav-text">Hello World</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">扩展目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6"><span class="nav-number">1.3.</span> <span class="nav-text">头文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E6%96%87%E4%BB%B6"><span class="nav-number">1.4.</span> <span class="nav-text">源文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-number">1.5.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81"><span class="nav-number">1.6.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#INI%E5%8F%82%E6%95%B0"><span class="nav-number">2.</span> <span class="nav-text">INI参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F"><span class="nav-number">3.</span> <span class="nav-text">全局变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#INI%E6%B3%A8%E5%86%8C%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F"><span class="nav-number">4.</span> <span class="nav-text">INI注册全局变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81"><span class="nav-number">5.</span> <span class="nav-text">完整代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="nav-number">6.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">y2k38</p>
+  <div class="site-description" itemprop="description">个人笔记</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/php-extension-writing-part1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="PHP扩展开发 - Part 1 | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PHP扩展开发 - Part 1
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-09-03 11:09:06" itemprop="dateCreated datePublished" datetime="2019-09-03T11:09:06+08:00">2019-09-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-08-17 15:07:25" itemprop="dateModified" datetime="2024-08-17T15:07:25+08:00">2024-08-17</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>在网上找到几篇基于PHP5的扩展开发的文章，有些古老，与PHP7不完全兼容，自己做了些简单的翻译、修改。</p>
+<p>建议开发者先阅读<a target="_blank" rel="noopener" href="http://www.phpinternalsbook.com/">PHP Internals Book</a>这份在线文档，里面对PHP做了比较全面的讲解。由于PHP扩展开发的资料比较少，也鲜有PHP开发者触及到这块，编写扩展时如果遇到问题，最好是先查找PHP源代码是否有相关的使用案例，再通过网上论坛、QQ等方式寻求帮助。</p>
+<p>本文是PHP扩展开发系列的第一篇，主要介绍如何开发一个简单的PHP扩展、如何获取ini配置参数、如何配置全局变量</p>
+<p>前期准备：</p>
+<p>PHP编译选项加入<code>--enable-debug</code>以及<code>--enable-maintainer-zts</code>。<code>--enable-debug</code>生成额外的调试符号，并将优化等级设置为<code>-O0</code>，报告内存泄露等错误，使使用gdb进行debug时更为准确；<code>--enable-maintainer-zts</code>启用线程安全，开启<code>ZTS</code>宏定义，配置PHP为TSRM机制，用于编写调试多线程代码</p>
+<h2 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h2><h3 id="扩展目录结构"><a href="#扩展目录结构" class="headerlink" title="扩展目录结构"></a>扩展目录结构</h3><p>你可能会使用PHP源代码自带的脚本<code>ext/ext_skel.php</code>生成扩展骨架，但这里选择极简方式创建一个扩展，最基本的扩展只需要三个文件：配置文件<code>config.m4</code>，头文件<code>php_test.h</code>，源文件<code>test.c</code></p>
+<p><code>test</code>扩展目录结构</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">php-7.4.1</span><br><span class="line">└── ext</span><br><span class="line">    └── <span class="built_in">test</span></span><br><span class="line">        ├── config.m4</span><br><span class="line">        ├── php_test.h</span><br><span class="line">        └── test.c</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">dnl 用于生成configure及其他文件</span><br><span class="line">dnl `dnl`开头的行为注释内容</span><br><span class="line">dnl 若扩展依赖外部库，使用--with，否则默认使用--enable</span><br><span class="line">PHP_ARG_ENABLE(test, whether to enable test support,</span><br><span class="line">[  --enable-test          Enable test support], no)</span><br><span class="line"></span><br><span class="line">if test &quot;$PHP_TEST&quot; != &quot;no&quot;; then</span><br><span class="line">  AC_DEFINE(HAVE_TEST, 1, [ Have test support ])</span><br><span class="line">  PHP_NEW_EXTENSION(test, test.c, $ext_shared)</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<h3 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h3><p>头文件默认格式为<code>php_extname.h</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> PHP_TEST_H</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> PHP_TEST_H</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* PHP扩展结构zend_module_entry */</span></span><br><span class="line"><span class="keyword">extern</span> zend_module_entry test_module_entry;</span><br><span class="line"><span class="meta"># <span class="keyword">define</span> phpext_test_ptr &amp;test_module_entry</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* version扩展版本号 */</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> PHP_TEST_VERSION <span class="string">&quot;0.1.0&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 自定义函数声明PHP_FUNCTION(your_function_name) */</span></span><br><span class="line">PHP_FUNCTION(test);</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">if</span> defined(ZTS) &amp;&amp; defined(COMPILE_DL_TEST)</span></span><br><span class="line">ZEND_TSRMLS_CACHE_EXTERN()</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="源文件"><a href="#源文件" class="headerlink" title="源文件"></a>源文件</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifdef</span> HAVE_CONFIG_H</span></span><br><span class="line"><span class="meta"># <span class="keyword">include</span> <span class="string">&quot;config.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;php.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;php_test.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 自定义函数注册，最终*test_functions注册到模块声明test_module_entry */</span></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_functions[] = &#123;</span><br><span class="line">    <span class="comment">/* </span></span><br><span class="line"><span class="comment">     * 注册`test`函数，格式为PHP_FE(func_name, arg_info)，arg_info声明参数信息，如是否是引用等，这里先忽略</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    PHP_FE(test, <span class="literal">NULL</span>)</span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 模块注册 */</span></span><br><span class="line">zend_module_entry test_module_entry = &#123;</span><br><span class="line">    STANDARD_MODULE_HEADER,</span><br><span class="line">    <span class="string">&quot;test&quot;</span>,                    <span class="comment">/* 扩展名称 */</span></span><br><span class="line">    test_functions,            <span class="comment">/* 自定义函数注册 */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_MINIT */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_MSHUTDOWN */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_RINIT */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_RSHUTDOWN */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_MINFO */</span></span><br><span class="line">    PHP_TEST_VERSION,          <span class="comment">/* version */</span></span><br><span class="line">    STANDARD_MODULE_PROPERTIES</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 函数test */</span></span><br><span class="line">PHP_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    RETURN_STRING(<span class="string">&quot;Hello World&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> COMPILE_DL_TEST</span></span><br><span class="line"><span class="meta"># <span class="keyword">ifdef</span> ZTS</span></span><br><span class="line">ZEND_TSRMLS_CACHE_DEFINE()</span><br><span class="line"><span class="meta"># <span class="keyword">endif</span></span></span><br><span class="line">ZEND_GET_MODULE(test)</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">phpize</span><br><span class="line">./configure</span><br><span class="line"><span class="comment"># 除非config.m4有改动，否则只执行以下命令</span></span><br><span class="line">make &amp;&amp; <span class="built_in">sudo</span> make install</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>在<code>php.ini</code>添加<code>extension=test.so</code>，执行脚本获取输出</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php -r <span class="string">&quot;echo test();&quot;</span> <span class="comment"># 输出：Hello World</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="INI参数"><a href="#INI参数" class="headerlink" title="INI参数"></a>INI参数</h2><p>Zend Engine提供了两种方式访问ini参数，以下是第一种较为简单的方式，第二种方式与全局变量搭配使用，后面介绍</p>
+<p>我们在PHP的声明周期MINIT阶段注册ini参数，在<code>php_test.h</code>添加MINIT原型声明</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// test模块初始化</span></span><br><span class="line">PHP_MINIT_FUNCTION(test);</span><br><span class="line"><span class="comment">// test模块关闭清理函数</span></span><br><span class="line">PHP_MSHUTDOWN_FUNCTION(test);</span><br></pre></td></tr></table></figure>
+
+<p><code>test.c</code>做以下调整，注册MINIT，init参数声明</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;php_ini.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">zend_module_entry test_module_entry = &#123;</span><br><span class="line">    STANDARD_MODULE_HEADER,</span><br><span class="line">    <span class="string">&quot;test&quot;</span>,</span><br><span class="line">    test_functions,</span><br><span class="line">    PHP_MINIT(test),      <span class="comment">/* 注册MINIT */</span></span><br><span class="line">    PHP_MSHUTDOWN(test),  <span class="comment">/* 注册MSHUTDOWN */</span></span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    PHP_TEST_VERSION,</span><br><span class="line">    STANDARD_MODULE_PROPERTIES</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ini参数获取代码块</span></span><br><span class="line">PHP_INI_BEGIN()</span><br><span class="line">    <span class="comment">// ini参数test.foo声明</span></span><br><span class="line">    PHP_INI_ENTRY(<span class="string">&quot;test.foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, PHP_INI_ALL, <span class="literal">NULL</span>)</span><br><span class="line">PHP_INI_END();</span><br><span class="line"><span class="comment">// 以上宏等同于声明zend_ini_entry_def[]变量</span></span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    REGISTER_INI_ENTRIES();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_MSHUTDOWN_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    UNREGISTER_INI_ENTRIES();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    RETURN_STRING(INI_STR(<span class="string">&quot;test.foo&quot;</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ini参数声明放置在<code>PHP_INI_BEGIN</code>、<code>PHP_INI_END</code>，参数声明使用宏<code>PHP_INI_ENTRY</code>，具体格式为<code>PHP_INI_ENTRY(param_name, default_val, access_mode_modifier, validator)</code></p>
+<p><code>access_mode_modifier</code>决定ini参数可在什么地方被修改，主要有</p>
+<ul>
+<li>PHP_INI_ALL: 值可通过php.ini、.htaccess、ini_set修改</li>
+<li>PHP_INI_SYSTEM: 只可通过php.ini修改</li>
+<li>PHP_INI_PERDIR: 只可通过.htaccess修改</li>
+</ul>
+<p><code>validator</code>校验这里先忽略</p>
+<p>ini参数值获取方式如下</p>
+<table>
+<thead>
+<tr>
+<th align="left">当前值local value</th>
+<th align="left">默认值master value</th>
+<th align="left">返回值类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">INI_STR</td>
+<td align="left">INI_ORIG_STR</td>
+<td align="left">char *</td>
+</tr>
+<tr>
+<td align="left">INI_INT</td>
+<td align="left">INI_ORIG_STR</td>
+<td align="left">zend_long</td>
+</tr>
+<tr>
+<td align="left">INI_FLT</td>
+<td align="left">INI_ORIG_STR</td>
+<td align="left">double</td>
+</tr>
+<tr>
+<td align="left">INI_BOOL</td>
+<td align="left">INI_ORIG_STR</td>
+<td align="left">zend_bool</td>
+</tr>
+</tbody></table>
+<p>配置PHP，在<code>php.ini</code>添加<code>test.foo=helloworld</code>，执行脚本获取输出</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php -r <span class="string">&quot;echo test();&quot;</span> <span class="comment"># 输出：helloworld</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="全局变量"><a href="#全局变量" class="headerlink" title="全局变量"></a>全局变量</h2><p>上面部分的ini参数获取代码有几个问题，第一，每次读取ini参数值时，都需要系统扫描ini设置表，并转换成相应的类型；第二，没有校验用户输入，这样用户使用<code>ini_set</code>可以设置任意数据</p>
+<p>我们可以配置ini参数到全局变量，避免每次扫描ini设置表，在这之前，先看看如何使用全局变量编写一个计数器</p>
+<p>头文件<code>php_test.h</code>添加全局变量声明，并定义一个宏来访问我们的全局变量</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifdef</span> ZTS</span></span><br><span class="line"><span class="meta"># <span class="keyword">include</span> <span class="string">&quot;TSRM.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 全局变量声明 */</span></span><br><span class="line">ZEND_BEGIN_MODULE_GLOBALS(test)</span><br><span class="line">    <span class="type">long</span> counter;</span><br><span class="line">ZEND_END_MODULE_GLOBALS(test)</span><br><span class="line"><span class="comment">/* </span></span><br><span class="line"><span class="comment"> * 上面代码等同</span></span><br><span class="line"><span class="comment"> * typedef struct _zend_pib_globals &#123;</span></span><br><span class="line"><span class="comment"> *     long counter;</span></span><br><span class="line"><span class="comment"> * &#125; zend_test_globals;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 宏定义 TEST_G - 全局变量访问 */</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> ZTS</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> TEST_G(v) TSRMG(test_globals_id, zend_test_globals *, v)</span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> TEST_G(v) (test_globals.v)</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 请求初始化 */</span></span><br><span class="line">PHP_MINIT_FUNCTION(test);</span><br></pre></td></tr></table></figure>
+
+<p>源文件初始化全局变量，MINIT只会在进程或线程创建时执行一次，而一个进程可以服务多个请求，我们需要计数器在每个请求开始时清零，需要RINIT函数清零counter</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 初始化zend_test_globals */</span></span><br><span class="line">ZEND_DECLARE_MODULE_GLOBALS(test)</span><br><span class="line"><span class="comment">/* 等同于 zend_test_globals test_globals; */</span></span><br><span class="line"></span><br><span class="line">zend_module_entry test_module_entry = &#123;</span><br><span class="line">    STANDARD_MODULE_HEADER,</span><br><span class="line">    <span class="string">&quot;test&quot;</span>,</span><br><span class="line">    test_functions,</span><br><span class="line">    PHP_MINIT(test),</span><br><span class="line">    PHP_MSHUTDOWN(test),</span><br><span class="line">    PHP_RINIT(test),     <span class="comment">/* 注册请求初始化函数 */</span></span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    PHP_TEST_VERSION,</span><br><span class="line">    STANDARD_MODULE_PROPERTIES</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 全局变量初始化，仅在进程/线程创建时初始化 */</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_init_globals</span><span class="params">(zend_test_globals *test_globals)</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 请求初始化</span></span><br><span class="line">PHP_RINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* 因一个进程可服务多个请求，我们需要每个请求都有独立的counter */</span></span><br><span class="line">    TEST_G(counter) = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 模块初始化</span></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* 全局变量表注册 */</span></span><br><span class="line">    ZEND_INIT_MODULE_GLOBALS(test, php_test_init_globals, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    REGISTER_INI_ENTRIES();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行PHP脚本获取输出验证</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php -r <span class="string">&quot;test(); echo test();&quot;</span> <span class="comment"># 输出：2</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="INI注册全局变量"><a href="#INI注册全局变量" class="headerlink" title="INI注册全局变量"></a>INI注册全局变量</h2><p>有了上面的认识，在这里，将ini参数<code>test.direction</code>注册到全局变量，并添加validator校验</p>
+<p>头文件添加参数声明</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ZEND_BEGIN_MODULE_GLOBALS(test)</span><br><span class="line">    <span class="type">long</span> counter;</span><br><span class="line">    zend_bool direction;</span><br><span class="line">ZEND_END_MODULE_GLOBALS(test)</span><br></pre></td></tr></table></figure>
+
+<p>源文件修改为以下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">PHP_INI_BEGIN()</span><br><span class="line">    PHP_INI_ENTRY(<span class="string">&quot;test.foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, PHP_INI_ALL, <span class="literal">NULL</span>)</span><br><span class="line">    <span class="comment">// STD_PHP_INI_ENTRY(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr)</span></span><br><span class="line">    STD_PHP_INI_ENTRY(<span class="string">&quot;test.direction&quot;</span>, <span class="string">&quot;1&quot;</span>, PHP_INI_ALL, OnUpdateBool, direction, zend_test_globals, test_globals)</span><br><span class="line">PHP_INI_END();</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_init_globals</span><span class="params">(zend_test_globals *test_globals)</span> &#123;</span><br><span class="line">    <span class="comment">/* direction初始化，0|1 */</span></span><br><span class="line">    test_globals-&gt;direction = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (TEST_G(direction)) &#123;</span><br><span class="line">        TEST_G(counter)++;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        TEST_G(counter)--;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    RETURN_LONG(TEST_G(counter));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>STD_PHP_INI_ENTRY</code>可以使用更多参数，这里我们将参数写入全局变量<code>test_globals</code>。关联第四个参数<code>on_modify</code>校验输入值，如果成功，写入到全局变量，默认为<code>onUpdateLongGEZero</code>，其他的宏还有<code>OnUpdateLong</code>、<code>OnUpdateBool</code>、<code>OnUpdateReal</code>、<code>OnUpdateString</code>、<code>OnUpdateStringUnempty</code></p>
+<p>配置PHP，在<code>php.ini</code>添加<code>test.direction=0</code>，执行脚本获取输出</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php -r <span class="string">&quot;echo test();&quot;</span> <span class="comment"># 输出：-1</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><p><a target="_blank" rel="noopener" href="https://github.com/Y2k38/php_ext_tutorial">php_ext_tutorial</a></p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/3632160/how-to-make-a-php-extension">How to make a PHP extension</a><br><a target="_blank" rel="noopener" href="https://wiki.php.net/phpng-upgrading">Upgrading PHP extensions from PHP5 to NG</a><br><del><a target="_blank" rel="noopener" href="https://devzone.zend.com/303/extension-writing-part-i-introduction-to-php-and-zend/">Extension Writing Part I: Introduction to PHP and Zend (已失效)</a></del><br><a target="_blank" rel="noopener" href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-I:-Introduction-to-PHP-and-Zend">Extension Writing Part I: Introduction to PHP and Zend</a><br><a target="_blank" rel="noopener" href="http://www.phpinternalsbook.com/">PHP Internals Book</a><br><a target="_blank" rel="noopener" href="https://wiki.php.net/internals/references">References about Maintaining and Extending PHP</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/php/" rel="tag"># php</a>
+              <a href="/tags/php-extension/" rel="tag"># php extension</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/personal-blog-using-github-pages/" rel="prev" title="使用github pages搭建个人博客">
+                  <i class="fa fa-angle-left"></i> 使用github pages搭建个人博客
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/vagrant-xdebug-not-working/" rel="next" title="记一次xdebug异常">
+                  记一次xdebug异常 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">y2k38</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">21k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:17</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

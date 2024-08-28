@@ -114,7 +114,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-count">20</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -146,7 +146,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2024/08/26/k8s-pv-setup-tutorial/">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/how-to-access-k8s-service-from-public-network/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -164,7 +164,216 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/08/26/k8s-pv-setup-tutorial/" class="post-title-link" itemprop="url">k8s pv配置教程</a>
+          <a href="/how-to-access-k8s-service-from-public-network/" class="post-title-link" itemprop="url">怎样从公网访问k8s服务</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-08-28 15:37:57 / 修改时间：16:00:31" itemprop="dateCreated datePublished" datetime="2024-08-28T15:37:57+08:00">2024-08-28</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>默认情况下，k8s内创建的服务是无法对公网提供访问的，如果要从公网访问k8s服务，一般有三种方式，NodePort、LoadBalancer、Ingress，下面简单介绍NodePort、LoadBalancer，着重讲解Ingress</p>
+<p>本文使用的deployment同官方教程<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/run-application/run-stateless-application-deployment/">nginx-deployment</a>，图片是从ingress-nginx官方文档拷贝过来借用，如侵必删</p>
+<h2 id="NodePort"><a href="#NodePort" class="headerlink" title="NodePort"></a>NodePort</h2><p><img src="/images/nodeport.jpg" alt="nodeport"></p>
+<p>如上图所示，客户端访问集群内任意机器端口30100，k8s自动将请求转发到对应的服务</p>
+<ol>
+<li>创建NodePort类型的service，不指定nodeport的情况下，默认从30000-32767中挑选一个端口使用</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment --<span class="built_in">type</span>=<span class="string">&quot;NodePort&quot;</span> --port 80</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看service <code>kubectl get svc</code>，输出如下</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NAME               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE</span><br><span class="line">kubernetes         ClusterIP   10.96.0.1        &lt;none&gt;        443/TCP        12d</span><br><span class="line">nginx-deployment   NodePort    10.110.255.135   &lt;none&gt;        80:31402/TCP   4s</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p>在物理机上访问服务<code>curl http://vm1:31402</code>，对比在虚拟机上执行<code>curl http://10.110.255.135</code>，你会发现输出是一样的</p>
+</li>
+<li><p>删除service</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete svc nginx-deployment</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意</strong>：考虑到线上一般是直接通过域名访问，如果不想以<code>www.noname.io:31402</code>的方式访问服务，那么你还需要使用nginx&#x2F;haproxy建立一个反向代理的网关进行管理</p>
+<h2 id="LoadBalancer"><a href="#LoadBalancer" class="headerlink" title="LoadBalancer"></a>LoadBalancer</h2><p><img src="/images/metallb.jpg" alt="metallb"></p>
+<p>如上图所示，客户端的请求会抵达LoadBalancer指定的IP，然后流量会转发到对应的服务</p>
+<p>一般情况下，各个云服务厂商有提供专门支持k8s的LoadBalancer，本文依赖的k8s是自建的裸集群（bare-metal），需要使用metallb</p>
+<h3 id="metallb安装"><a href="#metallb安装" class="headerlink" title="metallb安装"></a>metallb安装</h3><ol>
+<li>下载配置文件，修改image地址，然后使用kubectl执行</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f ./metallb-native.yaml</span><br><span class="line"><span class="comment"># 如果你的网络正常</span></span><br><span class="line"><span class="comment"># kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看pod运行状态</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -n metallb-system -o wide</span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">NAME                        READY   STATUS    RESTARTS   AGE   IP                NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">controller-f6d7bd7b-7kg47   1/1     Running   0          51s   10.0.2.19         vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-8fgzx               1/1     Running   0          51s   192.168.122.235   vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-bfbtk               1/1     Running   0          51s   192.168.122.11    vm1    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-t4lv8               1/1     Running   0          51s   192.168.122.126   vm2    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>配置IP池</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vi ip-address-pool.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">metallb.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">IPAddressPool</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">metallb-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">addresses:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.122</span><span class="number">.20</span><span class="number">-192.168</span><span class="number">.122</span><span class="number">.25</span></span><br><span class="line">  <span class="attr">autoAssign:</span> <span class="literal">true</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">metallb.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">L2Advertisement</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">metallb-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ipAddressPools:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">default</span></span><br></pre></td></tr></table></figure>
+
+<p>执行命令<code>kubectl apply -f ip-address-pool.yaml</code></p>
+<p>到这里就创建好了</p>
+<h3 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h3><ol>
+<li>创建LoadBalancer类型的service</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment --<span class="built_in">type</span>=<span class="string">&quot;LoadBalancer&quot;</span> --port 80</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看service <code>kubectl get svc</code>，输出如下</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NAME               TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)        AGE</span><br><span class="line">kubernetes         ClusterIP      10.96.0.1        &lt;none&gt;           443/TCP        12d</span><br><span class="line">nginx-deployment   LoadBalancer   10.111.110.163   192.168.122.20   80:30804/TCP   8s</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p>在物理机上访问服务<code>curl -D- http://192.168.122.20 -H &#39;Host: www.noname.io&#39;</code>，对比在虚拟机上执行<code>curl -D- http://10.111.110.163</code>，你会发现输出是一样的</p>
+</li>
+<li><p>删除service</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete svc nginx-deployment</span><br></pre></td></tr></table></figure>
+
+<h2 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h2><p>ingress在整个k8s架构中扮演着集群网关的角色，提供了如负载均衡、SSL终结和基于名称的虚拟托管功能，目前支持的协议是http，后续的继任者gateway支持更多协议、流量管理、更灵活的配置等</p>
+<p>本文使用的ingress是ingress-nginx，当然，你也可以选择envoy或higress等</p>
+<h3 id="ingress-nginx"><a href="#ingress-nginx" class="headerlink" title="ingress-nginx"></a>ingress-nginx</h3><p>ingress的运行方式有好几种，其中比较常见的是NodePort以及LoadBalancer，外部流量抵达ingress，ingress根据路由规则转发到指定的服务</p>
+<p>将repo下载到本地，地址：<a target="_blank" rel="noopener" href="https://github.com/kubernetes/ingress-nginx%EF%BC%8Ck8s%E4%BE%9D%E8%B5%96%E7%9A%84%E9%83%A8%E7%BD%B2%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60deploy/static/provider/%60%E7%9B%AE%E5%BD%95%E4%B8%8B%EF%BC%8CNodePort%E6%96%B9%E5%BC%8F%E7%9A%84%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60baremetal%60%EF%BC%8C%E8%80%8CLoadBalancer%E6%96%B9%E5%BC%8F%E7%9A%84%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60cloud">https://github.com/kubernetes/ingress-nginx，k8s依赖的部署文件放在`deploy/static/provider/`目录下，NodePort方式的文件放在`baremetal`，而LoadBalancer方式的文件放在`cloud</a></p>
+<ol>
+<li><p>拷贝文件夹<code>baremetal</code>或<code>cloud</code>，修改deploy.yaml中的image地址</p>
+</li>
+<li><p>执行命令<code>kubectl apply -k .</code></p>
+</li>
+<li><p>查看pod运行状况</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -o wide -n ingress-nginx</span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">NAME                                        READY   STATUS      RESTARTS   AGE     IP           NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">ingress-nginx-admission-create-6mmd6        0/1     Completed   0          2m33s   10.0.2.178   vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">ingress-nginx-admission-patch-clnr4         0/1     Completed   0          2m33s   10.0.1.235   vm2    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">ingress-nginx-controller-5989548bf5-tjv5t   1/1     Running     0          2m33s   10.0.2.12    vm3    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>查看controller运行状况</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get svc ingress-nginx-controller -n ingress-nginx</span><br></pre></td></tr></table></figure>
+
+<p><code>LoadBalancer</code>输出如下</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME                       TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)                      AGE</span><br><span class="line">ingress-nginx-controller   LoadBalancer   10.109.74.112   192.168.122.20   80:31608/TCP,443:30939/TCP   77m</span><br></pre></td></tr></table></figure>
+
+<p><code>NodePort</code>输出如下</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME                       TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE</span><br><span class="line">ingress-nginx-controller   NodePort   10.104.202.43   &lt;none&gt;        80:31880/TCP,443:30184/TCP   3m27s</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>验证</li>
+</ol>
+<p>访问<code>LoadBalancer</code>地址</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>或者，访问<code>NodePort</code>地址</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -D- http://vm1:31880 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 404 Not Found</span><br><span class="line">Date: Wed, 28 Aug 2024 04:09:19 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 146</span><br><span class="line">Connection: keep-alive</span><br><span class="line"></span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;&lt;title&gt;404 Not Found&lt;/title&gt;&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;center&gt;&lt;h1&gt;404 Not Found&lt;/h1&gt;&lt;/center&gt;</span><br><span class="line">&lt;hr&gt;&lt;center&gt;nginx&lt;/center&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>到这里，ingress安装完成</p>
+<h3 id="实践-1"><a href="#实践-1" class="headerlink" title="实践"></a>实践</h3><ol>
+<li>创建默认类型为ClusterIP的服务服务</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>查看service <code>kubectl get svc</code>，输出如下</p>
+</li>
+<li><p>配置ingress规则</p>
+</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># example-ingress.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"> <span class="attr">name:</span> <span class="string">example-ingress</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"> <span class="attr">rules:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">www.noname.io</span></span><br><span class="line">   <span class="attr">http:</span></span><br><span class="line">     <span class="attr">paths:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="attr">pathType:</span> <span class="string">Prefix</span></span><br><span class="line">       <span class="attr">path:</span> <span class="string">&quot;/&quot;</span></span><br><span class="line">       <span class="attr">backend:</span></span><br><span class="line">         <span class="attr">service:</span></span><br><span class="line">           <span class="attr">name:</span> <span class="string">nginx-deployment</span></span><br><span class="line">           <span class="attr">port:</span></span><br><span class="line">             <span class="attr">number:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>验证</li>
+</ol>
+<p>访问<code>LoadBalancer</code>地址</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://medium.com/@seanlinsanity/how-to-expose-applications-running-in-kubernetes-cluster-to-public-access-65c2fa959a3b">3 Ways to Expose Applications Running in Kubernetes Cluster to Public Access</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/ingress/">Ingress</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/tasks/access-application-cluster/ingress-minikube/">在 Minikube 环境中使用 NGINX Ingress 控制器配置 Ingress</a><br><a target="_blank" rel="noopener" href="https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/baremetal.md">Bare-metal considerations</a><br><a target="_blank" rel="noopener" href="https://medium.com/tektutor/using-nginx-ingress-controller-in-kubernetes-bare-metal-setup-890eb4e7772">Using Nginx Ingress Controller in Kubernetes bare-metal setup</a><br><a target="_blank" rel="noopener" href="https://medium.com/tektutor/using-metal-lb-on-a-bare-metal-onprem-kubernetes-setup-6d036af1d20c">Using Metal LB on a bare-metal(OnPrem) Kubernetes Setup</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/k8s-pv-setup-tutorial/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/k8s-pv-setup-tutorial/" class="post-title-link" itemprop="url">k8s pv配置教程</a>
         </h2>
 
         <div class="post-meta-container">
@@ -286,7 +495,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2024/08/25/k8s-config-and-secret-setup-tutorial/">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/k8s-config-and-secret-setup-tutorial/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -304,7 +513,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/08/25/k8s-config-and-secret-setup-tutorial/" class="post-title-link" itemprop="url">k8s config和secret配置教程</a>
+          <a href="/k8s-config-and-secret-setup-tutorial/" class="post-title-link" itemprop="url">k8s config和secret配置教程</a>
         </h2>
 
         <div class="post-meta-container">
@@ -426,7 +635,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2024/08/18/how-to-manage-wifi-on-ubuntu-server/">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/how-to-manage-wifi-on-ubuntu-server/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -444,7 +653,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/08/18/how-to-manage-wifi-on-ubuntu-server/" class="post-title-link" itemprop="url">如何在ubuntu服务器上管理Wi-Fi</a>
+          <a href="/how-to-manage-wifi-on-ubuntu-server/" class="post-title-link" itemprop="url">如何在ubuntu服务器上管理Wi-Fi</a>
         </h2>
 
         <div class="post-meta-container">
@@ -530,7 +739,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2024/08/18/how-to-download-online-video/">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/how-to-download-online-video/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -548,7 +757,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/08/18/how-to-download-online-video/" class="post-title-link" itemprop="url">如何下载网站视频</a>
+          <a href="/how-to-download-online-video/" class="post-title-link" itemprop="url">如何下载网站视频</a>
         </h2>
 
         <div class="post-meta-container">
@@ -644,7 +853,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2024/08/16/use-kubeadm-to-deploy-k8s-cluster/">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/use-kubeadm-to-deploy-k8s-cluster/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -662,7 +871,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/08/16/use-kubeadm-to-deploy-k8s-cluster/" class="post-title-link" itemprop="url">使用kubeadm部署k8s集群</a>
+          <a href="/use-kubeadm-to-deploy-k8s-cluster/" class="post-title-link" itemprop="url">使用kubeadm部署k8s集群</a>
         </h2>
 
         <div class="post-meta-container">
@@ -680,7 +889,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-26 18:16:35" itemprop="dateModified" datetime="2024-08-26T18:16:35+08:00">2024-08-26</time>
+      <time title="修改时间：2024-08-28 14:46:44" itemprop="dateModified" datetime="2024-08-28T14:46:44+08:00">2024-08-28</time>
     </span>
 
   
@@ -690,14 +899,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>4.1k</span>
+      <span>4.3k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>15 分钟</span>
+      <span>16 分钟</span>
     </span>
 </div>
 
@@ -711,7 +920,7 @@
           <p>部署计划：先创建一台虚拟机vm1，安装docker以及k8s组件，然后克隆两台新的vm2&#x2F;vm3，组合成一个小型的k8s集群</p>
 <h2 id="虚拟机准备"><a href="#虚拟机准备" class="headerlink" title="虚拟机准备"></a>虚拟机准备</h2><h3 id="创建vm1"><a href="#创建vm1" class="headerlink" title="创建vm1"></a>创建vm1</h3><p>创建虚拟机vm1，以下就不展示繁琐的系统安装过程了</p>
 <p><img src="/images/kvm_create_vm1.png" alt="kvm create vm1"></p>
-<h3 id="配置vm1"><a href="#配置vm1" class="headerlink" title="配置vm1"></a>配置vm1</h3><p>根据教程：<a href="/2024/07/20/deploy-docker-and-registry-service/">安装docker并部署registry服务</a>安装好containerd，再执行下面的配置</p>
+<h3 id="配置vm1"><a href="#配置vm1" class="headerlink" title="配置vm1"></a>配置vm1</h3><p>根据教程：<a href="/deploy-docker-and-registry-service/">安装docker并部署registry服务</a>安装好containerd，再执行下面的配置</p>
 <h4 id="系统配置修改"><a href="#系统配置修改" class="headerlink" title="系统配置修改"></a>系统配置修改</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># linux 模块</span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt;<span class="string">EOF | sudo tee /etc/modules-load.d/k8s.conf</span></span><br><span class="line"><span class="string">overlay</span></span><br><span class="line"><span class="string">br_netfilter</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> modprobe overlay</span><br><span class="line"><span class="built_in">sudo</span> modprobe br_netfilter</span><br><span class="line"></span><br><span class="line"><span class="comment"># lsmod | grep overlay</span></span><br><span class="line"><span class="comment"># lsmod | grep br_netfilter</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 网络配置</span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt;<span class="string">EOF | sudo tee /etc/sysctl.d/k8s.conf</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-iptables  = 1</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-ip6tables = 1</span></span><br><span class="line"><span class="string">net.ipv4.ip_forward                 = 1</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/sysctl.d/k8s.conf</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> sysctl --system</span><br><span class="line"></span><br><span class="line"><span class="comment"># sudo sysctl -a | grep net.ipv4.ip_forward</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="关闭swap"><a href="#关闭swap" class="headerlink" title="关闭swap"></a>关闭swap</h4><p>关闭swap并移除文件</p>
@@ -852,7 +1061,24 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 映射到vm1</span></span><br><span class="line">kubectl port-forward svc/wordpress 8888:80</span><br><span class="line"><span class="comment"># 映射到物理机</span></span><br><span class="line">ssh -L 8888:127.0.0.1:8888 noname@192.168.122.11</span><br></pre></td></tr></table></figure>
 
 <p>done!</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><h3 id="bug处理"><a href="#bug处理" class="headerlink" title="bug处理"></a>bug处理</h3><ol>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>注意，按照以上教程安装的集群属于裸集群（bare-metal），默认不支持以下几个功能</p>
+<ul>
+<li>Load Balancer Service</li>
+<li>Persistent Volume</li>
+<li>Ingress&#x2F;Gateway</li>
+</ul>
+<p>如果你的角色是开发者，还是老老实实使用Minikube，避免耗费太多时间精力在集群运维上</p>
+<p>另外，一个完整的运维系统不仅仅只是k8s，应当包含以下组件</p>
+<ul>
+<li>k8s，负责管理pod资源（cpu&#x2F;内存）、node资源</li>
+<li>分布式文件系统，负责持久存储</li>
+<li>gateway，负责控制外部流量对集群内服务的访问</li>
+<li>elk，负责日志收集、分析、告警</li>
+<li>prometheus，负责收集指标、链路分析、告警</li>
+<li>ci&#x2F;cd系统，如gitlab，负责开发-发布系统流程</li>
+<li>管理后台，负责应用管理、发布审核、记录审计信息等</li>
+</ul>
+<h3 id="bug处理"><a href="#bug处理" class="headerlink" title="bug处理"></a>bug处理</h3><ol>
 <li><code>kubeadm init</code>执行后集群组件反复崩溃重启<code>CrashLoopBackOff</code>或者是卡在<code>kubelet-check</code>检查步骤</li>
 </ol>
 <p>该问题原因与下面的cilium报错原因一致，软件权限导致的。在最开始时我使用的是手动安装方式，软件都是解压缩复制到bin目录，没有注意到所有组件的owner不是root，这才导致了上面这个问题。虽然是一个很容易忽视的问题，但却让我花了很长时间去debug，太亏了</p>
@@ -907,7 +1133,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2024/08/11/postgres-setup-example/">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/postgres-setup-example/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -925,7 +1151,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/08/11/postgres-setup-example/" class="post-title-link" itemprop="url">postgresql安装配置</a>
+          <a href="/postgres-setup-example/" class="post-title-link" itemprop="url">postgresql安装配置</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1041,7 +1267,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2024/07/20/deploy-docker-and-registry-service/">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/deploy-docker-and-registry-service/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1059,7 +1285,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/07/20/deploy-docker-and-registry-service/" class="post-title-link" itemprop="url">安装docker并部署registry服务</a>
+          <a href="/deploy-docker-and-registry-service/" class="post-title-link" itemprop="url">安装docker并部署registry服务</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1077,7 +1303,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-16 13:11:25" itemprop="dateModified" datetime="2024-08-16T13:11:25+08:00">2024-08-16</time>
+      <time title="修改时间：2024-08-28 14:45:10" itemprop="dateModified" datetime="2024-08-28T14:45:10+08:00">2024-08-28</time>
     </span>
 
   
@@ -1109,7 +1335,7 @@
 <h3 id="清理历史残留"><a href="#清理历史残留" class="headerlink" title="清理历史残留"></a>清理历史残留</h3><p>如果系统有预装docker或者先前安装过，先卸载干净在安装</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 第一次安装时输出为空</span></span><br><span class="line"><span class="keyword">for</span> pkg <span class="keyword">in</span> docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; <span class="keyword">do</span> <span class="built_in">sudo</span> apt remove <span class="variable">$pkg</span>; <span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 如果以前有安装过docker，相关数据可以删除掉</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /var/lib/docker</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /var/lib/containerd</span><br></pre></td></tr></table></figure>
 
-<h3 id="apt安装"><a href="#apt安装" class="headerlink" title="apt安装"></a>apt安装</h3><h4 id="设置代理"><a href="#设置代理" class="headerlink" title="设置代理"></a>设置代理</h4><p>由于docker被gfw屏蔽，访问时需要使用vpn，这里使用先前搭建的<a href="/posts/deploy-shadowsocks-service">ss服务</a></p>
+<h3 id="apt安装"><a href="#apt安装" class="headerlink" title="apt安装"></a>apt安装</h3><h4 id="设置代理"><a href="#设置代理" class="headerlink" title="设置代理"></a>设置代理</h4><p>由于docker被gfw屏蔽，访问时需要使用vpn，这里使用先前搭建的<a href="/deploy-shadowsocks-service">ss服务</a></p>
 <p>新建<code>apt.conf</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> vi /etc/apt/apt.conf</span><br></pre></td></tr></table></figure>
 
@@ -1201,7 +1427,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2024/07/19/deploy-kvm-and-cockpit/">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/deploy-kvm-and-cockpit/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1219,7 +1445,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/07/19/deploy-kvm-and-cockpit/" class="post-title-link" itemprop="url">安装kvm虚拟机</a>
+          <a href="/deploy-kvm-and-cockpit/" class="post-title-link" itemprop="url">安装kvm虚拟机</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1237,7 +1463,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-12 19:50:08" itemprop="dateModified" datetime="2024-08-12T19:50:08+08:00">2024-08-12</time>
+      <time title="修改时间：2024-08-28 14:45:36" itemprop="dateModified" datetime="2024-08-28T14:45:36+08:00">2024-08-28</time>
     </span>
 
   
@@ -1319,7 +1545,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2024/07/19/deploy-shadowsocks-service/">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/deploy-shadowsocks-service/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1337,7 +1563,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/07/19/deploy-shadowsocks-service/" class="post-title-link" itemprop="url">搭建shadowsocks服务</a>
+          <a href="/deploy-shadowsocks-service/" class="post-title-link" itemprop="url">搭建shadowsocks服务</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1477,142 +1703,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/2020/11/26/php-extension-writing-classes/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/11/26/php-extension-writing-classes/" class="post-title-link" itemprop="url">PHP扩展开发 - 类</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-11-26 19:31:05" itemprop="dateCreated datePublished" datetime="2020-11-26T19:31:05+08:00">2020-11-26</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-17 15:07:32" itemprop="dateModified" datetime="2024-08-17T15:07:32+08:00">2024-08-17</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>892</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>3 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>以下简单介绍如何在C语言层面使用PHP类</p>
-<h2 id="对象"><a href="#对象" class="headerlink" title="对象"></a>对象</h2><p>创建一个PHP对象，对象类似关联数组，对象之上可关联任意多个函数</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PHP_FUNCTION(makeObject) &#123;</span><br><span class="line">    object_init(return_value);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加属性</span></span><br><span class="line">    zend_update_property_string(<span class="literal">NULL</span>, return_value, <span class="string">&quot;prop1&quot;</span>, <span class="built_in">strlen</span>(<span class="string">&quot;prop1&quot;</span>), <span class="string">&quot;val1&quot;</span>);</span><br><span class="line">    zend_update_property_long(<span class="literal">NULL</span>, return_value, <span class="string">&quot;prop2&quot;</span>, <span class="built_in">strlen</span>(<span class="string">&quot;prop2&quot;</span>), <span class="number">123</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>调用函数并打印结果<code>var_dump(makeObject());</code>，输出如下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">object(stdClass)#1 (2) &#123;</span><br><span class="line">    [<span class="string">&quot;prop1&quot;</span>]=&gt;</span><br><span class="line">    string(3) <span class="string">&quot;val1&quot;</span></span><br><span class="line">    [<span class="string">&quot;prop2&quot;</span>]=&gt;</span><br><span class="line">    int(123)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="类"><a href="#类" class="headerlink" title="类"></a>类</h2><p>创建一个类模板</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// class定义存储于zend_class_entry</span></span><br><span class="line">zend_class_entry *test_ce_myclass;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_methods[] = &#123;</span><br><span class="line">    <span class="comment">// 类方法使用宏指令PHP_ME</span></span><br><span class="line">    <span class="comment">// public function hello()</span></span><br><span class="line">    PHP_ME(MyClass, hello, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC)</span><br><span class="line">    <span class="comment">// 与函数定义相同</span></span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 主菜，注册并加载类</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">test_init_myclass</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    zend_class_entry ce;</span><br><span class="line">    INIT_CLASS_ENTRY(ce, <span class="string">&quot;MyClass&quot;</span>, test_methods);</span><br><span class="line">    <span class="comment">// 注册MyClass类</span></span><br><span class="line">    test_ce_myclass = zend_register_internal_class(&amp;ce);</span><br><span class="line">    <span class="comment">// 添加属性/常量等</span></span><br><span class="line">    <span class="comment">// public $success = true;</span></span><br><span class="line">    zend_declare_property_bool(test_ce_myclass, <span class="string">&quot;success&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;success&quot;</span>)<span class="number">-1</span>, <span class="number">1</span>, ZEND_ACC_PUBLIC);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 类方法hello</span></span><br><span class="line">PHP_METHOD(MyClass, hello)</span><br><span class="line">&#123;</span><br><span class="line">    RETURN_STRING(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>其中，函数<code>test_init_myclass</code>的最后一个参数<code>ZEND_ACC_PUBLIC</code>为访问控制标记之一公共访问，常用的访问控制标记还有以下几个</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ZEND_ACC_STATIC</span><br><span class="line">ZEND_ACC_PUBLIC</span><br><span class="line">ZEND_ACC_PROTECTED</span><br><span class="line">ZEND_ACC_PRIVATE</span><br><span class="line">ZEND_ACC_CTOR</span><br><span class="line">ZEND_ACC_DTOR</span><br><span class="line">ZEND_ACC_DEPRECATED</span><br></pre></td></tr></table></figure>
-
-<p>一个class定义注册相关逻辑已经完成，要在PHP中使用类MyClass还需要在模块初始化<code>MINIT</code>中添加运行<code>test_init_myclass</code>以加载类MyClass</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    test_init_myclass();</span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>编译<code>test</code>模块并开启后，运行<code>var_dump(new MyClass());</code>，将得到以下类似输出</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">object(MyClass)#1 (1) &#123;</span><br><span class="line">    [<span class="string">&quot;success&quot;</span>]=&gt;</span><br><span class="line">    bool(<span class="literal">true</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们也可以直接在C层面初始化并生成一个实例化类对象，增加一个工厂方法<code>factory</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_methods[] = &#123;</span><br><span class="line">    PHP_ME(MyClass, hello, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC)</span><br><span class="line">    PHP_ME(MyClass, factory, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)</span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">PHP_METHOD(MyClass, factory)</span><br><span class="line">&#123;</span><br><span class="line">    object_init_ex(return_value, test_ce_myclass);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>此时，我们可以使用<code>MyClass::factory()</code>获取一个新的MyClass对象</p>
-<p>如果需要对MyClass进行一些操作，像在PHP使用构造方法，在test_methods里添加<code>__construct</code>，如此，PHP在<code>new MyClass()</code>将自动调用构造方法<code>__construct</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_methods[] = &#123;</span><br><span class="line">    <span class="comment">// ZEND_ACC_CTOR</span></span><br><span class="line">    PHP_ME(MyClass, __construct, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)</span><br><span class="line">    PHP_ME(MyClass, hello, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC)</span><br><span class="line">    PHP_ME(MyClass, factory, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)</span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">PHP_METHOD(MyClass, __construct)</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="调用类方法"><a href="#调用类方法" class="headerlink" title="调用类方法"></a>调用类方法</h2><p>上面，虽然对象在new时会自动调用<code>__construct</code>函数进行初始化，但<code>factory</code>不会自动调用构造函数，仅返回包含默认值的新对象，为此，我们需要在<code>factory</code>内调用构造方法</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;zend_interfaces.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">PHP_METHOD(MyClass, factory)</span><br><span class="line">&#123;</span><br><span class="line">    zval *myzval;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_ZVAL(myzval)</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    object_init_ex(return_value, test_ce_myclass);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// zend_call_method，其他的还有</span></span><br><span class="line">    <span class="comment">// zend_call_method_with_0_params</span></span><br><span class="line">    <span class="comment">// zend_call_method_with_1_params</span></span><br><span class="line">    <span class="comment">// zend_call_method_with_2_params</span></span><br><span class="line">    <span class="comment">// ZEND_API zval* zend_call_method(zval *object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval, int param_count, zval* arg1, zval* arg2);</span></span><br><span class="line">    zend_call_method(return_value, test_ce_myclass, <span class="literal">NULL</span>, <span class="string">&quot;__construct&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;__construct&quot;</span>)<span class="number">-1</span>, <span class="literal">NULL</span>, <span class="number">1</span>, myzval, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="this"><a href="#this" class="headerlink" title="this"></a>this</h2><p>先前我们已经了解函数返回值<code>return_value</code>的使用，现在，我们来看如何在方法内访问<code>$this</code>，PHP提供<code>getThis()</code>函数</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">PHP_METHOD(MyClass, __construct)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> *msg;</span><br><span class="line">    <span class="type">size_t</span> msg_len;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_STRING(msg, msg_len)</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    zend_update_property_string(test_ce_myclass, getThis(), <span class="string">&quot;msg&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;msg&quot;</span>)<span class="number">-1</span>, msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="关联结构体"><a href="#关联结构体" class="headerlink" title="关联结构体"></a>关联结构体</h2><p>我们构建一个结构体，这个结构体在PHP是无法访问的，但可以在扩展内访问对该结构体</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 还不是特别了解</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">test_struct</span> &#123;</span></span><br><span class="line">    zend_object <span class="built_in">std</span>;</span><br><span class="line">    <span class="type">int</span> unknown_id;</span><br><span class="line">    <span class="type">char</span> *unknown_str;</span><br><span class="line">&#125; test_struct;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> zend_object *<span class="title function_">create_test_struct</span><span class="params">(zend_class_entry *class_type)</span> &#123;</span><br><span class="line">    test_struct *intern;</span><br><span class="line"></span><br><span class="line">    intern = ecalloc(<span class="number">1</span>, <span class="keyword">sizeof</span>(test_struct) + zend_object_properties_size(class_type));</span><br><span class="line"></span><br><span class="line">    zend_object_std_init(&amp;intern-&gt;<span class="built_in">std</span>, class_type);</span><br><span class="line">    object_properties_init(&amp;intern-&gt;<span class="built_in">std</span>, class_type);</span><br><span class="line"></span><br><span class="line">    intern-&gt;<span class="built_in">std</span>.handlers = zend_get_std_object_handlers();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &amp;intern-&gt;<span class="built_in">std</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">free_test_struct</span><span class="params">(<span class="type">void</span> *object)</span> &#123;</span><br><span class="line">    test_struct *secrets = (test_struct*)object;</span><br><span class="line">    <span class="keyword">if</span> (secrets-&gt;unknown_str) &#123;</span><br><span class="line">        efree(secrets-&gt;unknown_str);</span><br><span class="line">    &#125;</span><br><span class="line">    efree(secrets);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>访问结构体<code>test_struct</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">PHP_METHOD(MyClass, attachStruct) &#123;</span><br><span class="line">    test_struct *secrets;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// </span></span><br><span class="line">    secrets = (test_struct*)getThis();</span><br><span class="line"></span><br><span class="line">    RETURN_LONG(secrets-&gt;unknown_id);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h2><p>PHP的异常继承自<code>Exception</code>，所以下面除了新增一个异常类，还涉及了类的继承</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;zend_exceptions.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">zend_class_entry *test_ce_exception;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">test_init_exception</span><span class="params">()</span> &#123;</span><br><span class="line">    zend_class_entry ce;</span><br><span class="line">    <span class="comment">// 设置第三个参数为NULL，继承Exception所有方法，无自定义行为</span></span><br><span class="line">    INIT_CLASS_ENTRY(ce, <span class="string">&quot;MyException&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    test_ce_exception = zend_register_internal_class_ex(&amp;ce, (zend_class_entry*)zend_exception_get_default());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    test_init_myclass();</span><br><span class="line">    <span class="comment">// </span></span><br><span class="line">    test_init_exception();</span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在方法&#x2F;函数中抛出异常</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PHP_METHOD(MyClass, throwExcept) &#123;</span><br><span class="line">    zend_throw_exception(test_ce_exception, <span class="string">&quot;custom exception throw&quot;</span>, <span class="number">1024</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><p><a target="_blank" rel="noopener" href="https://github.com/Y2k38/php_ext_tutorial">php_ext_tutorial</a></p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://github.com/bigbes/bigbes.github.io/wiki/PHP-Extensions-Made-Eldrich:-Classes">PHP Extensions Made Eldrich: Classes</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1636,13 +1726,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">20k</span>
+    <span title="站点总字数">21k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:11</span>
+    <span title="站点阅读时长">1:17</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动

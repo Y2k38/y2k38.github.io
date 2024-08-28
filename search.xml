@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title>Nginx配置HTTPS访问</title>
-    <url>/2019/09/02/configure-nginx-with-https/</url>
+    <url>/configure-nginx-with-https/</url>
     <content><![CDATA[<p>简单介绍如何生成https服务所需要的证书、私钥以及部署，文档分别描述了开发时使用的self-signed证书以及线上使用的let’s encrypt免费证书的生成方法</p>
 <h2 id="自签名证书"><a href="#自签名证书" class="headerlink" title="自签名证书"></a>自签名证书</h2><h3 id="创建证书以及私钥"><a href="#创建证书以及私钥" class="headerlink" title="创建证书以及私钥"></a>创建证书以及私钥</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt</span><br></pre></td></tr></table></figure>
 
@@ -62,12 +62,12 @@
   </entry>
   <entry>
     <title>安装docker并部署registry服务</title>
-    <url>/2024/07/20/deploy-docker-and-registry-service/</url>
+    <url>/deploy-docker-and-registry-service/</url>
     <content><![CDATA[<h2 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h2><p>当前仅展示apt方式安装，离线安装方式不展示</p>
 <h3 id="清理历史残留"><a href="#清理历史残留" class="headerlink" title="清理历史残留"></a>清理历史残留</h3><p>如果系统有预装docker或者先前安装过，先卸载干净在安装</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">## 第一次安装时输出为空</span></span><br><span class="line"><span class="keyword">for</span> pkg <span class="keyword">in</span> docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; <span class="keyword">do</span> <span class="built_in">sudo</span> apt remove <span class="variable">$pkg</span>; <span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 如果以前有安装过docker，相关数据可以删除掉</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /var/lib/docker</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /var/lib/containerd</span><br></pre></td></tr></table></figure>
 
-<h3 id="apt安装"><a href="#apt安装" class="headerlink" title="apt安装"></a>apt安装</h3><h4 id="设置代理"><a href="#设置代理" class="headerlink" title="设置代理"></a>设置代理</h4><p>由于docker被gfw屏蔽，访问时需要使用vpn，这里使用先前搭建的<a href="/posts/deploy-shadowsocks-service">ss服务</a></p>
+<h3 id="apt安装"><a href="#apt安装" class="headerlink" title="apt安装"></a>apt安装</h3><h4 id="设置代理"><a href="#设置代理" class="headerlink" title="设置代理"></a>设置代理</h4><p>由于docker被gfw屏蔽，访问时需要使用vpn，这里使用先前搭建的<a href="/deploy-shadowsocks-service">ss服务</a></p>
 <p>新建<code>apt.conf</code></p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> vi /etc/apt/apt.conf</span><br></pre></td></tr></table></figure>
 
@@ -140,8 +140,45 @@
       </tags>
   </entry>
   <entry>
+    <title>安装kvm虚拟机</title>
+    <url>/deploy-kvm-and-cockpit/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一般情况下，日常开发我只使用vagrant跟virtualbox，但后面想搭建一个k8s环境学习，需要一个免费、高性能、便于管理的虚拟机管理软件</p>
+<p>综合考虑了下现在市面上的虚拟机管理软件</p>
+<ol>
+<li>virtualbox 的磁盘性能太差，nat网络所有虚拟机都是同一个IP：10.0.2.15，其他方面也不考虑了</li>
+<li>parallel desktop 太贵太黑心</li>
+<li>vmware 价格也不便宜还很吃电脑资源</li>
+<li>hyper-v 管理界面太难用，同时无法固定虚拟机IP</li>
+</ol>
+<p>最终我选择组装一台台式机，安装了ubuntu系统，并在上面安装使用kvm虚拟机</p>
+<p>cpu是amd 7700，8核心16线程；32GB内存；暂时不需要用到显卡；PC在路由器做了MAC跟IP的绑定，方便使用ssh</p>
+<p>由于virt-manager太难用，最后选择cockpit作为kvm虚拟机管理软件</p>
+<h2 id="kvm安装"><a href="#kvm安装" class="headerlink" title="kvm安装"></a>kvm安装</h2><h3 id="前置工作"><a href="#前置工作" class="headerlink" title="前置工作"></a>前置工作</h3><p>确认cpu开启虚拟化功能</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一般是cpu的核心数量</span></span><br><span class="line">egrep -c <span class="string">&#x27;(vmx|svm)&#x27;</span> /proc/cpuinfo</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装kvm"><a href="#安装kvm" class="headerlink" title="安装kvm"></a>安装kvm</h3><p>安装kvm以及依赖软件</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install qemu-system-x86 libvirt-daemon-system virtinst \</span><br><span class="line">  virt-manager virt-viewer ovmf swtpm qemu-utils guestfs-tools \</span><br><span class="line">  libosinfo-bin tuned</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> libvirtd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line"><span class="built_in">sudo</span> virt-host-validate qemu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果有使用window的需要，可以下载virtio</span></span><br><span class="line">wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装后工作"><a href="#安装后工作" class="headerlink" title="安装后工作"></a>安装后工作</h3><p>将用户添加到kvm跟libvirt组</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> usermod -aG kvm <span class="variable">$USER</span></span><br><span class="line"><span class="built_in">sudo</span> usermod -aG libvirt <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="cockpit安装"><a href="#cockpit安装" class="headerlink" title="cockpit安装"></a>cockpit安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install cockpit cockpit-machines</span><br></pre></td></tr></table></figure>
+
+<p>防火墙配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 9090/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
+
+<p>浏览器打开访问web管理页面 <a href="https://192.168.0.105:9090/">https://192.168.0.105:9090</a></p>
+<p><img src="/images/kvm_with_cockpit.png" alt="kvm with cockpit preview"></p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.tecmint.com/install-qemu-kvm-ubuntu-create-virtual-machines/">How to Install QEMU&#x2F;KVM on Ubuntu to Create Virtual Machines</a><br><a href="https://www.tecmint.com/manage-kvm-virtual-machines-using-cockpit-web-console/">Managing KVM Virtual Machines with Cockpit Web Console in Linux</a><br><a href="https://github.com/bryansteiner/gpu-passthrough-tutorial">gpu-passthrough-tutorial</a></p>
+]]></content>
+      <tags>
+        <tag>kvm</tag>
+        <tag>cockpit</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>搭建shadowsocks服务</title>
-    <url>/2024/07/19/deploy-shadowsocks-service/</url>
+    <url>/deploy-shadowsocks-service/</url>
     <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>由于国内恶劣的网络环境，作为一名频繁访问外网的Web开发者，不得不自建一个VPN服务，以下简单介绍Shadowsocks的搭建过程。</p>
 <p>单纯的ss流量会迅速被gfw识别到并屏蔽，因此使用ss时需要增加obfs用以混淆欺骗gfw，可以极大程度减小被屏蔽的风险。当然，如果你用的是比较出名的服务器供应商，如bandwagon的服务器，那么被屏蔽的机会也很大。</p>
 <p>服务端使用的一键安装脚本twist由于开发者已经放弃维护长时间，目前只有参考作用，如果你有耐心，也可以自己修改后再使用，也就跟下面的服务端搭建教程一样。搞完是真的累，太渣了，太需要提高自己的编程水平，写一个一体化的软件包才行</p>
@@ -226,71 +263,8 @@
       </tags>
   </entry>
   <entry>
-    <title>安装kvm虚拟机</title>
-    <url>/2024/07/19/deploy-kvm-and-cockpit/</url>
-    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一般情况下，日常开发我只使用vagrant跟virtualbox，但后面想搭建一个k8s环境学习，需要一个免费、高性能、便于管理的虚拟机管理软件</p>
-<p>综合考虑了下现在市面上的虚拟机管理软件</p>
-<ol>
-<li>virtualbox 的磁盘性能太差，nat网络所有虚拟机都是同一个IP：10.0.2.15，其他方面也不考虑了</li>
-<li>parallel desktop 太贵太黑心</li>
-<li>vmware 价格也不便宜还很吃电脑资源</li>
-<li>hyper-v 管理界面太难用，同时无法固定虚拟机IP</li>
-</ol>
-<p>最终我选择组装一台台式机，安装了ubuntu系统，并在上面安装使用kvm虚拟机</p>
-<p>cpu是amd 7700，8核心16线程；32GB内存；暂时不需要用到显卡；PC在路由器做了MAC跟IP的绑定，方便使用ssh</p>
-<p>由于virt-manager太难用，最后选择cockpit作为kvm虚拟机管理软件</p>
-<h2 id="kvm安装"><a href="#kvm安装" class="headerlink" title="kvm安装"></a>kvm安装</h2><h3 id="前置工作"><a href="#前置工作" class="headerlink" title="前置工作"></a>前置工作</h3><p>确认cpu开启虚拟化功能</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一般是cpu的核心数量</span></span><br><span class="line">egrep -c <span class="string">&#x27;(vmx|svm)&#x27;</span> /proc/cpuinfo</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装kvm"><a href="#安装kvm" class="headerlink" title="安装kvm"></a>安装kvm</h3><p>安装kvm以及依赖软件</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install qemu-system-x86 libvirt-daemon-system virtinst \</span><br><span class="line">  virt-manager virt-viewer ovmf swtpm qemu-utils guestfs-tools \</span><br><span class="line">  libosinfo-bin tuned</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> libvirtd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line"><span class="built_in">sudo</span> virt-host-validate qemu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果有使用window的需要，可以下载virtio</span></span><br><span class="line">wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装后工作"><a href="#安装后工作" class="headerlink" title="安装后工作"></a>安装后工作</h3><p>将用户添加到kvm跟libvirt组</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> usermod -aG kvm <span class="variable">$USER</span></span><br><span class="line"><span class="built_in">sudo</span> usermod -aG libvirt <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="cockpit安装"><a href="#cockpit安装" class="headerlink" title="cockpit安装"></a>cockpit安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install cockpit cockpit-machines</span><br></pre></td></tr></table></figure>
-
-<p>防火墙配置</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 9090/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
-
-<p>浏览器打开访问web管理页面 <a href="https://192.168.0.105:9090/">https://192.168.0.105:9090</a></p>
-<p><img src="/images/kvm_with_cockpit.png" alt="kvm with cockpit preview"></p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.tecmint.com/install-qemu-kvm-ubuntu-create-virtual-machines/">How to Install QEMU&#x2F;KVM on Ubuntu to Create Virtual Machines</a><br><a href="https://www.tecmint.com/manage-kvm-virtual-machines-using-cockpit-web-console/">Managing KVM Virtual Machines with Cockpit Web Console in Linux</a><br><a href="https://github.com/bryansteiner/gpu-passthrough-tutorial">gpu-passthrough-tutorial</a></p>
-]]></content>
-      <tags>
-        <tag>kvm</tag>
-        <tag>cockpit</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>生成火焰图分析php代码</title>
-    <url>/2020/01/23/how-to-generate-php-flamegraphs/</url>
-    <content><![CDATA[<p>flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间。下面简单介绍如何使用xdebug以及flamegraph生成火焰图</p>
-<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>配置xdebug参数</p>
-<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.trace_output_name</span> = xdebug.trace.%t.%s</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.trace_output_dir</span> = /tmp</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger_value</span> = <span class="string">&quot;&lt;secret key&gt;&quot;</span></span><br><span class="line"><span class="attr">xdebug.trace_format</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
-
-<p>下载flamegraph，<code>git clone https://github.com/brendangregg/FlameGraph.git</code>，放置在任意位置</p>
-<h2 id="flamegraph"><a href="#flamegraph" class="headerlink" title="flamegraph"></a>flamegraph</h2><p>获取堆栈数据</p>
-<p>请求页面&#x2F;接口url，在url后面增加<code>?XDEBUG_TRACE=&lt;secret key&gt;</code>，获取php堆栈数据 <code>curl http://youdomain.com?XDEBUG_TRACE=&lt;secret key&gt;</code>，如果是命令行命令，则在php命令后使用参数<code>php -d xdebug.auto_trace=1</code></p>
-<p>转换堆栈数据</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./stackcollapse-xdebug.php /tmp/xdebug.trace.1579703170._data_www_yii2_web_index_php.xt &gt; out.folded</span><br></pre></td></tr></table></figure>
-
-<p>生成火焰图</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; out.svg</span><br></pre></td></tr></table></figure>
-
-<p>示例</p>
-<p><img src="/images/yii2-flamegraph-example.svg" alt="yii2 flamegraph example"></p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://daniellockyer.com/php-flame-graphs/">How to generate PHP Flamegraphs</a><br><a href="https://github.com/brendangregg/FlameGraph">Flame Graphs visualize profiled code</a></p>
-]]></content>
-      <tags>
-        <tag>php</tag>
-        <tag>flamegraph</tag>
-        <tag>profiling</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>如何下载网站视频</title>
-    <url>/2024/08/18/how-to-download-online-video/</url>
+    <url>/how-to-download-online-video/</url>
     <content><![CDATA[<p>现在的在线视频网站为了打击盗版、保护资源&#x2F;网络流量，不再直接使用mp4等视频格式，而是转而使用m3u8文件（播放索引列表）+ts文件（视频分段技术），其中有的视频还用了加密，下面简单展示下如何下载ts文件并合并为mp4</p>
 <h2 id="m3u8索引"><a href="#m3u8索引" class="headerlink" title="m3u8索引"></a>m3u8索引</h2><p>从浏览器的dev tool找到m3u8文件的连接并下载，该m3u8文件内有所有的ts文件列表，你可以将他们复制出来，通过编辑器补全制作成完整的url，通过下载器批量下载</p>
 <h2 id="未加密"><a href="#未加密" class="headerlink" title="未加密"></a>未加密</h2><p>如果视频没有加密（m3u8文件中#EXT-X-KEY字段为空），那么在下载所有ts文件后，可以直接用linux命令合并</p>
@@ -329,8 +303,167 @@
       </tags>
   </entry>
   <entry>
+    <title>生成火焰图分析php代码</title>
+    <url>/how-to-generate-php-flamegraphs/</url>
+    <content><![CDATA[<p>flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间。下面简单介绍如何使用xdebug以及flamegraph生成火焰图</p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>配置xdebug参数</p>
+<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.trace_output_name</span> = xdebug.trace.%t.%s</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.trace_output_dir</span> = /tmp</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger_value</span> = <span class="string">&quot;&lt;secret key&gt;&quot;</span></span><br><span class="line"><span class="attr">xdebug.trace_format</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>下载flamegraph，<code>git clone https://github.com/brendangregg/FlameGraph.git</code>，放置在任意位置</p>
+<h2 id="flamegraph"><a href="#flamegraph" class="headerlink" title="flamegraph"></a>flamegraph</h2><p>获取堆栈数据</p>
+<p>请求页面&#x2F;接口url，在url后面增加<code>?XDEBUG_TRACE=&lt;secret key&gt;</code>，获取php堆栈数据 <code>curl http://youdomain.com?XDEBUG_TRACE=&lt;secret key&gt;</code>，如果是命令行命令，则在php命令后使用参数<code>php -d xdebug.auto_trace=1</code></p>
+<p>转换堆栈数据</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./stackcollapse-xdebug.php /tmp/xdebug.trace.1579703170._data_www_yii2_web_index_php.xt &gt; out.folded</span><br></pre></td></tr></table></figure>
+
+<p>生成火焰图</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; out.svg</span><br></pre></td></tr></table></figure>
+
+<p>示例</p>
+<p><img src="/images/yii2-flamegraph-example.svg" alt="yii2 flamegraph example"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://daniellockyer.com/php-flame-graphs/">How to generate PHP Flamegraphs</a><br><a href="https://github.com/brendangregg/FlameGraph">Flame Graphs visualize profiled code</a></p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>flamegraph</tag>
+        <tag>profiling</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>怎样从公网访问k8s服务</title>
+    <url>/how-to-access-k8s-service-from-public-network/</url>
+    <content><![CDATA[<p>默认情况下，k8s内创建的服务是无法对公网提供访问的，如果要从公网访问k8s服务，一般有三种方式，NodePort、LoadBalancer、Ingress，下面简单介绍NodePort、LoadBalancer，着重讲解Ingress</p>
+<p>本文使用的deployment同官方教程<a href="https://kubernetes.io/docs/tasks/run-application/run-stateless-application-deployment/">nginx-deployment</a>，图片是从ingress-nginx官方文档拷贝过来借用，如侵必删</p>
+<h2 id="NodePort"><a href="#NodePort" class="headerlink" title="NodePort"></a>NodePort</h2><p><img src="/images/nodeport.jpg" alt="nodeport"></p>
+<p>如上图所示，客户端访问集群内任意机器端口30100，k8s自动将请求转发到对应的服务</p>
+<ol>
+<li>创建NodePort类型的service，不指定nodeport的情况下，默认从30000-32767中挑选一个端口使用</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment --<span class="built_in">type</span>=<span class="string">&quot;NodePort&quot;</span> --port 80</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看service <code>kubectl get svc</code>，输出如下</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE</span><br><span class="line">kubernetes         ClusterIP   10.96.0.1        &lt;none&gt;        443/TCP        12d</span><br><span class="line">nginx-deployment   NodePort    10.110.255.135   &lt;none&gt;        80:31402/TCP   4s</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p>在物理机上访问服务<code>curl http://vm1:31402</code>，对比在虚拟机上执行<code>curl http://10.110.255.135</code>，你会发现输出是一样的</p>
+</li>
+<li><p>删除service</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl delete svc nginx-deployment</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意</strong>：考虑到线上一般是直接通过域名访问，如果不想以<code>www.noname.io:31402</code>的方式访问服务，那么你还需要使用nginx&#x2F;haproxy建立一个反向代理的网关进行管理</p>
+<h2 id="LoadBalancer"><a href="#LoadBalancer" class="headerlink" title="LoadBalancer"></a>LoadBalancer</h2><p><img src="/images/metallb.jpg" alt="metallb"></p>
+<p>如上图所示，客户端的请求会抵达LoadBalancer指定的IP，然后流量会转发到对应的服务</p>
+<p>一般情况下，各个云服务厂商有提供专门支持k8s的LoadBalancer，本文依赖的k8s是自建的裸集群（bare-metal），需要使用metallb</p>
+<h3 id="metallb安装"><a href="#metallb安装" class="headerlink" title="metallb安装"></a>metallb安装</h3><ol>
+<li>下载配置文件，修改image地址，然后使用kubectl执行</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl apply -f ./metallb-native.yaml</span><br><span class="line"><span class="comment"># 如果你的网络正常</span></span><br><span class="line"><span class="comment"># kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看pod运行状态</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pods -n metallb-system -o wide</span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME                        READY   STATUS    RESTARTS   AGE   IP                NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">controller-f6d7bd7b-7kg47   1/1     Running   0          51s   10.0.2.19         vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-8fgzx               1/1     Running   0          51s   192.168.122.235   vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-bfbtk               1/1     Running   0          51s   192.168.122.11    vm1    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-t4lv8               1/1     Running   0          51s   192.168.122.126   vm2    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>配置IP池</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># vi ip-address-pool.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">metallb.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">IPAddressPool</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">metallb-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">addresses:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.122</span><span class="number">.20</span><span class="number">-192.168</span><span class="number">.122</span><span class="number">.25</span></span><br><span class="line">  <span class="attr">autoAssign:</span> <span class="literal">true</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">metallb.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">L2Advertisement</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">metallb-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ipAddressPools:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">default</span></span><br></pre></td></tr></table></figure>
+
+<p>执行命令<code>kubectl apply -f ip-address-pool.yaml</code></p>
+<p>到这里就创建好了</p>
+<h3 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h3><ol>
+<li>创建LoadBalancer类型的service</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment --<span class="built_in">type</span>=<span class="string">&quot;LoadBalancer&quot;</span> --port 80</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看service <code>kubectl get svc</code>，输出如下</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME               TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)        AGE</span><br><span class="line">kubernetes         ClusterIP      10.96.0.1        &lt;none&gt;           443/TCP        12d</span><br><span class="line">nginx-deployment   LoadBalancer   10.111.110.163   192.168.122.20   80:30804/TCP   8s</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p>在物理机上访问服务<code>curl -D- http://192.168.122.20 -H &#39;Host: www.noname.io&#39;</code>，对比在虚拟机上执行<code>curl -D- http://10.111.110.163</code>，你会发现输出是一样的</p>
+</li>
+<li><p>删除service</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl delete svc nginx-deployment</span><br></pre></td></tr></table></figure>
+
+<h2 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h2><p>ingress在整个k8s架构中扮演着集群网关的角色，提供了如负载均衡、SSL终结和基于名称的虚拟托管功能，目前支持的协议是http，后续的继任者gateway支持更多协议、流量管理、更灵活的配置等</p>
+<p>本文使用的ingress是ingress-nginx，当然，你也可以选择envoy或higress等</p>
+<h3 id="ingress-nginx"><a href="#ingress-nginx" class="headerlink" title="ingress-nginx"></a>ingress-nginx</h3><p>ingress的运行方式有好几种，其中比较常见的是NodePort以及LoadBalancer，外部流量抵达ingress，ingress根据路由规则转发到指定的服务</p>
+<p>将repo下载到本地，地址：<a href="https://github.com/kubernetes/ingress-nginx%EF%BC%8Ck8s%E4%BE%9D%E8%B5%96%E7%9A%84%E9%83%A8%E7%BD%B2%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60deploy/static/provider/%60%E7%9B%AE%E5%BD%95%E4%B8%8B%EF%BC%8CNodePort%E6%96%B9%E5%BC%8F%E7%9A%84%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60baremetal%60%EF%BC%8C%E8%80%8CLoadBalancer%E6%96%B9%E5%BC%8F%E7%9A%84%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60cloud">https://github.com/kubernetes/ingress-nginx，k8s依赖的部署文件放在`deploy/static/provider/`目录下，NodePort方式的文件放在`baremetal`，而LoadBalancer方式的文件放在`cloud</a></p>
+<ol>
+<li><p>拷贝文件夹<code>baremetal</code>或<code>cloud</code>，修改deploy.yaml中的image地址</p>
+</li>
+<li><p>执行命令<code>kubectl apply -k .</code></p>
+</li>
+<li><p>查看pod运行状况</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pods -o wide -n ingress-nginx</span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME                                        READY   STATUS      RESTARTS   AGE     IP           NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">ingress-nginx-admission-create-6mmd6        0/1     Completed   0          2m33s   10.0.2.178   vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">ingress-nginx-admission-patch-clnr4         0/1     Completed   0          2m33s   10.0.1.235   vm2    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">ingress-nginx-controller-5989548bf5-tjv5t   1/1     Running     0          2m33s   10.0.2.12    vm3    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>查看controller运行状况</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get svc ingress-nginx-controller -n ingress-nginx</span><br></pre></td></tr></table></figure>
+
+<p><code>LoadBalancer</code>输出如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME                       TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)                      AGE</span><br><span class="line">ingress-nginx-controller   LoadBalancer   10.109.74.112   192.168.122.20   80:31608/TCP,443:30939/TCP   77m</span><br></pre></td></tr></table></figure>
+
+<p><code>NodePort</code>输出如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME                       TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE</span><br><span class="line">ingress-nginx-controller   NodePort   10.104.202.43   &lt;none&gt;        80:31880/TCP,443:30184/TCP   3m27s</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>验证</li>
+</ol>
+<p>访问<code>LoadBalancer</code>地址</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>或者，访问<code>NodePort</code>地址</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -D- http://vm1:31880 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">HTTP/1.1 404 Not Found</span><br><span class="line">Date: Wed, 28 Aug 2024 04:09:19 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 146</span><br><span class="line">Connection: keep-alive</span><br><span class="line"></span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;&lt;title&gt;404 Not Found&lt;/title&gt;&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;center&gt;&lt;h1&gt;404 Not Found&lt;/h1&gt;&lt;/center&gt;</span><br><span class="line">&lt;hr&gt;&lt;center&gt;nginx&lt;/center&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>到这里，ingress安装完成</p>
+<h3 id="实践-1"><a href="#实践-1" class="headerlink" title="实践"></a>实践</h3><ol>
+<li>创建默认类型为ClusterIP的服务服务</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>查看service <code>kubectl get svc</code>，输出如下</p>
+</li>
+<li><p>配置ingress规则</p>
+</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># example-ingress.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"> <span class="attr">name:</span> <span class="string">example-ingress</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"> <span class="attr">rules:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">www.noname.io</span></span><br><span class="line">   <span class="attr">http:</span></span><br><span class="line">     <span class="attr">paths:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="attr">pathType:</span> <span class="string">Prefix</span></span><br><span class="line">       <span class="attr">path:</span> <span class="string">&quot;/&quot;</span></span><br><span class="line">       <span class="attr">backend:</span></span><br><span class="line">         <span class="attr">service:</span></span><br><span class="line">           <span class="attr">name:</span> <span class="string">nginx-deployment</span></span><br><span class="line">           <span class="attr">port:</span></span><br><span class="line">             <span class="attr">number:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>验证</li>
+</ol>
+<p>访问<code>LoadBalancer</code>地址</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><a href="https://medium.com/@seanlinsanity/how-to-expose-applications-running-in-kubernetes-cluster-to-public-access-65c2fa959a3b">3 Ways to Expose Applications Running in Kubernetes Cluster to Public Access</a><br><a href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/ingress/">Ingress</a><br><a href="https://kubernetes.io/zh-cn/docs/tasks/access-application-cluster/ingress-minikube/">在 Minikube 环境中使用 NGINX Ingress 控制器配置 Ingress</a><br><a href="https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/baremetal.md">Bare-metal considerations</a><br><a href="https://medium.com/tektutor/using-nginx-ingress-controller-in-kubernetes-bare-metal-setup-890eb4e7772">Using Nginx Ingress Controller in Kubernetes bare-metal setup</a><br><a href="https://medium.com/tektutor/using-metal-lb-on-a-bare-metal-onprem-kubernetes-setup-6d036af1d20c">Using Metal LB on a bare-metal(OnPrem) Kubernetes Setup</a></p>
+]]></content>
+      <tags>
+        <tag>kubernetes</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何在ubuntu服务器上管理Wi-Fi</title>
-    <url>/2024/08/18/how-to-manage-wifi-on-ubuntu-server/</url>
+    <url>/how-to-manage-wifi-on-ubuntu-server/</url>
     <content><![CDATA[<p>当没有桌面时，ubuntu服务器该如何连接宽带、共享Wi-Fi热点，就像一台路由器一样运作，或者如何连接Wi-Fi，以下简单介绍这几个操作的过程</p>
 <h2 id="连接宽带"><a href="#连接宽带" class="headerlink" title="连接宽带"></a>连接宽带</h2><h3 id="PPPOE方式"><a href="#PPPOE方式" class="headerlink" title="PPPOE方式"></a>PPPOE方式</h3><p>使用nmcli输入pppoe账号密码，这时会打开一个交互式的命令行</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> nmcli con edit <span class="built_in">type</span> pppoe con-name <span class="string">&quot;Connection name&quot;</span></span><br></pre></td></tr></table></figure>
@@ -359,7 +492,7 @@
   </entry>
   <entry>
     <title>如何配置wireguard服务端及客户端</title>
-    <url>/2020/04/05/how-to-setup-wireguard-vpn-server/</url>
+    <url>/how-to-setup-wireguard-vpn-server/</url>
     <content><![CDATA[<p>从19年开始，ss流量已经能被gfw识别并屏蔽，原本打算切换到v2ray，但配置混淆需要域名反而会暴露出更多信息，此外，网上一篇文章指出v2ray开发者失联的同时一项v2ray流量识别的专利被注册，因此决定放弃v2ray并转向另一个被linus盛赞的wireguard。</p>
 <p>wireguard是非常简单、现代化、快速的vpn，使用最新的加密技术，udp传输，支持ip漫游等。wireguard没有服务端、客户端的区分，每一台设备都是一个<code>peer</code>。</p>
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>添加wireguard的PPA源</p>
@@ -410,7 +543,7 @@
   </entry>
   <entry>
     <title>k8s config和secret配置教程</title>
-    <url>/2024/08/25/k8s-config-and-secret-setup-tutorial/</url>
+    <url>/k8s-config-and-secret-setup-tutorial/</url>
     <content><![CDATA[<p>简单的配置管理，可以把信息写入文件放在项目里，然后打包发布，但这样会有信息泄露的安全风险，经常会看到谁谁谁把项目上传到github，然后公司数据库&#x2F;敏感密钥泄漏等。所以，现在的公司一般会自建发布平台，通过发布平台管理配置，流程：配置修改-&gt;审核-&gt;发布。了解到这背景，我们就知道config跟secret在整个软件开发过程中扮演的角色，接下来就学习如何配置config&#x2F;secret并使用</p>
 <blockquote>
 <p>当然，一般情况下，配置管理没有那么简单，要考虑多种环境如dev&#x2F;test&#x2F;release以及地区区分，操作需小心谨慎，一不小心就出现遗漏、错配，此外，还有多人开发时配置冲突等，这些都是开发过程中要注意的问题</p>
@@ -474,7 +607,7 @@
   </entry>
   <entry>
     <title>k8s pv配置教程</title>
-    <url>/2024/08/26/k8s-pv-setup-tutorial/</url>
+    <url>/k8s-pv-setup-tutorial/</url>
     <content><![CDATA[<p>在Kubernetes官网的学习教程：<a href="https://kubernetes.io/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/">wordpress</a>中，我尝试了手动创建pv并绑定pvc，但是每次申请pvc都要手动添加pv并绑定是一件很麻烦且很容易出错的事情，官方也早就意识到这个问题，提出了动态存储分配，只需要通过storageclass即可实现</p>
 <p>本文使用了nfs作为集群存储用于实践，线上建议考虑使用ceph等分布式文件存储系统，nfs搭建教程参考：<a href="https://www.tecmint.com/install-nfs-server-on-ubuntu/">How to Install NFS Server and Client on Ubuntu 22.04</a></p>
 <h2 id="安装nfs-provisioner"><a href="#安装nfs-provisioner" class="headerlink" title="安装nfs provisioner"></a>安装nfs provisioner</h2><ol>
@@ -537,36 +670,8 @@
       </tags>
   </entry>
   <entry>
-    <title>使用github pages搭建个人博客</title>
-    <url>/2019/09/02/personal-blog-using-github-pages/</url>
-    <content><![CDATA[<p>简单介绍如何使用github pages服务以及hexo搭建一个免费的个人博客</p>
-<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><h3 id="创建仓库"><a href="#创建仓库" class="headerlink" title="创建仓库"></a>创建仓库</h3><p>创建一个空的仓库，名字固定格式为“username.github.io”，这个名字也是博客的访问的域名</p>
-<h3 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g hexo-cli           <span class="comment"># 安装hexo命令行工具</span></span><br><span class="line">hexo init blog                    <span class="comment"># 创建blog项目</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> blog</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/theme-next/hexo-theme-next themes/next <span class="comment"># 安装next主题，可选</span></span><br><span class="line"></span><br><span class="line">npm install hexo-deployer-git --save <span class="comment"># 安装github发布工具</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><h3 id="配置hexo"><a href="#配置hexo" class="headerlink" title="配置hexo"></a>配置hexo</h3><p>修改_config.yml</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基础配置</span></span><br><span class="line"><span class="comment"># Hexo Configuration</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/configuration.html</span></span><br><span class="line"><span class="comment">## Source: https://github.com/hexojs/hexo/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Site</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">Y2k38&#x27;s</span> <span class="string">Blog</span></span><br><span class="line"><span class="attr">subtitle:</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">y2k38&#x27;s</span> <span class="string">blog</span></span><br><span class="line"><span class="attr">keywords:</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">y2k38</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="attr">timezone:</span> </span><br><span class="line"></span><br><span class="line"><span class="comment"># URL </span></span><br><span class="line"><span class="comment">## If your site is put in a subdirectory, set url as &#x27;http://yoursite.com/child&#x27; and root as &#x27;/child/&#x27;</span></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://y2k38.github.io</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">:year/:month/:day/:title/</span></span><br><span class="line"><span class="attr">permalink_defaults:</span></span><br><span class="line"></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 博客主题配置</span></span><br><span class="line"><span class="comment"># Extensions</span></span><br><span class="line"><span class="comment">## Plugins: https://hexo.io/plugins/</span></span><br><span class="line"><span class="comment">## Themes: https://hexo.io/themes/</span></span><br><span class="line"><span class="attr">theme:</span> <span class="string">next</span> <span class="comment"># 可选，若没有安装next主题，则忽略</span></span><br><span class="line"></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># github部署配置</span></span><br><span class="line"><span class="comment"># Deployment</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/deployment.html</span></span><br><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">https://github.com/Y2k38/y2k38.github.io.git</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">master</span> <span class="comment"># 注意，分支固定位master</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="发布github"><a href="#发布github" class="headerlink" title="发布github"></a>发布github</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo clean &amp;&amp; hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>完成</p>
-<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="添加gitalk评论系统"><a href="#添加gitalk评论系统" class="headerlink" title="添加gitalk评论系统"></a>添加gitalk评论系统</h3><blockquote>
-<p>[Deprecated] github要求校验方式改为personal access token，待gitalk作者及theme-next作者更新</p>
-</blockquote>
-<p>新建OAuth application获取id、secret，<a href="https://github.com/settings/applications/new">https://github.com/settings/applications/new</a></p>
-<p><img src="/images/register_a_new_OAuth_application.png" alt="new oauth app"></p>
-<p>配置next主题 <code>themes/next/_config.yml</code></p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Gitalk</span></span><br><span class="line"><span class="comment"># Demo: https://gitalk.github.io</span></span><br><span class="line"><span class="comment"># For more information: https://github.com/gitalk/gitalk, https://github.com/emn178/js-md5</span></span><br><span class="line"><span class="attr">gitalk:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">github_id:</span> <span class="string">y2k38</span> <span class="comment"># GitHub repo owner</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">y2k38.github.io</span> <span class="comment"># Repository name to store issues</span></span><br><span class="line">  <span class="attr">client_id:</span> <span class="string">xxxxxxxxxxxxxxxx</span> <span class="comment"># GitHub Application Client ID</span></span><br><span class="line">  <span class="attr">client_secret:</span> <span class="string">yyyyyyyyyyyyyyyy</span> <span class="comment"># GitHub Application Client Secret</span></span><br><span class="line">  <span class="attr">admin_user:</span> <span class="string">Y2k38</span> <span class="comment"># GitHub repo owner and collaborators, only these guys can initialize gitHub issues</span></span><br><span class="line">  <span class="attr">distraction_free_mode:</span> <span class="literal">true</span> <span class="comment"># Facebook-like distraction free mode</span></span><br><span class="line">  <span class="comment"># Gitalk&#x27;s display language depends on user&#x27;s browser or system environment</span></span><br><span class="line">  <span class="comment"># If you want everyone visiting your site to see a uniform language, you can set a force language value</span></span><br><span class="line">  <span class="comment"># Available values: en | es-ES | fr | ru | zh-CN | zh-TW</span></span><br><span class="line">  <span class="attr">language:</span> <span class="string">zh-CN</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://pages.github.com/">GitHub Pages</a><br><a href="https://gist.github.com/btfak/18938572f5df000ebe06fbd1872e4e39">How to use Hexo and deploy to GitHub Pages</a><br><a href="https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line">Creating a personal access token for the command line</a></p>
-]]></content>
-      <tags>
-        <tag>github pages</tag>
-        <tag>hexo</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>解决ubuntu系统monospace字体显示异常的问题</title>
-    <url>/2019/11/24/linux-monofonts-render-incorrectly/</url>
+    <url>/linux-monofonts-render-incorrectly/</url>
     <content><![CDATA[<p>很长的一段时间，被xubuntu下的一个monospace字体显示问题困扰着，在网上找了很多方法也没有解决问题，在一次误打误撞的情况下解决了，简单把自己问题的过程记录下来，希望给一些小伙伴们帮助</p>
 <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>xubuntu下monospace在浏览器以及vscode下显示异常，具体如下图所示</p>
 <p>浏览器chrome&#x2F;firefox下的monospace</p>
@@ -598,8 +703,135 @@
       </tags>
   </entry>
   <entry>
+    <title>使用github pages搭建个人博客</title>
+    <url>/personal-blog-using-github-pages/</url>
+    <content><![CDATA[<p>简单介绍如何使用github pages服务以及hexo搭建一个免费的个人博客</p>
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><h3 id="创建仓库"><a href="#创建仓库" class="headerlink" title="创建仓库"></a>创建仓库</h3><p>创建一个空的仓库，名字固定格式为“username.github.io”，这个名字也是博客的访问的域名</p>
+<h3 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g hexo-cli           <span class="comment"># 安装hexo命令行工具</span></span><br><span class="line">hexo init blog                    <span class="comment"># 创建blog项目</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> blog</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/theme-next/hexo-theme-next themes/next <span class="comment"># 安装next主题，可选</span></span><br><span class="line"></span><br><span class="line">npm install hexo-deployer-git --save <span class="comment"># 安装github发布工具</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><h3 id="配置hexo"><a href="#配置hexo" class="headerlink" title="配置hexo"></a>配置hexo</h3><p>修改_config.yml</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基础配置</span></span><br><span class="line"><span class="comment"># Hexo Configuration</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/configuration.html</span></span><br><span class="line"><span class="comment">## Source: https://github.com/hexojs/hexo/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Site</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">Y2k38&#x27;s</span> <span class="string">Blog</span></span><br><span class="line"><span class="attr">subtitle:</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">y2k38&#x27;s</span> <span class="string">blog</span></span><br><span class="line"><span class="attr">keywords:</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">y2k38</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="attr">timezone:</span> </span><br><span class="line"></span><br><span class="line"><span class="comment"># URL </span></span><br><span class="line"><span class="comment">## If your site is put in a subdirectory, set url as &#x27;http://yoursite.com/child&#x27; and root as &#x27;/child/&#x27;</span></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://y2k38.github.io</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">:year/:month/:day/:title/</span></span><br><span class="line"><span class="attr">permalink_defaults:</span></span><br><span class="line"></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 博客主题配置</span></span><br><span class="line"><span class="comment"># Extensions</span></span><br><span class="line"><span class="comment">## Plugins: https://hexo.io/plugins/</span></span><br><span class="line"><span class="comment">## Themes: https://hexo.io/themes/</span></span><br><span class="line"><span class="attr">theme:</span> <span class="string">next</span> <span class="comment"># 可选，若没有安装next主题，则忽略</span></span><br><span class="line"></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># github部署配置</span></span><br><span class="line"><span class="comment"># Deployment</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/deployment.html</span></span><br><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">https://github.com/Y2k38/y2k38.github.io.git</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">master</span> <span class="comment"># 注意，分支固定位master</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="发布github"><a href="#发布github" class="headerlink" title="发布github"></a>发布github</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo clean &amp;&amp; hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>完成</p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="添加gitalk评论系统"><a href="#添加gitalk评论系统" class="headerlink" title="添加gitalk评论系统"></a>添加gitalk评论系统</h3><blockquote>
+<p>[Deprecated] github要求校验方式改为personal access token，待gitalk作者及theme-next作者更新</p>
+</blockquote>
+<p>新建OAuth application获取id、secret，<a href="https://github.com/settings/applications/new">https://github.com/settings/applications/new</a></p>
+<p><img src="/images/register_a_new_OAuth_application.png" alt="new oauth app"></p>
+<p>配置next主题 <code>themes/next/_config.yml</code></p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Gitalk</span></span><br><span class="line"><span class="comment"># Demo: https://gitalk.github.io</span></span><br><span class="line"><span class="comment"># For more information: https://github.com/gitalk/gitalk, https://github.com/emn178/js-md5</span></span><br><span class="line"><span class="attr">gitalk:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">github_id:</span> <span class="string">y2k38</span> <span class="comment"># GitHub repo owner</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">y2k38.github.io</span> <span class="comment"># Repository name to store issues</span></span><br><span class="line">  <span class="attr">client_id:</span> <span class="string">xxxxxxxxxxxxxxxx</span> <span class="comment"># GitHub Application Client ID</span></span><br><span class="line">  <span class="attr">client_secret:</span> <span class="string">yyyyyyyyyyyyyyyy</span> <span class="comment"># GitHub Application Client Secret</span></span><br><span class="line">  <span class="attr">admin_user:</span> <span class="string">Y2k38</span> <span class="comment"># GitHub repo owner and collaborators, only these guys can initialize gitHub issues</span></span><br><span class="line">  <span class="attr">distraction_free_mode:</span> <span class="literal">true</span> <span class="comment"># Facebook-like distraction free mode</span></span><br><span class="line">  <span class="comment"># Gitalk&#x27;s display language depends on user&#x27;s browser or system environment</span></span><br><span class="line">  <span class="comment"># If you want everyone visiting your site to see a uniform language, you can set a force language value</span></span><br><span class="line">  <span class="comment"># Available values: en | es-ES | fr | ru | zh-CN | zh-TW</span></span><br><span class="line">  <span class="attr">language:</span> <span class="string">zh-CN</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://pages.github.com/">GitHub Pages</a><br><a href="https://gist.github.com/btfak/18938572f5df000ebe06fbd1872e4e39">How to use Hexo and deploy to GitHub Pages</a><br><a href="https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line">Creating a personal access token for the command line</a></p>
+]]></content>
+      <tags>
+        <tag>github pages</tag>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PHP扩展开发 - 类</title>
+    <url>/php-extension-writing-classes/</url>
+    <content><![CDATA[<p>以下简单介绍如何在C语言层面使用PHP类</p>
+<h2 id="对象"><a href="#对象" class="headerlink" title="对象"></a>对象</h2><p>创建一个PHP对象，对象类似关联数组，对象之上可关联任意多个函数</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(makeObject) &#123;</span><br><span class="line">    object_init(return_value);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加属性</span></span><br><span class="line">    zend_update_property_string(<span class="literal">NULL</span>, return_value, <span class="string">&quot;prop1&quot;</span>, <span class="built_in">strlen</span>(<span class="string">&quot;prop1&quot;</span>), <span class="string">&quot;val1&quot;</span>);</span><br><span class="line">    zend_update_property_long(<span class="literal">NULL</span>, return_value, <span class="string">&quot;prop2&quot;</span>, <span class="built_in">strlen</span>(<span class="string">&quot;prop2&quot;</span>), <span class="number">123</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用函数并打印结果<code>var_dump(makeObject());</code>，输出如下</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">object(stdClass)#1 (2) &#123;</span><br><span class="line">    [<span class="string">&quot;prop1&quot;</span>]=&gt;</span><br><span class="line">    string(3) <span class="string">&quot;val1&quot;</span></span><br><span class="line">    [<span class="string">&quot;prop2&quot;</span>]=&gt;</span><br><span class="line">    int(123)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="类"><a href="#类" class="headerlink" title="类"></a>类</h2><p>创建一个类模板</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// class定义存储于zend_class_entry</span></span><br><span class="line">zend_class_entry *test_ce_myclass;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_methods[] = &#123;</span><br><span class="line">    <span class="comment">// 类方法使用宏指令PHP_ME</span></span><br><span class="line">    <span class="comment">// public function hello()</span></span><br><span class="line">    PHP_ME(MyClass, hello, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC)</span><br><span class="line">    <span class="comment">// 与函数定义相同</span></span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 主菜，注册并加载类</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">test_init_myclass</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    zend_class_entry ce;</span><br><span class="line">    INIT_CLASS_ENTRY(ce, <span class="string">&quot;MyClass&quot;</span>, test_methods);</span><br><span class="line">    <span class="comment">// 注册MyClass类</span></span><br><span class="line">    test_ce_myclass = zend_register_internal_class(&amp;ce);</span><br><span class="line">    <span class="comment">// 添加属性/常量等</span></span><br><span class="line">    <span class="comment">// public $success = true;</span></span><br><span class="line">    zend_declare_property_bool(test_ce_myclass, <span class="string">&quot;success&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;success&quot;</span>)<span class="number">-1</span>, <span class="number">1</span>, ZEND_ACC_PUBLIC);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 类方法hello</span></span><br><span class="line">PHP_METHOD(MyClass, hello)</span><br><span class="line">&#123;</span><br><span class="line">    RETURN_STRING(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，函数<code>test_init_myclass</code>的最后一个参数<code>ZEND_ACC_PUBLIC</code>为访问控制标记之一公共访问，常用的访问控制标记还有以下几个</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">ZEND_ACC_STATIC</span><br><span class="line">ZEND_ACC_PUBLIC</span><br><span class="line">ZEND_ACC_PROTECTED</span><br><span class="line">ZEND_ACC_PRIVATE</span><br><span class="line">ZEND_ACC_CTOR</span><br><span class="line">ZEND_ACC_DTOR</span><br><span class="line">ZEND_ACC_DEPRECATED</span><br></pre></td></tr></table></figure>
+
+<p>一个class定义注册相关逻辑已经完成，要在PHP中使用类MyClass还需要在模块初始化<code>MINIT</code>中添加运行<code>test_init_myclass</code>以加载类MyClass</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    test_init_myclass();</span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译<code>test</code>模块并开启后，运行<code>var_dump(new MyClass());</code>，将得到以下类似输出</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">object(MyClass)#1 (1) &#123;</span><br><span class="line">    [<span class="string">&quot;success&quot;</span>]=&gt;</span><br><span class="line">    bool(<span class="literal">true</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们也可以直接在C层面初始化并生成一个实例化类对象，增加一个工厂方法<code>factory</code></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_methods[] = &#123;</span><br><span class="line">    PHP_ME(MyClass, hello, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC)</span><br><span class="line">    PHP_ME(MyClass, factory, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)</span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">PHP_METHOD(MyClass, factory)</span><br><span class="line">&#123;</span><br><span class="line">    object_init_ex(return_value, test_ce_myclass);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时，我们可以使用<code>MyClass::factory()</code>获取一个新的MyClass对象</p>
+<p>如果需要对MyClass进行一些操作，像在PHP使用构造方法，在test_methods里添加<code>__construct</code>，如此，PHP在<code>new MyClass()</code>将自动调用构造方法<code>__construct</code></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_methods[] = &#123;</span><br><span class="line">    <span class="comment">// ZEND_ACC_CTOR</span></span><br><span class="line">    PHP_ME(MyClass, __construct, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)</span><br><span class="line">    PHP_ME(MyClass, hello, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC)</span><br><span class="line">    PHP_ME(MyClass, factory, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)</span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">PHP_METHOD(MyClass, __construct)</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="调用类方法"><a href="#调用类方法" class="headerlink" title="调用类方法"></a>调用类方法</h2><p>上面，虽然对象在new时会自动调用<code>__construct</code>函数进行初始化，但<code>factory</code>不会自动调用构造函数，仅返回包含默认值的新对象，为此，我们需要在<code>factory</code>内调用构造方法</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;zend_interfaces.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">PHP_METHOD(MyClass, factory)</span><br><span class="line">&#123;</span><br><span class="line">    zval *myzval;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_ZVAL(myzval)</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    object_init_ex(return_value, test_ce_myclass);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// zend_call_method，其他的还有</span></span><br><span class="line">    <span class="comment">// zend_call_method_with_0_params</span></span><br><span class="line">    <span class="comment">// zend_call_method_with_1_params</span></span><br><span class="line">    <span class="comment">// zend_call_method_with_2_params</span></span><br><span class="line">    <span class="comment">// ZEND_API zval* zend_call_method(zval *object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval, int param_count, zval* arg1, zval* arg2);</span></span><br><span class="line">    zend_call_method(return_value, test_ce_myclass, <span class="literal">NULL</span>, <span class="string">&quot;__construct&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;__construct&quot;</span>)<span class="number">-1</span>, <span class="literal">NULL</span>, <span class="number">1</span>, myzval, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="this"><a href="#this" class="headerlink" title="this"></a>this</h2><p>先前我们已经了解函数返回值<code>return_value</code>的使用，现在，我们来看如何在方法内访问<code>$this</code>，PHP提供<code>getThis()</code>函数</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_METHOD(MyClass, __construct)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> *msg;</span><br><span class="line">    <span class="type">size_t</span> msg_len;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_STRING(msg, msg_len)</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    zend_update_property_string(test_ce_myclass, getThis(), <span class="string">&quot;msg&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;msg&quot;</span>)<span class="number">-1</span>, msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="关联结构体"><a href="#关联结构体" class="headerlink" title="关联结构体"></a>关联结构体</h2><p>我们构建一个结构体，这个结构体在PHP是无法访问的，但可以在扩展内访问对该结构体</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 还不是特别了解</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">test_struct</span> &#123;</span></span><br><span class="line">    zend_object <span class="built_in">std</span>;</span><br><span class="line">    <span class="type">int</span> unknown_id;</span><br><span class="line">    <span class="type">char</span> *unknown_str;</span><br><span class="line">&#125; test_struct;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> zend_object *<span class="title function_">create_test_struct</span><span class="params">(zend_class_entry *class_type)</span> &#123;</span><br><span class="line">    test_struct *intern;</span><br><span class="line"></span><br><span class="line">    intern = ecalloc(<span class="number">1</span>, <span class="keyword">sizeof</span>(test_struct) + zend_object_properties_size(class_type));</span><br><span class="line"></span><br><span class="line">    zend_object_std_init(&amp;intern-&gt;<span class="built_in">std</span>, class_type);</span><br><span class="line">    object_properties_init(&amp;intern-&gt;<span class="built_in">std</span>, class_type);</span><br><span class="line"></span><br><span class="line">    intern-&gt;<span class="built_in">std</span>.handlers = zend_get_std_object_handlers();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &amp;intern-&gt;<span class="built_in">std</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">free_test_struct</span><span class="params">(<span class="type">void</span> *object)</span> &#123;</span><br><span class="line">    test_struct *secrets = (test_struct*)object;</span><br><span class="line">    <span class="keyword">if</span> (secrets-&gt;unknown_str) &#123;</span><br><span class="line">        efree(secrets-&gt;unknown_str);</span><br><span class="line">    &#125;</span><br><span class="line">    efree(secrets);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>访问结构体<code>test_struct</code></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_METHOD(MyClass, attachStruct) &#123;</span><br><span class="line">    test_struct *secrets;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// </span></span><br><span class="line">    secrets = (test_struct*)getThis();</span><br><span class="line"></span><br><span class="line">    RETURN_LONG(secrets-&gt;unknown_id);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h2><p>PHP的异常继承自<code>Exception</code>，所以下面除了新增一个异常类，还涉及了类的继承</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;zend_exceptions.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">zend_class_entry *test_ce_exception;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">test_init_exception</span><span class="params">()</span> &#123;</span><br><span class="line">    zend_class_entry ce;</span><br><span class="line">    <span class="comment">// 设置第三个参数为NULL，继承Exception所有方法，无自定义行为</span></span><br><span class="line">    INIT_CLASS_ENTRY(ce, <span class="string">&quot;MyException&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    test_ce_exception = zend_register_internal_class_ex(&amp;ce, (zend_class_entry*)zend_exception_get_default());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    test_init_myclass();</span><br><span class="line">    <span class="comment">// </span></span><br><span class="line">    test_init_exception();</span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在方法&#x2F;函数中抛出异常</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_METHOD(MyClass, throwExcept) &#123;</span><br><span class="line">    zend_throw_exception(test_ce_exception, <span class="string">&quot;custom exception throw&quot;</span>, <span class="number">1024</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><p><a href="https://github.com/Y2k38/php_ext_tutorial">php_ext_tutorial</a></p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/bigbes/bigbes.github.io/wiki/PHP-Extensions-Made-Eldrich:-Classes">PHP Extensions Made Eldrich: Classes</a></p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>php extension</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PHP扩展开发 - Part 3</title>
+    <url>/php-extension-writing-part3/</url>
+    <content><![CDATA[<p>本文将简单介绍资源类型、资源的创建、访问、销毁操作。不再建议使用资源类型，使用类更为合适</p>
+<h2 id="资源类型"><a href="#资源类型" class="headerlink" title="资源类型"></a>资源类型</h2><p><code>zval</code>可以表示大部分的PHP数据类型，但有一样不能很好的表示其结构：指针。由于不透明的结构、无法使用传统运算符进行操作等，使得指针在PHP的表示变得困难。因此PHP用一个特殊的标记表示指针：资源，为了使资源标记具有意义，必须先注册到zend engine才能使用。</p>
+<p>在头文件定义结构体<code>php_test_person</code>以及资源名称，放置在<code>#define</code>语句后，<code>PHP_MINIT_FUNCTION(test);</code>之前</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    zend_string *name;</span><br><span class="line">    zend_long age;</span><br><span class="line">&#125; php_test_person;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PHP_TEST_PERSON_RES_NAME <span class="string">&quot;Person Data&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>源文件定义<code>le_*</code>全局变量，MINIT阶段注册，用于获取资源类型、字面意义名称、析构函数</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(<span class="literal">NULL</span>, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="初始化资源"><a href="#初始化资源" class="headerlink" title="初始化资源"></a>初始化资源</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_new)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = emalloc(<span class="keyword">sizeof</span>(php_test_person));</span><br><span class="line">    person-&gt;name = zend_string_copy(name); <span class="comment">// estrndup + zend_string =&gt; zend_string_copy</span></span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数接收参数name以及age，参数进行校验通过后，申请一段内存空间并写入数据，<code>return_value</code>返回该资源。PHP不需要知道资源的具体内部表示，只需要获取该资源存储的指针以及资源类型</p>
+<h2 id="函数接收资源参数"><a href="#函数接收资源参数" class="headerlink" title="函数接收资源参数"></a>函数接收资源参数</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_greet)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person;</span><br><span class="line">    zval *zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    person = (php_test_person *) zend_fetch_resource_ex(zperson, PHP_TEST_PERSON_RES_NAME, le_test_person);</span><br><span class="line"></span><br><span class="line">    php_printf(<span class="string">&quot;Hello &quot;</span>);</span><br><span class="line">    PHPWRITE(ZSTR_VAL(person-&gt;name), ZSTR_LEN(person-&gt;name));</span><br><span class="line">    php_printf(<span class="string">&quot;!\nAccording to my records, you are %ld years old.\n&quot;</span>, person-&gt;age);</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>ZEND_FETCH_RESOURCE</code>在PHP7中已被删除，目前获取资源的函数是<code>zend_fetch_resource</code>、<code>zend_fetch_resource_ex</code>。<code>zend_fetch_resource_ex</code>函数需要一个zval、字面意义名称、资源类型，返回一个指针。函数内部切记不要<code>free</code>该指针</p>
+<h2 id="销毁资源"><a href="#销毁资源" class="headerlink" title="销毁资源"></a>销毁资源</h2><p>在PHP中使用<code>fopen</code>打开文件并获得一个资源句柄<code>$fp</code>，接下来<code>unset($fp)</code>时文件被关闭，即使没有使用<code>fclose</code>函数。其中的奥秘在<code>zend_register_list_destructors_ex</code>，该函数第一个参数为常规资源的析构函数，第二个为持久化资源的析构函数，当离开资源变量所在作用域时，自动调用清理&#x2F;析构函数，释放内存、关闭连接或执行其他清理操作</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_person_dtor</span><span class="params">(zend_resource *res)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name); <span class="comment">// efree zend_string =&gt; zend_string_release</span></span><br><span class="line">        &#125;</span><br><span class="line">        efree(person);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="强制销毁资源"><a href="#强制销毁资源" class="headerlink" title="强制销毁资源"></a>强制销毁资源</h2><p>使用<code>zend_list_delete</code>销毁资源，该函数可销毁任何资源类型变量</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_delete)</span><br><span class="line">&#123;</span><br><span class="line">    zval * zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    zend_list_delete(Z_RES_P(zperson));</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="持久化资源"><a href="#持久化资源" class="headerlink" title="持久化资源"></a>持久化资源</h2><p>持久化资源与常规资源不同的地方在析构函数声明注册的位置，数据内存申请使用<code>pemalloc</code>代替<code>emalloc</code></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person_persist;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">    le_test_person_persist = zend_register_list_destructors_ex(<span class="literal">NULL</span>, php_test_person_persist_dtor, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通常情况下，<code>php_test_person_dtor</code>会在请求结束后调用，<code>php_test_person_persist_dtor</code>在扩展shutdown阶段调用</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_person_persist_dtor</span><span class="params">(zend_resource *res)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name);</span><br><span class="line">        &#125;</span><br><span class="line">        pefree(person, <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_dup(name, <span class="number">1</span>);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person_persist));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>test_person_pnew</code>与<code>test_person_new</code>仅在数据初始化、资源类型方面有差异</p>
+<h2 id="查找已存在的持久化资源"><a href="#查找已存在的持久化资源" class="headerlink" title="查找已存在的持久化资源"></a>查找已存在的持久化资源</h2><p>为了可以重用持久化资源，需要将其保存在一个安全的地方，zend engine提供了一个executor global通过<code>EG(persistent_list)</code>访问，该变量类型为<code>HashTable</code></p>
+<p>重新修改t<code>est_person_pnew</code></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew2)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    <span class="type">char</span> * key_raw;</span><br><span class="line">    <span class="type">size_t</span> key_len;</span><br><span class="line">    zend_string * name, * key;</span><br><span class="line">    zend_long age;</span><br><span class="line">    zval * zperson = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    key_len = spprintf(&amp;key_raw, <span class="number">0</span>, <span class="string">&quot;test_person_%s_%ld\n&quot;</span>, ZSTR_VAL(name), age);</span><br><span class="line">    key = zend_string_init(key_raw, key_len, <span class="number">1</span>);</span><br><span class="line">    efree(key_raw);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((zperson = zend_hash_find(&amp;EG(persistent_list), key)) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        person = (php_test_person *) zend_fetch_resource_ex(zperson, PHP_TEST_PERSON_RES_NAME, le_test_person_persist);</span><br><span class="line"></span><br><span class="line">        ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">        zend_string_release(key);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_copy(name);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">    zend_string_release(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>test_person_pnew2</code>先确定<code>EG(persistent_list)</code>是否已经存在，已存在则直接使用，不存在则申请内存初始化资源</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><del><a href="https://devzone.zend.com/446/extension-writing-part-iii-resources/">Extension Writing Part III: Resources</a></del><br><a href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-III:-Resources">Extension Writing Part III: Resources</a><br><a href="https://wiki.php.net/phpng-upgrading">Upgrading PHP extensions from PHP5 to NG</a><br><a href="http://www.phpinternalsbook.com/">PHP Internals Book</a><br><a href="https://wiki.php.net/internals/references">References about Maintaining and Extending PHP</a></p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>php extension</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>PHP扩展开发 - Part 1</title>
-    <url>/2019/09/03/php-extension-writing-part1/</url>
+    <url>/php-extension-writing-part1/</url>
     <content><![CDATA[<p>在网上找到几篇基于PHP5的扩展开发的文章，有些古老，与PHP7不完全兼容，自己做了些简单的翻译、修改。</p>
 <p>建议开发者先阅读<a href="http://www.phpinternalsbook.com/">PHP Internals Book</a>这份在线文档，里面对PHP做了比较全面的讲解。由于PHP扩展开发的资料比较少，也鲜有PHP开发者触及到这块，编写扩展时如果遇到问题，最好是先查找PHP源代码是否有相关的使用案例，再通过网上论坛、QQ等方式寻求帮助。</p>
 <p>本文是PHP扩展开发系列的第一篇，主要介绍如何开发一个简单的PHP扩展、如何获取ini配置参数、如何配置全局变量</p>
@@ -701,7 +933,7 @@
   </entry>
   <entry>
     <title>PHP扩展开发 - Part 2</title>
-    <url>/2020/02/01/php-extension-writing-part2/</url>
+    <url>/php-extension-writing-part2/</url>
     <content><![CDATA[<p>PHP扩展开发第二章，主要介绍函数参数获取、zval数据类型、数组及数组遍历以及$GLOBALS全局变量访问</p>
 <h2 id="函数参数"><a href="#函数参数" class="headerlink" title="函数参数"></a>函数参数</h2><p>扩展自定义函数不需要声明形参，Zend Engine会给每个函数传递一个参数列表<code>zend_execute_data *execute_data</code>，函数参数通过宏块<code>ZEND_PARSE_PARAMETERS_START</code>、<code>ZEND_PARSE_PARAMETERS_END</code>获取，当然，旧的方法<code>zend_parse_parameters</code>也可以使用，只是会更麻烦点</p>
 <p>下面示例函数将接收参数name以及打印的次数t_param并打印name</p>
@@ -805,107 +1037,8 @@
       </tags>
   </entry>
   <entry>
-    <title>PHP扩展开发 - 类</title>
-    <url>/2020/11/26/php-extension-writing-classes/</url>
-    <content><![CDATA[<p>以下简单介绍如何在C语言层面使用PHP类</p>
-<h2 id="对象"><a href="#对象" class="headerlink" title="对象"></a>对象</h2><p>创建一个PHP对象，对象类似关联数组，对象之上可关联任意多个函数</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(makeObject) &#123;</span><br><span class="line">    object_init(return_value);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加属性</span></span><br><span class="line">    zend_update_property_string(<span class="literal">NULL</span>, return_value, <span class="string">&quot;prop1&quot;</span>, <span class="built_in">strlen</span>(<span class="string">&quot;prop1&quot;</span>), <span class="string">&quot;val1&quot;</span>);</span><br><span class="line">    zend_update_property_long(<span class="literal">NULL</span>, return_value, <span class="string">&quot;prop2&quot;</span>, <span class="built_in">strlen</span>(<span class="string">&quot;prop2&quot;</span>), <span class="number">123</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>调用函数并打印结果<code>var_dump(makeObject());</code>，输出如下</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">object(stdClass)#1 (2) &#123;</span><br><span class="line">    [<span class="string">&quot;prop1&quot;</span>]=&gt;</span><br><span class="line">    string(3) <span class="string">&quot;val1&quot;</span></span><br><span class="line">    [<span class="string">&quot;prop2&quot;</span>]=&gt;</span><br><span class="line">    int(123)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="类"><a href="#类" class="headerlink" title="类"></a>类</h2><p>创建一个类模板</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// class定义存储于zend_class_entry</span></span><br><span class="line">zend_class_entry *test_ce_myclass;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_methods[] = &#123;</span><br><span class="line">    <span class="comment">// 类方法使用宏指令PHP_ME</span></span><br><span class="line">    <span class="comment">// public function hello()</span></span><br><span class="line">    PHP_ME(MyClass, hello, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC)</span><br><span class="line">    <span class="comment">// 与函数定义相同</span></span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 主菜，注册并加载类</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">test_init_myclass</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    zend_class_entry ce;</span><br><span class="line">    INIT_CLASS_ENTRY(ce, <span class="string">&quot;MyClass&quot;</span>, test_methods);</span><br><span class="line">    <span class="comment">// 注册MyClass类</span></span><br><span class="line">    test_ce_myclass = zend_register_internal_class(&amp;ce);</span><br><span class="line">    <span class="comment">// 添加属性/常量等</span></span><br><span class="line">    <span class="comment">// public $success = true;</span></span><br><span class="line">    zend_declare_property_bool(test_ce_myclass, <span class="string">&quot;success&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;success&quot;</span>)<span class="number">-1</span>, <span class="number">1</span>, ZEND_ACC_PUBLIC);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 类方法hello</span></span><br><span class="line">PHP_METHOD(MyClass, hello)</span><br><span class="line">&#123;</span><br><span class="line">    RETURN_STRING(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>其中，函数<code>test_init_myclass</code>的最后一个参数<code>ZEND_ACC_PUBLIC</code>为访问控制标记之一公共访问，常用的访问控制标记还有以下几个</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">ZEND_ACC_STATIC</span><br><span class="line">ZEND_ACC_PUBLIC</span><br><span class="line">ZEND_ACC_PROTECTED</span><br><span class="line">ZEND_ACC_PRIVATE</span><br><span class="line">ZEND_ACC_CTOR</span><br><span class="line">ZEND_ACC_DTOR</span><br><span class="line">ZEND_ACC_DEPRECATED</span><br></pre></td></tr></table></figure>
-
-<p>一个class定义注册相关逻辑已经完成，要在PHP中使用类MyClass还需要在模块初始化<code>MINIT</code>中添加运行<code>test_init_myclass</code>以加载类MyClass</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    test_init_myclass();</span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>编译<code>test</code>模块并开启后，运行<code>var_dump(new MyClass());</code>，将得到以下类似输出</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">object(MyClass)#1 (1) &#123;</span><br><span class="line">    [<span class="string">&quot;success&quot;</span>]=&gt;</span><br><span class="line">    bool(<span class="literal">true</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们也可以直接在C层面初始化并生成一个实例化类对象，增加一个工厂方法<code>factory</code></p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_methods[] = &#123;</span><br><span class="line">    PHP_ME(MyClass, hello, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC)</span><br><span class="line">    PHP_ME(MyClass, factory, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)</span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">PHP_METHOD(MyClass, factory)</span><br><span class="line">&#123;</span><br><span class="line">    object_init_ex(return_value, test_ce_myclass);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>此时，我们可以使用<code>MyClass::factory()</code>获取一个新的MyClass对象</p>
-<p>如果需要对MyClass进行一些操作，像在PHP使用构造方法，在test_methods里添加<code>__construct</code>，如此，PHP在<code>new MyClass()</code>将自动调用构造方法<code>__construct</code></p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_methods[] = &#123;</span><br><span class="line">    <span class="comment">// ZEND_ACC_CTOR</span></span><br><span class="line">    PHP_ME(MyClass, __construct, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)</span><br><span class="line">    PHP_ME(MyClass, hello, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC)</span><br><span class="line">    PHP_ME(MyClass, factory, <span class="literal">NULL</span>, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)</span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">PHP_METHOD(MyClass, __construct)</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="调用类方法"><a href="#调用类方法" class="headerlink" title="调用类方法"></a>调用类方法</h2><p>上面，虽然对象在new时会自动调用<code>__construct</code>函数进行初始化，但<code>factory</code>不会自动调用构造函数，仅返回包含默认值的新对象，为此，我们需要在<code>factory</code>内调用构造方法</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;zend_interfaces.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">PHP_METHOD(MyClass, factory)</span><br><span class="line">&#123;</span><br><span class="line">    zval *myzval;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_ZVAL(myzval)</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    object_init_ex(return_value, test_ce_myclass);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// zend_call_method，其他的还有</span></span><br><span class="line">    <span class="comment">// zend_call_method_with_0_params</span></span><br><span class="line">    <span class="comment">// zend_call_method_with_1_params</span></span><br><span class="line">    <span class="comment">// zend_call_method_with_2_params</span></span><br><span class="line">    <span class="comment">// ZEND_API zval* zend_call_method(zval *object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval, int param_count, zval* arg1, zval* arg2);</span></span><br><span class="line">    zend_call_method(return_value, test_ce_myclass, <span class="literal">NULL</span>, <span class="string">&quot;__construct&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;__construct&quot;</span>)<span class="number">-1</span>, <span class="literal">NULL</span>, <span class="number">1</span>, myzval, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="this"><a href="#this" class="headerlink" title="this"></a>this</h2><p>先前我们已经了解函数返回值<code>return_value</code>的使用，现在，我们来看如何在方法内访问<code>$this</code>，PHP提供<code>getThis()</code>函数</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_METHOD(MyClass, __construct)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> *msg;</span><br><span class="line">    <span class="type">size_t</span> msg_len;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_STRING(msg, msg_len)</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    zend_update_property_string(test_ce_myclass, getThis(), <span class="string">&quot;msg&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;msg&quot;</span>)<span class="number">-1</span>, msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="关联结构体"><a href="#关联结构体" class="headerlink" title="关联结构体"></a>关联结构体</h2><p>我们构建一个结构体，这个结构体在PHP是无法访问的，但可以在扩展内访问对该结构体</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 还不是特别了解</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">test_struct</span> &#123;</span></span><br><span class="line">    zend_object <span class="built_in">std</span>;</span><br><span class="line">    <span class="type">int</span> unknown_id;</span><br><span class="line">    <span class="type">char</span> *unknown_str;</span><br><span class="line">&#125; test_struct;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> zend_object *<span class="title function_">create_test_struct</span><span class="params">(zend_class_entry *class_type)</span> &#123;</span><br><span class="line">    test_struct *intern;</span><br><span class="line"></span><br><span class="line">    intern = ecalloc(<span class="number">1</span>, <span class="keyword">sizeof</span>(test_struct) + zend_object_properties_size(class_type));</span><br><span class="line"></span><br><span class="line">    zend_object_std_init(&amp;intern-&gt;<span class="built_in">std</span>, class_type);</span><br><span class="line">    object_properties_init(&amp;intern-&gt;<span class="built_in">std</span>, class_type);</span><br><span class="line"></span><br><span class="line">    intern-&gt;<span class="built_in">std</span>.handlers = zend_get_std_object_handlers();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &amp;intern-&gt;<span class="built_in">std</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">free_test_struct</span><span class="params">(<span class="type">void</span> *object)</span> &#123;</span><br><span class="line">    test_struct *secrets = (test_struct*)object;</span><br><span class="line">    <span class="keyword">if</span> (secrets-&gt;unknown_str) &#123;</span><br><span class="line">        efree(secrets-&gt;unknown_str);</span><br><span class="line">    &#125;</span><br><span class="line">    efree(secrets);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>访问结构体<code>test_struct</code></p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_METHOD(MyClass, attachStruct) &#123;</span><br><span class="line">    test_struct *secrets;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// </span></span><br><span class="line">    secrets = (test_struct*)getThis();</span><br><span class="line"></span><br><span class="line">    RETURN_LONG(secrets-&gt;unknown_id);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h2><p>PHP的异常继承自<code>Exception</code>，所以下面除了新增一个异常类，还涉及了类的继承</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;zend_exceptions.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">zend_class_entry *test_ce_exception;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">test_init_exception</span><span class="params">()</span> &#123;</span><br><span class="line">    zend_class_entry ce;</span><br><span class="line">    <span class="comment">// 设置第三个参数为NULL，继承Exception所有方法，无自定义行为</span></span><br><span class="line">    INIT_CLASS_ENTRY(ce, <span class="string">&quot;MyException&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    test_ce_exception = zend_register_internal_class_ex(&amp;ce, (zend_class_entry*)zend_exception_get_default());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    test_init_myclass();</span><br><span class="line">    <span class="comment">// </span></span><br><span class="line">    test_init_exception();</span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在方法&#x2F;函数中抛出异常</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_METHOD(MyClass, throwExcept) &#123;</span><br><span class="line">    zend_throw_exception(test_ce_exception, <span class="string">&quot;custom exception throw&quot;</span>, <span class="number">1024</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><p><a href="https://github.com/Y2k38/php_ext_tutorial">php_ext_tutorial</a></p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/bigbes/bigbes.github.io/wiki/PHP-Extensions-Made-Eldrich:-Classes">PHP Extensions Made Eldrich: Classes</a></p>
-]]></content>
-      <tags>
-        <tag>php</tag>
-        <tag>php extension</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PHP扩展开发 - Part 3</title>
-    <url>/2020/02/09/php-extension-writing-part3/</url>
-    <content><![CDATA[<p>本文将简单介绍资源类型、资源的创建、访问、销毁操作。不再建议使用资源类型，使用类更为合适</p>
-<h2 id="资源类型"><a href="#资源类型" class="headerlink" title="资源类型"></a>资源类型</h2><p><code>zval</code>可以表示大部分的PHP数据类型，但有一样不能很好的表示其结构：指针。由于不透明的结构、无法使用传统运算符进行操作等，使得指针在PHP的表示变得困难。因此PHP用一个特殊的标记表示指针：资源，为了使资源标记具有意义，必须先注册到zend engine才能使用。</p>
-<p>在头文件定义结构体<code>php_test_person</code>以及资源名称，放置在<code>#define</code>语句后，<code>PHP_MINIT_FUNCTION(test);</code>之前</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    zend_string *name;</span><br><span class="line">    zend_long age;</span><br><span class="line">&#125; php_test_person;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PHP_TEST_PERSON_RES_NAME <span class="string">&quot;Person Data&quot;</span></span></span><br></pre></td></tr></table></figure>
-
-<p>源文件定义<code>le_*</code>全局变量，MINIT阶段注册，用于获取资源类型、字面意义名称、析构函数</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(<span class="literal">NULL</span>, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="初始化资源"><a href="#初始化资源" class="headerlink" title="初始化资源"></a>初始化资源</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_new)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = emalloc(<span class="keyword">sizeof</span>(php_test_person));</span><br><span class="line">    person-&gt;name = zend_string_copy(name); <span class="comment">// estrndup + zend_string =&gt; zend_string_copy</span></span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>函数接收参数name以及age，参数进行校验通过后，申请一段内存空间并写入数据，<code>return_value</code>返回该资源。PHP不需要知道资源的具体内部表示，只需要获取该资源存储的指针以及资源类型</p>
-<h2 id="函数接收资源参数"><a href="#函数接收资源参数" class="headerlink" title="函数接收资源参数"></a>函数接收资源参数</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_greet)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person;</span><br><span class="line">    zval *zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    person = (php_test_person *) zend_fetch_resource_ex(zperson, PHP_TEST_PERSON_RES_NAME, le_test_person);</span><br><span class="line"></span><br><span class="line">    php_printf(<span class="string">&quot;Hello &quot;</span>);</span><br><span class="line">    PHPWRITE(ZSTR_VAL(person-&gt;name), ZSTR_LEN(person-&gt;name));</span><br><span class="line">    php_printf(<span class="string">&quot;!\nAccording to my records, you are %ld years old.\n&quot;</span>, person-&gt;age);</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>ZEND_FETCH_RESOURCE</code>在PHP7中已被删除，目前获取资源的函数是<code>zend_fetch_resource</code>、<code>zend_fetch_resource_ex</code>。<code>zend_fetch_resource_ex</code>函数需要一个zval、字面意义名称、资源类型，返回一个指针。函数内部切记不要<code>free</code>该指针</p>
-<h2 id="销毁资源"><a href="#销毁资源" class="headerlink" title="销毁资源"></a>销毁资源</h2><p>在PHP中使用<code>fopen</code>打开文件并获得一个资源句柄<code>$fp</code>，接下来<code>unset($fp)</code>时文件被关闭，即使没有使用<code>fclose</code>函数。其中的奥秘在<code>zend_register_list_destructors_ex</code>，该函数第一个参数为常规资源的析构函数，第二个为持久化资源的析构函数，当离开资源变量所在作用域时，自动调用清理&#x2F;析构函数，释放内存、关闭连接或执行其他清理操作</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_person_dtor</span><span class="params">(zend_resource *res)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name); <span class="comment">// efree zend_string =&gt; zend_string_release</span></span><br><span class="line">        &#125;</span><br><span class="line">        efree(person);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="强制销毁资源"><a href="#强制销毁资源" class="headerlink" title="强制销毁资源"></a>强制销毁资源</h2><p>使用<code>zend_list_delete</code>销毁资源，该函数可销毁任何资源类型变量</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_delete)</span><br><span class="line">&#123;</span><br><span class="line">    zval * zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    zend_list_delete(Z_RES_P(zperson));</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="持久化资源"><a href="#持久化资源" class="headerlink" title="持久化资源"></a>持久化资源</h2><p>持久化资源与常规资源不同的地方在析构函数声明注册的位置，数据内存申请使用<code>pemalloc</code>代替<code>emalloc</code></p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person_persist;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">    le_test_person_persist = zend_register_list_destructors_ex(<span class="literal">NULL</span>, php_test_person_persist_dtor, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>通常情况下，<code>php_test_person_dtor</code>会在请求结束后调用，<code>php_test_person_persist_dtor</code>在扩展shutdown阶段调用</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_person_persist_dtor</span><span class="params">(zend_resource *res)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name);</span><br><span class="line">        &#125;</span><br><span class="line">        pefree(person, <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_dup(name, <span class="number">1</span>);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person_persist));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>test_person_pnew</code>与<code>test_person_new</code>仅在数据初始化、资源类型方面有差异</p>
-<h2 id="查找已存在的持久化资源"><a href="#查找已存在的持久化资源" class="headerlink" title="查找已存在的持久化资源"></a>查找已存在的持久化资源</h2><p>为了可以重用持久化资源，需要将其保存在一个安全的地方，zend engine提供了一个executor global通过<code>EG(persistent_list)</code>访问，该变量类型为<code>HashTable</code></p>
-<p>重新修改t<code>est_person_pnew</code></p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew2)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    <span class="type">char</span> * key_raw;</span><br><span class="line">    <span class="type">size_t</span> key_len;</span><br><span class="line">    zend_string * name, * key;</span><br><span class="line">    zend_long age;</span><br><span class="line">    zval * zperson = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    key_len = spprintf(&amp;key_raw, <span class="number">0</span>, <span class="string">&quot;test_person_%s_%ld\n&quot;</span>, ZSTR_VAL(name), age);</span><br><span class="line">    key = zend_string_init(key_raw, key_len, <span class="number">1</span>);</span><br><span class="line">    efree(key_raw);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((zperson = zend_hash_find(&amp;EG(persistent_list), key)) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        person = (php_test_person *) zend_fetch_resource_ex(zperson, PHP_TEST_PERSON_RES_NAME, le_test_person_persist);</span><br><span class="line"></span><br><span class="line">        ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">        zend_string_release(key);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_copy(name);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">    zend_string_release(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>test_person_pnew2</code>先确定<code>EG(persistent_list)</code>是否已经存在，已存在则直接使用，不存在则申请内存初始化资源</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><del><a href="https://devzone.zend.com/446/extension-writing-part-iii-resources/">Extension Writing Part III: Resources</a></del><br><a href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-III:-Resources">Extension Writing Part III: Resources</a><br><a href="https://wiki.php.net/phpng-upgrading">Upgrading PHP extensions from PHP5 to NG</a><br><a href="http://www.phpinternalsbook.com/">PHP Internals Book</a><br><a href="https://wiki.php.net/internals/references">References about Maintaining and Extending PHP</a></p>
-]]></content>
-      <tags>
-        <tag>php</tag>
-        <tag>php extension</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>postgresql安装配置</title>
-    <url>/2024/08/11/postgres-setup-example/</url>
+    <url>/postgres-setup-example/</url>
     <content><![CDATA[<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="前置依赖"><a href="#前置依赖" class="headerlink" title="前置依赖"></a>前置依赖</h3><p>系统是ubuntu 24.04 LTS，开机启动使用了systemd，所以先安装相关依赖包</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install libsystemd-dev</span><br></pre></td></tr></table></figure>
 
@@ -956,12 +1089,42 @@
       </tags>
   </entry>
   <entry>
+    <title>记一次xdebug异常</title>
+    <url>/vagrant-xdebug-not-working/</url>
+    <content><![CDATA[<p>工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴</p>
+<h2 id="问题及解决过程"><a href="#问题及解决过程" class="headerlink" title="问题及解决过程"></a>问题及解决过程</h2><h3 id="异常情况"><a href="#异常情况" class="headerlink" title="异常情况"></a>异常情况</h3><p>xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错；监测网络数据，只有初次请求数据，无结果返回</p>
+<h3 id="客户端-服务器配置信息"><a href="#客户端-服务器配置信息" class="headerlink" title="客户端&#x2F;服务器配置信息"></a>客户端&#x2F;服务器配置信息</h3><p>服务器是vagrant + ubuntu 18.04 + PHP 7.4，客户端是Windows 10，编辑器是vscode</p>
+<p>初始xdebug配置如下</p>
+<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="section">[xdebug]</span></span><br><span class="line"><span class="attr">xdebug.remote_enable</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_autostart</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_port</span> = <span class="number">9001</span></span><br><span class="line"><span class="attr">xdebug.remote_handler</span> = <span class="string">&quot;dbgp&quot;</span></span><br><span class="line"><span class="attr">xdebug.remote_mode</span> = req</span><br><span class="line"><span class="attr">xdebug.remote_connect_back</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.overload_var_dump</span>=<span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>vscode配置launch.json如下</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.2.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;configurations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Listen for XDebug&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;php&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">9001</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;pathMappings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;/data/example&quot;</span><span class="punctuation">:</span> <span class="string">&quot;D:\\data\\example&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;log&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="开启xdebug日志监测"><a href="#开启xdebug日志监测" class="headerlink" title="开启xdebug日志监测"></a>开启xdebug日志监测</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.remote_log</span>=/tmp/xdebug.log</span><br></pre></td></tr></table></figure>
+
+<p>再次请求，获取日志数据如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[140114918627520] Log opened at 2019-09-04 11:49:00</span><br><span class="line">[140114918627520] I: Checking remote connect back address.</span><br><span class="line">[140114918627520] I: Checking header &#x27;HTTP_X_FORWARDED_FOR&#x27;.</span><br><span class="line">[140114918627520] I: Checking header &#x27;REMOTE_ADDR&#x27;.</span><br><span class="line">[140114918627520] I: Remote address found, connecting to 192.168.33.1:9001.</span><br><span class="line">[140114918627520] E: Time-out connecting to client (Waited: 200 ms). :-(</span><br><span class="line">[140114918627520] Log closed at 2019-09-04 11:49:00</span><br></pre></td></tr></table></figure>
+
+<p>日志显示服务端有正常向客户端9001端口发起连接，但客户端无响应导致超时，检查客户端防火墙无异常</p>
+<p>最后，在谷歌上找到一个类似的问题，发现问题与vagrant有关，具体问题描述见参考文档链接</p>
+<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="comment">; 移除 xdebug.remote_connect_back = 1</span></span><br><span class="line"><span class="comment">; 添加</span></span><br><span class="line"><span class="attr">xdebug.remote_host</span>=<span class="number">10.0</span>.<span class="number">2.2</span></span><br></pre></td></tr></table></figure>
+
+<p>重启php-fpm，再次测试，vscode可连接xdebug，问题解决</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://danemacmillan.com/how-to-configure-xdebug-in-phpstorm-through-vagrant/">How to configure Xdebug in PhpStorm through Vagrant</a><br><a href="https://stackoverflow.com/questions/24831707/xdebug-time-out-connecting-to-client-using-phpstorm-7-1-3-vagrant-virtualbo">xdebug Time-out connecting to client</a></p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>vagrant</tag>
+        <tag>xdebug</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>使用kubeadm部署k8s集群</title>
-    <url>/2024/08/16/use-kubeadm-to-deploy-k8s-cluster/</url>
+    <url>/use-kubeadm-to-deploy-k8s-cluster/</url>
     <content><![CDATA[<p>部署计划：先创建一台虚拟机vm1，安装docker以及k8s组件，然后克隆两台新的vm2&#x2F;vm3，组合成一个小型的k8s集群</p>
 <h2 id="虚拟机准备"><a href="#虚拟机准备" class="headerlink" title="虚拟机准备"></a>虚拟机准备</h2><h3 id="创建vm1"><a href="#创建vm1" class="headerlink" title="创建vm1"></a>创建vm1</h3><p>创建虚拟机vm1，以下就不展示繁琐的系统安装过程了</p>
 <p><img src="/images/kvm_create_vm1.png" alt="kvm create vm1"></p>
-<h3 id="配置vm1"><a href="#配置vm1" class="headerlink" title="配置vm1"></a>配置vm1</h3><p>根据教程：<a href="/2024/07/20/deploy-docker-and-registry-service/">安装docker并部署registry服务</a>安装好containerd，再执行下面的配置</p>
+<h3 id="配置vm1"><a href="#配置vm1" class="headerlink" title="配置vm1"></a>配置vm1</h3><p>根据教程：<a href="/deploy-docker-and-registry-service/">安装docker并部署registry服务</a>安装好containerd，再执行下面的配置</p>
 <h4 id="系统配置修改"><a href="#系统配置修改" class="headerlink" title="系统配置修改"></a>系统配置修改</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># linux 模块</span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt;<span class="string">EOF | sudo tee /etc/modules-load.d/k8s.conf</span></span><br><span class="line"><span class="string">overlay</span></span><br><span class="line"><span class="string">br_netfilter</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> modprobe overlay</span><br><span class="line"><span class="built_in">sudo</span> modprobe br_netfilter</span><br><span class="line"></span><br><span class="line"><span class="comment"># lsmod | grep overlay</span></span><br><span class="line"><span class="comment"># lsmod | grep br_netfilter</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 网络配置</span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt;<span class="string">EOF | sudo tee /etc/sysctl.d/k8s.conf</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-iptables  = 1</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-ip6tables = 1</span></span><br><span class="line"><span class="string">net.ipv4.ip_forward                 = 1</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/sysctl.d/k8s.conf</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> sysctl --system</span><br><span class="line"></span><br><span class="line"><span class="comment"># sudo sysctl -a | grep net.ipv4.ip_forward</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="关闭swap"><a href="#关闭swap" class="headerlink" title="关闭swap"></a>关闭swap</h4><p>关闭swap并移除文件</p>
@@ -1102,7 +1265,24 @@
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 映射到vm1</span></span><br><span class="line">kubectl port-forward svc/wordpress 8888:80</span><br><span class="line"><span class="comment"># 映射到物理机</span></span><br><span class="line">ssh -L 8888:127.0.0.1:8888 noname@192.168.122.11</span><br></pre></td></tr></table></figure>
 
 <p>done!</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><h3 id="bug处理"><a href="#bug处理" class="headerlink" title="bug处理"></a>bug处理</h3><ol>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>注意，按照以上教程安装的集群属于裸集群（bare-metal），默认不支持以下几个功能</p>
+<ul>
+<li>Load Balancer Service</li>
+<li>Persistent Volume</li>
+<li>Ingress&#x2F;Gateway</li>
+</ul>
+<p>如果你的角色是开发者，还是老老实实使用Minikube，避免耗费太多时间精力在集群运维上</p>
+<p>另外，一个完整的运维系统不仅仅只是k8s，应当包含以下组件</p>
+<ul>
+<li>k8s，负责管理pod资源（cpu&#x2F;内存）、node资源</li>
+<li>分布式文件系统，负责持久存储</li>
+<li>gateway，负责控制外部流量对集群内服务的访问</li>
+<li>elk，负责日志收集、分析、告警</li>
+<li>prometheus，负责收集指标、链路分析、告警</li>
+<li>ci&#x2F;cd系统，如gitlab，负责开发-发布系统流程</li>
+<li>管理后台，负责应用管理、发布审核、记录审计信息等</li>
+</ul>
+<h3 id="bug处理"><a href="#bug处理" class="headerlink" title="bug处理"></a>bug处理</h3><ol>
 <li><code>kubeadm init</code>执行后集群组件反复崩溃重启<code>CrashLoopBackOff</code>或者是卡在<code>kubelet-check</code>检查步骤</li>
 </ol>
 <p>该问题原因与下面的cilium报错原因一致，软件权限导致的。在最开始时我使用的是手动安装方式，软件都是解压缩复制到bin目录，没有注意到所有组件的owner不是root，这才导致了上面这个问题。虽然是一个很容易忽视的问题，但却让我花了很长时间去debug，太亏了</p>
@@ -1135,36 +1315,6 @@
       <tags>
         <tag>kubernetes</tag>
         <tag>kubeadm</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>记一次xdebug异常</title>
-    <url>/2019/09/05/vagrant-xdebug-not-working/</url>
-    <content><![CDATA[<p>工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴</p>
-<h2 id="问题及解决过程"><a href="#问题及解决过程" class="headerlink" title="问题及解决过程"></a>问题及解决过程</h2><h3 id="异常情况"><a href="#异常情况" class="headerlink" title="异常情况"></a>异常情况</h3><p>xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错；监测网络数据，只有初次请求数据，无结果返回</p>
-<h3 id="客户端-服务器配置信息"><a href="#客户端-服务器配置信息" class="headerlink" title="客户端&#x2F;服务器配置信息"></a>客户端&#x2F;服务器配置信息</h3><p>服务器是vagrant + ubuntu 18.04 + PHP 7.4，客户端是Windows 10，编辑器是vscode</p>
-<p>初始xdebug配置如下</p>
-<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="section">[xdebug]</span></span><br><span class="line"><span class="attr">xdebug.remote_enable</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_autostart</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_port</span> = <span class="number">9001</span></span><br><span class="line"><span class="attr">xdebug.remote_handler</span> = <span class="string">&quot;dbgp&quot;</span></span><br><span class="line"><span class="attr">xdebug.remote_mode</span> = req</span><br><span class="line"><span class="attr">xdebug.remote_connect_back</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.overload_var_dump</span>=<span class="number">0</span></span><br></pre></td></tr></table></figure>
-
-<p>vscode配置launch.json如下</p>
-<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.2.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;configurations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Listen for XDebug&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;php&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">9001</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;pathMappings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;/data/example&quot;</span><span class="punctuation">:</span> <span class="string">&quot;D:\\data\\example&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;log&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="开启xdebug日志监测"><a href="#开启xdebug日志监测" class="headerlink" title="开启xdebug日志监测"></a>开启xdebug日志监测</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.remote_log</span>=/tmp/xdebug.log</span><br></pre></td></tr></table></figure>
-
-<p>再次请求，获取日志数据如下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[140114918627520] Log opened at 2019-09-04 11:49:00</span><br><span class="line">[140114918627520] I: Checking remote connect back address.</span><br><span class="line">[140114918627520] I: Checking header &#x27;HTTP_X_FORWARDED_FOR&#x27;.</span><br><span class="line">[140114918627520] I: Checking header &#x27;REMOTE_ADDR&#x27;.</span><br><span class="line">[140114918627520] I: Remote address found, connecting to 192.168.33.1:9001.</span><br><span class="line">[140114918627520] E: Time-out connecting to client (Waited: 200 ms). :-(</span><br><span class="line">[140114918627520] Log closed at 2019-09-04 11:49:00</span><br></pre></td></tr></table></figure>
-
-<p>日志显示服务端有正常向客户端9001端口发起连接，但客户端无响应导致超时，检查客户端防火墙无异常</p>
-<p>最后，在谷歌上找到一个类似的问题，发现问题与vagrant有关，具体问题描述见参考文档链接</p>
-<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="comment">; 移除 xdebug.remote_connect_back = 1</span></span><br><span class="line"><span class="comment">; 添加</span></span><br><span class="line"><span class="attr">xdebug.remote_host</span>=<span class="number">10.0</span>.<span class="number">2.2</span></span><br></pre></td></tr></table></figure>
-
-<p>重启php-fpm，再次测试，vscode可连接xdebug，问题解决</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://danemacmillan.com/how-to-configure-xdebug-in-phpstorm-through-vagrant/">How to configure Xdebug in PhpStorm through Vagrant</a><br><a href="https://stackoverflow.com/questions/24831707/xdebug-time-out-connecting-to-client-using-phpstorm-7-1-3-vagrant-virtualbo">xdebug Time-out connecting to client</a></p>
-]]></content>
-      <tags>
-        <tag>php</tag>
-        <tag>vagrant</tag>
-        <tag>xdebug</tag>
       </tags>
   </entry>
 </search>
