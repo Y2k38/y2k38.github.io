@@ -291,6 +291,13 @@
   </url>
   
   <url>
+    <loc>https://y2k38.github.io/tags/kubernetes/</loc>
+    <lastmod>2024-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://y2k38.github.io/tags/php/</loc>
     <lastmod>2024-08-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -306,13 +313,6 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/profiling/</loc>
-    <lastmod>2024-08-28</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/kubernetes/</loc>
     <lastmod>2024-08-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -382,6 +382,13 @@
   </url>
   
   <url>
+    <loc>https://y2k38.github.io/tags/kubeadm/</loc>
+    <lastmod>2024-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://y2k38.github.io/tags/vagrant/</loc>
     <lastmod>2024-08-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -390,13 +397,6 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/xdebug/</loc>
-    <lastmod>2024-08-28</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/kubeadm/</loc>
     <lastmod>2024-08-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
