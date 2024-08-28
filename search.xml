@@ -1,43 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>安装kvm虚拟机</title>
-    <url>/deploy-kvm-and-cockpit/</url>
-    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一般情况下，日常开发我只使用vagrant跟virtualbox，但后面想搭建一个k8s环境学习，需要一个免费、高性能、便于管理的虚拟机管理软件</p>
-<p>综合考虑了下现在市面上的虚拟机管理软件</p>
-<ol>
-<li>virtualbox 的磁盘性能太差，nat网络所有虚拟机都是同一个IP：10.0.2.15，其他方面也不考虑了</li>
-<li>parallel desktop 太贵太黑心</li>
-<li>vmware 价格也不便宜还很吃电脑资源</li>
-<li>hyper-v 管理界面太难用，同时无法固定虚拟机IP</li>
-</ol>
-<p>最终我选择组装一台台式机，安装了ubuntu系统，并在上面安装使用kvm虚拟机</p>
-<p>cpu是amd 7700，8核心16线程；32GB内存；暂时不需要用到显卡；PC在路由器做了MAC跟IP的绑定，方便使用ssh</p>
-<p>由于virt-manager太难用，最后选择cockpit作为kvm虚拟机管理软件</p>
-<h2 id="kvm安装"><a href="#kvm安装" class="headerlink" title="kvm安装"></a>kvm安装</h2><h3 id="前置工作"><a href="#前置工作" class="headerlink" title="前置工作"></a>前置工作</h3><p>确认cpu开启虚拟化功能</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一般是cpu的核心数量</span></span><br><span class="line">egrep -c <span class="string">&#x27;(vmx|svm)&#x27;</span> /proc/cpuinfo</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装kvm"><a href="#安装kvm" class="headerlink" title="安装kvm"></a>安装kvm</h3><p>安装kvm以及依赖软件</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install qemu-system-x86 libvirt-daemon-system virtinst \</span><br><span class="line">  virt-manager virt-viewer ovmf swtpm qemu-utils guestfs-tools \</span><br><span class="line">  libosinfo-bin tuned</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> libvirtd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line"><span class="built_in">sudo</span> virt-host-validate qemu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果有使用window的需要，可以下载virtio</span></span><br><span class="line">wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装后工作"><a href="#安装后工作" class="headerlink" title="安装后工作"></a>安装后工作</h3><p>将用户添加到kvm跟libvirt组</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> usermod -aG kvm <span class="variable">$USER</span></span><br><span class="line"><span class="built_in">sudo</span> usermod -aG libvirt <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="cockpit安装"><a href="#cockpit安装" class="headerlink" title="cockpit安装"></a>cockpit安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install cockpit cockpit-machines</span><br></pre></td></tr></table></figure>
-
-<p>防火墙配置</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 9090/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
-
-<p>浏览器打开访问web管理页面 <a href="https://192.168.0.105:9090/">https://192.168.0.105:9090</a></p>
-<p><img src="/images/kvm_with_cockpit.png" alt="kvm with cockpit preview"></p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.tecmint.com/install-qemu-kvm-ubuntu-create-virtual-machines/">How to Install QEMU&#x2F;KVM on Ubuntu to Create Virtual Machines</a><br><a href="https://www.tecmint.com/manage-kvm-virtual-machines-using-cockpit-web-console/">Managing KVM Virtual Machines with Cockpit Web Console in Linux</a><br><a href="https://github.com/bryansteiner/gpu-passthrough-tutorial">gpu-passthrough-tutorial</a></p>
-]]></content>
-      <tags>
-        <tag>kvm</tag>
-        <tag>cockpit</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Nginx配置HTTPS访问</title>
     <url>/configure-nginx-with-https/</url>
     <content><![CDATA[<p>简单介绍如何生成https服务所需要的证书、私钥以及部署，文档分别描述了开发时使用的self-signed证书以及线上使用的let’s encrypt免费证书的生成方法</p>
@@ -177,72 +140,40 @@
       </tags>
   </entry>
   <entry>
-    <title>如何在ubuntu服务器上管理Wi-Fi</title>
-    <url>/how-to-manage-wifi-on-ubuntu-server/</url>
-    <content><![CDATA[<p>当没有桌面时，ubuntu服务器该如何连接宽带、共享Wi-Fi热点，就像一台路由器一样运作，或者如何连接Wi-Fi，以下简单介绍这几个操作的过程</p>
-<h2 id="连接宽带"><a href="#连接宽带" class="headerlink" title="连接宽带"></a>连接宽带</h2><h3 id="PPPOE方式"><a href="#PPPOE方式" class="headerlink" title="PPPOE方式"></a>PPPOE方式</h3><p>使用nmcli输入pppoe账号密码，这时会打开一个交互式的命令行</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> nmcli con edit <span class="built_in">type</span> pppoe con-name <span class="string">&quot;Connection name&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>输入保存宽带账户相关信息</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 输入账号名密码</span></span><br><span class="line"><span class="built_in">set</span> pppoe.username &lt;username&gt;</span><br><span class="line"><span class="built_in">set</span> pppoe.password &lt;password&gt;</span><br><span class="line"><span class="comment"># 保存并推出</span></span><br><span class="line">save</span><br><span class="line">quit</span><br></pre></td></tr></table></figure>
-
-<h2 id="连接Wi-Fi"><a href="#连接Wi-Fi" class="headerlink" title="连接Wi-Fi"></a>连接Wi-Fi</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 列出所有Wi-Fi热点</span></span><br><span class="line"><span class="built_in">sudo</span> nmcli dev wifi</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接Wi-Fi热点</span></span><br><span class="line"><span class="built_in">sudo</span> nmcli dev wifi connect &lt;SSID&gt; &lt;password&gt;</span><br></pre></td></tr></table></figure>
-
-<h2 id="共享Wi-Fi"><a href="#共享Wi-Fi" class="headerlink" title="共享Wi-Fi"></a>共享Wi-Fi</h2><p>禁用cloud-init</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> bash -c <span class="string">&quot;echo &#x27;network: &#123;config: disabled&#125;&#x27; &gt; /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>创建Netplan配置</p>
-<p><code>sudo vi /etc/netplan/10-my-config.yaml</code></p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">network:</span></span><br><span class="line">  <span class="attr">version:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">renderer:</span> <span class="string">NetworkManager</span></span><br><span class="line">  <span class="attr">ethernets:</span></span><br><span class="line">    <span class="attr">eth0:</span></span><br><span class="line">      <span class="attr">dhcp4:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">optional:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">wifis:</span></span><br><span class="line">    <span class="attr">wlan0:</span></span><br><span class="line">      <span class="attr">dhcp4:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">optional:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">access-points:</span></span><br><span class="line">        <span class="attr">&quot;Connection Name&quot;:</span></span><br><span class="line">          <span class="attr">password:</span> <span class="string">&quot;you wifi password&quot;</span></span><br><span class="line">          <span class="attr">mode:</span> <span class="string">ap</span>  <span class="comment"># 如果是作为客户端使用，移除这一行</span></span><br></pre></td></tr></table></figure>
-
-<p>Netplan配置生效</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> netplan generate</span><br><span class="line"><span class="built_in">sudo</span> netplan apply</span><br></pre></td></tr></table></figure>
-
-<p><a href="https://raspberrypi.stackexchange.com/questions/109425/ubuntu-server-18-wifi-hotspot-setup">Ubuntu Server 18 Wifi Hotspot setup</a></p>
-]]></content>
-      <tags>
-        <tag>ubuntu</tag>
-        <tag>hotspot</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何下载网站视频</title>
-    <url>/how-to-download-online-video/</url>
-    <content><![CDATA[<p>现在的在线视频网站为了打击盗版、保护资源&#x2F;网络流量，不再直接使用mp4等视频格式，而是转而使用m3u8文件（播放索引列表）+ts文件（视频分段技术），其中有的视频还用了加密，下面简单展示下如何下载ts文件并合并为mp4</p>
-<h2 id="m3u8索引"><a href="#m3u8索引" class="headerlink" title="m3u8索引"></a>m3u8索引</h2><p>从浏览器的dev tool找到m3u8文件的连接并下载，该m3u8文件内有所有的ts文件列表，你可以将他们复制出来，通过编辑器补全制作成完整的url，通过下载器批量下载</p>
-<h2 id="未加密"><a href="#未加密" class="headerlink" title="未加密"></a>未加密</h2><p>如果视频没有加密（m3u8文件中#EXT-X-KEY字段为空），那么在下载所有ts文件后，可以直接用linux命令合并</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># ts段一般都有固定格式，如example_1.ts</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;ts_link_in_m3u8_file_&#x27;</span>&#123;number_first..number_end&#125;.ts | <span class="built_in">tr</span> <span class="string">&quot;&quot;</span> <span class="string">&quot;\n&quot;</span> &gt; tslist</span><br><span class="line"><span class="comment"># 将所有相关的ts文件合并</span></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> line; <span class="keyword">do</span> <span class="built_in">cat</span> <span class="variable">$line</span> &gt;&gt; the_final_video.mp4; <span class="keyword">done</span> &lt; tslist</span><br></pre></td></tr></table></figure>
-
-<p>到这里就不需要再往下看了</p>
-<h2 id="加密"><a href="#加密" class="headerlink" title="加密"></a>加密</h2><p>如果视频加密（m3u8文件中#EXT-X-KEY字段不为空），如下所示</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;https://hentai.com/xxxxxx&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">https://hentai.com/xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
-
-<p>处理步骤：</p>
+    <title>安装kvm虚拟机</title>
+    <url>/deploy-kvm-and-cockpit/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一般情况下，日常开发我只使用vagrant跟virtualbox，但后面想搭建一个k8s环境学习，需要一个免费、高性能、便于管理的虚拟机管理软件</p>
+<p>综合考虑了下现在市面上的虚拟机管理软件</p>
 <ol>
-<li>下载必须的文件</li>
-<li>修改m3u8文件</li>
-<li>使用ffmpeg合并</li>
+<li>virtualbox 的磁盘性能太差，nat网络所有虚拟机都是同一个IP：10.0.2.15，其他方面也不考虑了</li>
+<li>parallel desktop 太贵太黑心</li>
+<li>vmware 价格也不便宜还很吃电脑资源</li>
+<li>hyper-v 管理界面太难用，同时无法固定虚拟机IP</li>
 </ol>
-<h3 id="下载必须的文件"><a href="#下载必须的文件" class="headerlink" title="下载必须的文件"></a>下载必须的文件</h3><ol>
-<li>通过浏览器dev tool找到m3u8文件url</li>
-<li>复制m3u8文件内所有ts文件地址到下载器下载，这里可能还需要通过编辑器补全url</li>
-<li>复制m3u8文件内记录的key的地址（从EXT-X-KEY字段获取链接）到下载器下载，可进一步重命名，如改为crypt.key，该文件文件大小一般是16字节</li>
-</ol>
-<h3 id="修改m3u8文件"><a href="#修改m3u8文件" class="headerlink" title="修改m3u8文件"></a>修改m3u8文件</h3><ol>
-<li>修改key的地址，将url改为本地文件路径</li>
-<li>如果ts文件url是http链接，那么也改为本地文件路径</li>
-</ol>
-<p>示例如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;crypt.key&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
+<p>最终我选择组装一台台式机，安装了ubuntu系统，并在上面安装使用kvm虚拟机</p>
+<p>cpu是amd 7700，8核心16线程；32GB内存；暂时不需要用到显卡；PC在路由器做了MAC跟IP的绑定，方便使用ssh</p>
+<p>由于virt-manager太难用，最后选择cockpit作为kvm虚拟机管理软件</p>
+<h2 id="kvm安装"><a href="#kvm安装" class="headerlink" title="kvm安装"></a>kvm安装</h2><h3 id="前置工作"><a href="#前置工作" class="headerlink" title="前置工作"></a>前置工作</h3><p>确认cpu开启虚拟化功能</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一般是cpu的核心数量</span></span><br><span class="line">egrep -c <span class="string">&#x27;(vmx|svm)&#x27;</span> /proc/cpuinfo</span><br></pre></td></tr></table></figure>
 
-<h3 id="使用ffmpeg合并"><a href="#使用ffmpeg合并" class="headerlink" title="使用ffmpeg合并"></a>使用ffmpeg合并</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ffmpeg -allowed_extensions ALL -protocol_whitelist <span class="string">&quot;file,http,crypto,tcp&quot;</span> -i example.m3u8 -c copy the_final_video.mp4</span><br></pre></td></tr></table></figure>
+<h3 id="安装kvm"><a href="#安装kvm" class="headerlink" title="安装kvm"></a>安装kvm</h3><p>安装kvm以及依赖软件</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install qemu-system-x86 libvirt-daemon-system virtinst \</span><br><span class="line">  virt-manager virt-viewer ovmf swtpm qemu-utils guestfs-tools \</span><br><span class="line">  libosinfo-bin tuned</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> libvirtd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line"><span class="built_in">sudo</span> virt-host-validate qemu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果有使用window的需要，可以下载virtio</span></span><br><span class="line">wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso</span><br></pre></td></tr></table></figure>
 
-<p>done</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.cnblogs.com/warcraft/p/13388280.html">记一次加密的ts视频下载</a></p>
+<h3 id="安装后工作"><a href="#安装后工作" class="headerlink" title="安装后工作"></a>安装后工作</h3><p>将用户添加到kvm跟libvirt组</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> usermod -aG kvm <span class="variable">$USER</span></span><br><span class="line"><span class="built_in">sudo</span> usermod -aG libvirt <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="cockpit安装"><a href="#cockpit安装" class="headerlink" title="cockpit安装"></a>cockpit安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install cockpit cockpit-machines</span><br></pre></td></tr></table></figure>
+
+<p>防火墙配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 9090/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
+
+<p>浏览器打开访问web管理页面 <a href="https://192.168.0.105:9090/">https://192.168.0.105:9090</a></p>
+<p><img src="/images/kvm_with_cockpit.png" alt="kvm with cockpit preview"></p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.tecmint.com/install-qemu-kvm-ubuntu-create-virtual-machines/">How to Install QEMU&#x2F;KVM on Ubuntu to Create Virtual Machines</a><br><a href="https://www.tecmint.com/manage-kvm-virtual-machines-using-cockpit-web-console/">Managing KVM Virtual Machines with Cockpit Web Console in Linux</a><br><a href="https://github.com/bryansteiner/gpu-passthrough-tutorial">gpu-passthrough-tutorial</a></p>
 ]]></content>
       <tags>
-        <tag>ffmpeg</tag>
-        <tag>hls</tag>
+        <tag>kvm</tag>
+        <tag>cockpit</tag>
       </tags>
   </entry>
   <entry>
@@ -382,6 +313,72 @@
       </tags>
   </entry>
   <entry>
+    <title>如何下载网站视频</title>
+    <url>/how-to-download-online-video/</url>
+    <content><![CDATA[<p>现在的在线视频网站为了打击盗版、保护资源&#x2F;网络流量，不再直接使用mp4等视频格式，而是转而使用m3u8文件（播放索引列表）+ts文件（视频分段技术），其中有的视频还用了加密，下面简单展示下如何下载ts文件并合并为mp4</p>
+<h2 id="m3u8索引"><a href="#m3u8索引" class="headerlink" title="m3u8索引"></a>m3u8索引</h2><p>从浏览器的dev tool找到m3u8文件的连接并下载，该m3u8文件内有所有的ts文件列表，你可以将他们复制出来，通过编辑器补全制作成完整的url，通过下载器批量下载</p>
+<h2 id="未加密"><a href="#未加密" class="headerlink" title="未加密"></a>未加密</h2><p>如果视频没有加密（m3u8文件中#EXT-X-KEY字段为空），那么在下载所有ts文件后，可以直接用linux命令合并</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># ts段一般都有固定格式，如example_1.ts</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;ts_link_in_m3u8_file_&#x27;</span>&#123;number_first..number_end&#125;.ts | <span class="built_in">tr</span> <span class="string">&quot;&quot;</span> <span class="string">&quot;\n&quot;</span> &gt; tslist</span><br><span class="line"><span class="comment"># 将所有相关的ts文件合并</span></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> line; <span class="keyword">do</span> <span class="built_in">cat</span> <span class="variable">$line</span> &gt;&gt; the_final_video.mp4; <span class="keyword">done</span> &lt; tslist</span><br></pre></td></tr></table></figure>
+
+<p>到这里就不需要再往下看了</p>
+<h2 id="加密"><a href="#加密" class="headerlink" title="加密"></a>加密</h2><p>如果视频加密（m3u8文件中#EXT-X-KEY字段不为空），如下所示</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;https://hentai.com/xxxxxx&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">https://hentai.com/xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
+
+<p>处理步骤：</p>
+<ol>
+<li>下载必须的文件</li>
+<li>修改m3u8文件</li>
+<li>使用ffmpeg合并</li>
+</ol>
+<h3 id="下载必须的文件"><a href="#下载必须的文件" class="headerlink" title="下载必须的文件"></a>下载必须的文件</h3><ol>
+<li>通过浏览器dev tool找到m3u8文件url</li>
+<li>复制m3u8文件内所有ts文件地址到下载器下载，这里可能还需要通过编辑器补全url</li>
+<li>复制m3u8文件内记录的key的地址（从EXT-X-KEY字段获取链接）到下载器下载，可进一步重命名，如改为crypt.key，该文件文件大小一般是16字节</li>
+</ol>
+<h3 id="修改m3u8文件"><a href="#修改m3u8文件" class="headerlink" title="修改m3u8文件"></a>修改m3u8文件</h3><ol>
+<li>修改key的地址，将url改为本地文件路径</li>
+<li>如果ts文件url是http链接，那么也改为本地文件路径</li>
+</ol>
+<p>示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;crypt.key&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用ffmpeg合并"><a href="#使用ffmpeg合并" class="headerlink" title="使用ffmpeg合并"></a>使用ffmpeg合并</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ffmpeg -allowed_extensions ALL -protocol_whitelist <span class="string">&quot;file,http,crypto,tcp&quot;</span> -i example.m3u8 -c copy the_final_video.mp4</span><br></pre></td></tr></table></figure>
+
+<p>done</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.cnblogs.com/warcraft/p/13388280.html">记一次加密的ts视频下载</a></p>
+]]></content>
+      <tags>
+        <tag>ffmpeg</tag>
+        <tag>hls</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>生成火焰图分析php代码</title>
+    <url>/how-to-generate-php-flamegraphs/</url>
+    <content><![CDATA[<p>flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间。下面简单介绍如何使用xdebug以及flamegraph生成火焰图</p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>配置xdebug参数</p>
+<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.trace_output_name</span> = xdebug.trace.%t.%s</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.trace_output_dir</span> = /tmp</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger_value</span> = <span class="string">&quot;&lt;secret key&gt;&quot;</span></span><br><span class="line"><span class="attr">xdebug.trace_format</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>下载flamegraph，<code>git clone https://github.com/brendangregg/FlameGraph.git</code>，放置在任意位置</p>
+<h2 id="flamegraph"><a href="#flamegraph" class="headerlink" title="flamegraph"></a>flamegraph</h2><p>获取堆栈数据</p>
+<p>请求页面&#x2F;接口url，在url后面增加<code>?XDEBUG_TRACE=&lt;secret key&gt;</code>，获取php堆栈数据 <code>curl http://youdomain.com?XDEBUG_TRACE=&lt;secret key&gt;</code>，如果是命令行命令，则在php命令后使用参数<code>php -d xdebug.auto_trace=1</code></p>
+<p>转换堆栈数据</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./stackcollapse-xdebug.php /tmp/xdebug.trace.1579703170._data_www_yii2_web_index_php.xt &gt; out.folded</span><br></pre></td></tr></table></figure>
+
+<p>生成火焰图</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; out.svg</span><br></pre></td></tr></table></figure>
+
+<p>示例</p>
+<p><img src="/images/yii2-flamegraph-example.svg" alt="yii2 flamegraph example"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://daniellockyer.com/php-flame-graphs/">How to generate PHP Flamegraphs</a><br><a href="https://github.com/brendangregg/FlameGraph">Flame Graphs visualize profiled code</a></p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>flamegraph</tag>
+        <tag>profiling</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>搭建shadowsocks服务</title>
     <url>/deploy-shadowsocks-service/</url>
     <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>由于国内恶劣的网络环境，作为一名频繁访问外网的Web开发者，不得不自建一个VPN服务，以下简单介绍Shadowsocks的搭建过程。</p>
@@ -468,29 +465,32 @@
       </tags>
   </entry>
   <entry>
-    <title>生成火焰图分析php代码</title>
-    <url>/how-to-generate-php-flamegraphs/</url>
-    <content><![CDATA[<p>flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间。下面简单介绍如何使用xdebug以及flamegraph生成火焰图</p>
-<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>配置xdebug参数</p>
-<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.trace_output_name</span> = xdebug.trace.%t.%s</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.trace_output_dir</span> = /tmp</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger_value</span> = <span class="string">&quot;&lt;secret key&gt;&quot;</span></span><br><span class="line"><span class="attr">xdebug.trace_format</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
+    <title>如何在ubuntu服务器上管理Wi-Fi</title>
+    <url>/how-to-manage-wifi-on-ubuntu-server/</url>
+    <content><![CDATA[<p>当没有桌面时，ubuntu服务器该如何连接宽带、共享Wi-Fi热点，就像一台路由器一样运作，或者如何连接Wi-Fi，以下简单介绍这几个操作的过程</p>
+<h2 id="连接宽带"><a href="#连接宽带" class="headerlink" title="连接宽带"></a>连接宽带</h2><h3 id="PPPOE方式"><a href="#PPPOE方式" class="headerlink" title="PPPOE方式"></a>PPPOE方式</h3><p>使用nmcli输入pppoe账号密码，这时会打开一个交互式的命令行</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> nmcli con edit <span class="built_in">type</span> pppoe con-name <span class="string">&quot;Connection name&quot;</span></span><br></pre></td></tr></table></figure>
 
-<p>下载flamegraph，<code>git clone https://github.com/brendangregg/FlameGraph.git</code>，放置在任意位置</p>
-<h2 id="flamegraph"><a href="#flamegraph" class="headerlink" title="flamegraph"></a>flamegraph</h2><p>获取堆栈数据</p>
-<p>请求页面&#x2F;接口url，在url后面增加<code>?XDEBUG_TRACE=&lt;secret key&gt;</code>，获取php堆栈数据 <code>curl http://youdomain.com?XDEBUG_TRACE=&lt;secret key&gt;</code>，如果是命令行命令，则在php命令后使用参数<code>php -d xdebug.auto_trace=1</code></p>
-<p>转换堆栈数据</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./stackcollapse-xdebug.php /tmp/xdebug.trace.1579703170._data_www_yii2_web_index_php.xt &gt; out.folded</span><br></pre></td></tr></table></figure>
+<p>输入保存宽带账户相关信息</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 输入账号名密码</span></span><br><span class="line"><span class="built_in">set</span> pppoe.username &lt;username&gt;</span><br><span class="line"><span class="built_in">set</span> pppoe.password &lt;password&gt;</span><br><span class="line"><span class="comment"># 保存并推出</span></span><br><span class="line">save</span><br><span class="line">quit</span><br></pre></td></tr></table></figure>
 
-<p>生成火焰图</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; out.svg</span><br></pre></td></tr></table></figure>
+<h2 id="连接Wi-Fi"><a href="#连接Wi-Fi" class="headerlink" title="连接Wi-Fi"></a>连接Wi-Fi</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 列出所有Wi-Fi热点</span></span><br><span class="line"><span class="built_in">sudo</span> nmcli dev wifi</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接Wi-Fi热点</span></span><br><span class="line"><span class="built_in">sudo</span> nmcli dev wifi connect &lt;SSID&gt; &lt;password&gt;</span><br></pre></td></tr></table></figure>
 
-<p>示例</p>
-<p><img src="/images/yii2-flamegraph-example.svg" alt="yii2 flamegraph example"></p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://daniellockyer.com/php-flame-graphs/">How to generate PHP Flamegraphs</a><br><a href="https://github.com/brendangregg/FlameGraph">Flame Graphs visualize profiled code</a></p>
+<h2 id="共享Wi-Fi"><a href="#共享Wi-Fi" class="headerlink" title="共享Wi-Fi"></a>共享Wi-Fi</h2><p>禁用cloud-init</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> bash -c <span class="string">&quot;echo &#x27;network: &#123;config: disabled&#125;&#x27; &gt; /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>创建Netplan配置</p>
+<p><code>sudo vi /etc/netplan/10-my-config.yaml</code></p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">network:</span></span><br><span class="line">  <span class="attr">version:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">renderer:</span> <span class="string">NetworkManager</span></span><br><span class="line">  <span class="attr">ethernets:</span></span><br><span class="line">    <span class="attr">eth0:</span></span><br><span class="line">      <span class="attr">dhcp4:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">optional:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">wifis:</span></span><br><span class="line">    <span class="attr">wlan0:</span></span><br><span class="line">      <span class="attr">dhcp4:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">optional:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">access-points:</span></span><br><span class="line">        <span class="attr">&quot;Connection Name&quot;:</span></span><br><span class="line">          <span class="attr">password:</span> <span class="string">&quot;you wifi password&quot;</span></span><br><span class="line">          <span class="attr">mode:</span> <span class="string">ap</span>  <span class="comment"># 如果是作为客户端使用，移除这一行</span></span><br></pre></td></tr></table></figure>
+
+<p>Netplan配置生效</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> netplan generate</span><br><span class="line"><span class="built_in">sudo</span> netplan apply</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://raspberrypi.stackexchange.com/questions/109425/ubuntu-server-18-wifi-hotspot-setup">Ubuntu Server 18 Wifi Hotspot setup</a></p>
 ]]></content>
       <tags>
-        <tag>php</tag>
-        <tag>flamegraph</tag>
-        <tag>profiling</tag>
+        <tag>ubuntu</tag>
+        <tag>hotspot</tag>
       </tags>
   </entry>
   <entry>
@@ -609,39 +609,6 @@
       </tags>
   </entry>
   <entry>
-    <title>解决ubuntu系统monospace字体显示异常的问题</title>
-    <url>/linux-monofonts-render-incorrectly/</url>
-    <content><![CDATA[<p>很长的一段时间，被xubuntu下的一个monospace字体显示问题困扰着，在网上找了很多方法也没有解决问题，在一次误打误撞的情况下解决了，简单把自己问题的过程记录下来，希望给一些小伙伴们帮助</p>
-<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>xubuntu下monospace在浏览器以及vscode下显示异常，具体如下图所示</p>
-<p>浏览器chrome&#x2F;firefox下的monospace</p>
-<p><img src="/images/monofont_display_incorrect_in_browser.png" alt="monofont display incorrect in browser"></p>
-<p>vscode下的monospace</p>
-<p><img src="/images/monofont_display_incorrect_in_vscode.png" alt="monofont display incorrect in vscode"></p>
-<p>网上搜索结果大部分指示，是由于libfreetype6 2.8.1-2ubuntu2的一个bug导致，需要升级到最新的libfreetype2.9或者降级到libfreetype2.8.0，按照搜索的文档进行libfreetype的升级&#x2F;降级后，显示效果依旧，问题没有得到解决</p>
-<h2 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h2><p>在我放弃治疗后过了一段时间，突然想起，一直以来都忽略了验证linux的字体信息。首先，获取显示异常的字体font-family，如下图</p>
-<p><img src="/images/browser_get_font_family.png" alt="browser get font family"></p>
-<p>使用fc-match验证字体</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ fc-match monospace</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match consolas</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match Menlo</span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;PingFang SC&quot;</span></span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;Microsoft YaHei&quot;</span></span><br><span class="line">NotoSansCJK-Regular.ttc: <span class="string">&quot;Noto Sans CJK SC&quot;</span> <span class="string">&quot;Regular&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>可以看到Menlo、”PingFang SC”、”Microsoft YaHei”的实际字体跟monospace并不一致，抱着死马当活马医的心态，编辑字体配置文件<code>~/.config/fontconfig/fonts.conf</code>，内容如下，</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&#x27;1.0&#x27;?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&#x27;fonts.dtd&#x27;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">alias</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">prefer</span>&gt;</span><span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span><span class="tag">&lt;/<span class="name">prefer</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>退出，重新登录，发现这个困扰了很久的问题终于解决，如下图</p>
-<p><img src="/images/monofont_the_correct_view.png" alt="monofont the correct view"></p>
-<p>vscode可以通过更改font-family恢复正常的显示效果</p>
-<p><strong>注意</strong></p>
-<p>ubuntu&#x2F;xubuntu、中文&#x2F;英文的系统默认的字体会有些许差异，以上的操作可能不一定生效，可以新增<code>~/.config/fontconfig/conf.d/00-menlo.conf</code></p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;fonts.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">alias</span> <span class="attr">binding</span>=<span class="string">&quot;same&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">accept</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">accept</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/adobe/brackets/issues/14290">[Ubuntu 18.04 LTS] Font not rendering properly</a><br><a href="https://stackoverflow.com/questions/50114376/ubuntu-18-04-lts-font-not-rendering-properly">Ubuntu 18.04 LTS Font not rendering properly</a><br><a href="https://superuser.com/questions/930572/why-doesnt-fc-match-respect-my-match-and-edit-rule-for-courier-when-it-does-for">Why doesn’t fc-match respect my match and edit rule for Courier when it does for Consolas?</a></p>
-]]></content>
-      <tags>
-        <tag>ubuntu</tag>
-        <tag>vscode</tag>
-        <tag>monospace fonts</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>k8s pv配置教程</title>
     <url>/k8s-pv-setup-tutorial/</url>
     <content><![CDATA[<p>在Kubernetes官网的学习教程：<a href="https://kubernetes.io/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/">wordpress</a>中，我尝试了手动创建pv并绑定pvc，但是每次申请pvc都要手动添加pv并绑定是一件很麻烦且很容易出错的事情，官方也早就意识到这个问题，提出了动态存储分配，只需要通过storageclass即可实现</p>
@@ -703,6 +670,39 @@
 ]]></content>
       <tags>
         <tag>kubernetes</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>解决ubuntu系统monospace字体显示异常的问题</title>
+    <url>/linux-monofonts-render-incorrectly/</url>
+    <content><![CDATA[<p>很长的一段时间，被xubuntu下的一个monospace字体显示问题困扰着，在网上找了很多方法也没有解决问题，在一次误打误撞的情况下解决了，简单把自己问题的过程记录下来，希望给一些小伙伴们帮助</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>xubuntu下monospace在浏览器以及vscode下显示异常，具体如下图所示</p>
+<p>浏览器chrome&#x2F;firefox下的monospace</p>
+<p><img src="/images/monofont_display_incorrect_in_browser.png" alt="monofont display incorrect in browser"></p>
+<p>vscode下的monospace</p>
+<p><img src="/images/monofont_display_incorrect_in_vscode.png" alt="monofont display incorrect in vscode"></p>
+<p>网上搜索结果大部分指示，是由于libfreetype6 2.8.1-2ubuntu2的一个bug导致，需要升级到最新的libfreetype2.9或者降级到libfreetype2.8.0，按照搜索的文档进行libfreetype的升级&#x2F;降级后，显示效果依旧，问题没有得到解决</p>
+<h2 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h2><p>在我放弃治疗后过了一段时间，突然想起，一直以来都忽略了验证linux的字体信息。首先，获取显示异常的字体font-family，如下图</p>
+<p><img src="/images/browser_get_font_family.png" alt="browser get font family"></p>
+<p>使用fc-match验证字体</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ fc-match monospace</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match consolas</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match Menlo</span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;PingFang SC&quot;</span></span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;Microsoft YaHei&quot;</span></span><br><span class="line">NotoSansCJK-Regular.ttc: <span class="string">&quot;Noto Sans CJK SC&quot;</span> <span class="string">&quot;Regular&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到Menlo、”PingFang SC”、”Microsoft YaHei”的实际字体跟monospace并不一致，抱着死马当活马医的心态，编辑字体配置文件<code>~/.config/fontconfig/fonts.conf</code>，内容如下，</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&#x27;1.0&#x27;?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&#x27;fonts.dtd&#x27;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">alias</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">prefer</span>&gt;</span><span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span><span class="tag">&lt;/<span class="name">prefer</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>退出，重新登录，发现这个困扰了很久的问题终于解决，如下图</p>
+<p><img src="/images/monofont_the_correct_view.png" alt="monofont the correct view"></p>
+<p>vscode可以通过更改font-family恢复正常的显示效果</p>
+<p><strong>注意</strong></p>
+<p>ubuntu&#x2F;xubuntu、中文&#x2F;英文的系统默认的字体会有些许差异，以上的操作可能不一定生效，可以新增<code>~/.config/fontconfig/conf.d/00-menlo.conf</code></p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;fonts.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">alias</span> <span class="attr">binding</span>=<span class="string">&quot;same&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">accept</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">accept</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/adobe/brackets/issues/14290">[Ubuntu 18.04 LTS] Font not rendering properly</a><br><a href="https://stackoverflow.com/questions/50114376/ubuntu-18-04-lts-font-not-rendering-properly">Ubuntu 18.04 LTS Font not rendering properly</a><br><a href="https://superuser.com/questions/930572/why-doesnt-fc-match-respect-my-match-and-edit-rule-for-courier-when-it-does-for">Why doesn’t fc-match respect my match and edit rule for Courier when it does for Consolas?</a></p>
+]]></content>
+      <tags>
+        <tag>ubuntu</tag>
+        <tag>vscode</tag>
+        <tag>monospace fonts</tag>
       </tags>
   </entry>
   <entry>
@@ -891,102 +891,6 @@
       </tags>
   </entry>
   <entry>
-    <title>PHP扩展开发 - Part 3</title>
-    <url>/php-extension-writing-part3/</url>
-    <content><![CDATA[<p>本文将简单介绍资源类型、资源的创建、访问、销毁操作。不再建议使用资源类型，使用类更为合适</p>
-<h2 id="资源类型"><a href="#资源类型" class="headerlink" title="资源类型"></a>资源类型</h2><p><code>zval</code>可以表示大部分的PHP数据类型，但有一样不能很好的表示其结构：指针。由于不透明的结构、无法使用传统运算符进行操作等，使得指针在PHP的表示变得困难。因此PHP用一个特殊的标记表示指针：资源，为了使资源标记具有意义，必须先注册到zend engine才能使用。</p>
-<p>在头文件定义结构体<code>php_test_person</code>以及资源名称，放置在<code>#define</code>语句后，<code>PHP_MINIT_FUNCTION(test);</code>之前</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    zend_string *name;</span><br><span class="line">    zend_long age;</span><br><span class="line">&#125; php_test_person;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PHP_TEST_PERSON_RES_NAME <span class="string">&quot;Person Data&quot;</span></span></span><br></pre></td></tr></table></figure>
-
-<p>源文件定义<code>le_*</code>全局变量，MINIT阶段注册，用于获取资源类型、字面意义名称、析构函数</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(<span class="literal">NULL</span>, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="初始化资源"><a href="#初始化资源" class="headerlink" title="初始化资源"></a>初始化资源</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_new)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = emalloc(<span class="keyword">sizeof</span>(php_test_person));</span><br><span class="line">    person-&gt;name = zend_string_copy(name); <span class="comment">// estrndup + zend_string =&gt; zend_string_copy</span></span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>函数接收参数name以及age，参数进行校验通过后，申请一段内存空间并写入数据，<code>return_value</code>返回该资源。PHP不需要知道资源的具体内部表示，只需要获取该资源存储的指针以及资源类型</p>
-<h2 id="函数接收资源参数"><a href="#函数接收资源参数" class="headerlink" title="函数接收资源参数"></a>函数接收资源参数</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_greet)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person;</span><br><span class="line">    zval *zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    person = (php_test_person *) zend_fetch_resource_ex(zperson, PHP_TEST_PERSON_RES_NAME, le_test_person);</span><br><span class="line"></span><br><span class="line">    php_printf(<span class="string">&quot;Hello &quot;</span>);</span><br><span class="line">    PHPWRITE(ZSTR_VAL(person-&gt;name), ZSTR_LEN(person-&gt;name));</span><br><span class="line">    php_printf(<span class="string">&quot;!\nAccording to my records, you are %ld years old.\n&quot;</span>, person-&gt;age);</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>ZEND_FETCH_RESOURCE</code>在PHP7中已被删除，目前获取资源的函数是<code>zend_fetch_resource</code>、<code>zend_fetch_resource_ex</code>。<code>zend_fetch_resource_ex</code>函数需要一个zval、字面意义名称、资源类型，返回一个指针。函数内部切记不要<code>free</code>该指针</p>
-<h2 id="销毁资源"><a href="#销毁资源" class="headerlink" title="销毁资源"></a>销毁资源</h2><p>在PHP中使用<code>fopen</code>打开文件并获得一个资源句柄<code>$fp</code>，接下来<code>unset($fp)</code>时文件被关闭，即使没有使用<code>fclose</code>函数。其中的奥秘在<code>zend_register_list_destructors_ex</code>，该函数第一个参数为常规资源的析构函数，第二个为持久化资源的析构函数，当离开资源变量所在作用域时，自动调用清理&#x2F;析构函数，释放内存、关闭连接或执行其他清理操作</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_person_dtor</span><span class="params">(zend_resource *res)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name); <span class="comment">// efree zend_string =&gt; zend_string_release</span></span><br><span class="line">        &#125;</span><br><span class="line">        efree(person);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="强制销毁资源"><a href="#强制销毁资源" class="headerlink" title="强制销毁资源"></a>强制销毁资源</h2><p>使用<code>zend_list_delete</code>销毁资源，该函数可销毁任何资源类型变量</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_delete)</span><br><span class="line">&#123;</span><br><span class="line">    zval * zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    zend_list_delete(Z_RES_P(zperson));</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="持久化资源"><a href="#持久化资源" class="headerlink" title="持久化资源"></a>持久化资源</h2><p>持久化资源与常规资源不同的地方在析构函数声明注册的位置，数据内存申请使用<code>pemalloc</code>代替<code>emalloc</code></p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person_persist;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">    le_test_person_persist = zend_register_list_destructors_ex(<span class="literal">NULL</span>, php_test_person_persist_dtor, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>通常情况下，<code>php_test_person_dtor</code>会在请求结束后调用，<code>php_test_person_persist_dtor</code>在扩展shutdown阶段调用</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_person_persist_dtor</span><span class="params">(zend_resource *res)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name);</span><br><span class="line">        &#125;</span><br><span class="line">        pefree(person, <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_dup(name, <span class="number">1</span>);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person_persist));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>test_person_pnew</code>与<code>test_person_new</code>仅在数据初始化、资源类型方面有差异</p>
-<h2 id="查找已存在的持久化资源"><a href="#查找已存在的持久化资源" class="headerlink" title="查找已存在的持久化资源"></a>查找已存在的持久化资源</h2><p>为了可以重用持久化资源，需要将其保存在一个安全的地方，zend engine提供了一个executor global通过<code>EG(persistent_list)</code>访问，该变量类型为<code>HashTable</code></p>
-<p>重新修改t<code>est_person_pnew</code></p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew2)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    <span class="type">char</span> * key_raw;</span><br><span class="line">    <span class="type">size_t</span> key_len;</span><br><span class="line">    zend_string * name, * key;</span><br><span class="line">    zend_long age;</span><br><span class="line">    zval * zperson = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    key_len = spprintf(&amp;key_raw, <span class="number">0</span>, <span class="string">&quot;test_person_%s_%ld\n&quot;</span>, ZSTR_VAL(name), age);</span><br><span class="line">    key = zend_string_init(key_raw, key_len, <span class="number">1</span>);</span><br><span class="line">    efree(key_raw);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((zperson = zend_hash_find(&amp;EG(persistent_list), key)) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        person = (php_test_person *) zend_fetch_resource_ex(zperson, PHP_TEST_PERSON_RES_NAME, le_test_person_persist);</span><br><span class="line"></span><br><span class="line">        ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">        zend_string_release(key);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_copy(name);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">    zend_string_release(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>test_person_pnew2</code>先确定<code>EG(persistent_list)</code>是否已经存在，已存在则直接使用，不存在则申请内存初始化资源</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><del><a href="https://devzone.zend.com/446/extension-writing-part-iii-resources/">Extension Writing Part III: Resources</a></del><br><a href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-III:-Resources">Extension Writing Part III: Resources</a><br><a href="https://wiki.php.net/phpng-upgrading">Upgrading PHP extensions from PHP5 to NG</a><br><a href="http://www.phpinternalsbook.com/">PHP Internals Book</a><br><a href="https://wiki.php.net/internals/references">References about Maintaining and Extending PHP</a></p>
-]]></content>
-      <tags>
-        <tag>php</tag>
-        <tag>php extension</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>postgresql安装配置</title>
-    <url>/postgres-setup-example/</url>
-    <content><![CDATA[<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="前置依赖"><a href="#前置依赖" class="headerlink" title="前置依赖"></a>前置依赖</h3><p>系统是ubuntu 24.04 LTS，开机启动使用了systemd，所以先安装相关依赖包</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install libsystemd-dev</span><br></pre></td></tr></table></figure>
-
-<h3 id="编译安装"><a href="#编译安装" class="headerlink" title="编译安装"></a>编译安装</h3><p>官网推荐使用pre-packaged方式，稳定可靠，适合生产环境。不过我想用最新版，就直接用源码编译安装了</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 进入源代码目录</span></span><br><span class="line"><span class="built_in">cd</span> postgresql-16.4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定安装目录、设置支持systemd</span></span><br><span class="line">./configure --prefix=/usr/local/postgresql-16.4 --with-systemd --with-ssl=openssl</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编译安装</span></span><br><span class="line">make</span><br><span class="line"><span class="built_in">sudo</span> make install</span><br><span class="line"></span><br><span class="line"><span class="comment"># 软连接，方便升级用</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">ln</span> -s /usr/local/postgresql-16.4 /usr/local/pgsql</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建用户</span></span><br><span class="line"><span class="built_in">sudo</span> adduser postgres</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据库数据存储目录，与app目录分离</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /var/lib/pgsql/data</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chown</span> -R postgres /var/lib/pgsql</span><br><span class="line"></span><br><span class="line"><span class="comment"># 切换到postgres用户</span></span><br><span class="line">su - postgres</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化数据库目录、启动实例</span></span><br><span class="line">/usr/local/pgsql/bin/initdb -D /var/lib/pgsql/data</span><br><span class="line">/usr/local/pgsql/bin/pg_ctl -D /var/lib/pgsql/data -l logfile start</span><br><span class="line"><span class="comment"># 验证</span></span><br><span class="line">/usr/local/pgsql/bin/psql</span><br><span class="line"><span class="comment"># 关闭实例</span></span><br><span class="line"><span class="comment"># /usr/local/pgsql/bin/pg_ctl -D /var/lib/pgsql/data/ -l logfile stop</span></span><br></pre></td></tr></table></figure>
-
-<p>到这里，postgresql完成安装、初始化</p>
-<h3 id="systemd配置"><a href="#systemd配置" class="headerlink" title="systemd配置"></a>systemd配置</h3><p>开机启动配置systemd，添加配置文件<code>/etc/systemd/system/postgresql.service</code>，内容如下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=PostgreSQL database server</span><br><span class="line">Documentation=man:postgres(1)</span><br><span class="line">After=network-online.target</span><br><span class="line">Wants=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=notify</span><br><span class="line">User=postgres</span><br><span class="line">ExecStart=/usr/local/pgsql/bin/postgres -D /var/lib/pgsql/data</span><br><span class="line">ExecReload=/bin/kill -HUP $MAINPID</span><br><span class="line">KillMode=mixed</span><br><span class="line">KillSignal=SIGINT</span><br><span class="line">TimeoutSec=infinity</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
-
-<p>使用systemd启动postgresql</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl daemon-reload</span><br><span class="line"><span class="built_in">sudo</span> systemctl start postgresql</span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> postgresql</span><br></pre></td></tr></table></figure>
-
-<h2 id="pgsql配置"><a href="#pgsql配置" class="headerlink" title="pgsql配置"></a>pgsql配置</h2><p>以上完成pg安装，本地可以直接访问使用。接下来是配置数据库提供对外访问能力，如配置tcp监听地址、添加用户、配置权限等</p>
-<p>进入pg的data数据存储目录，修改相关配置文件</p>
-<h3 id="tcp配置"><a href="#tcp配置" class="headerlink" title="tcp配置"></a>tcp配置</h3><p>修改<code>postgresql.conf</code>文件，配置监听地址</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 默认localhost，改为&#x27;*&#x27;</span><br><span class="line">listen_addresses = &#x27;*&#x27;</span><br></pre></td></tr></table></figure>
-
-<h3 id="auth配置"><a href="#auth配置" class="headerlink" title="auth配置"></a>auth配置</h3><p>PS: pg的授权配置没有像mysql一样开箱即用，先简单配置下吧</p>
-<p>修改<code>pg_hba.conf</code>文件，开放数据库&#x2F;用户对外访问权限</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># TYPE  DATABASE        USER            ADDRESS                 METHOD</span><br><span class="line">host    blogdb          all             0.0.0.0/0               scram-sha-256</span><br><span class="line">host    blogdb          all             ::0/0                   scram-sha-256</span><br></pre></td></tr></table></figure>
-
-<p>重启postgresql</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl start postgresql</span><br></pre></td></tr></table></figure>
-
-<p>修改超级用户密码或者创建新角色并授权</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 1. 修改postgres密码</span></span><br><span class="line"><span class="comment">-- alter user postgres password &#x27;your_password&#x27;;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 创建新角色并授权</span></span><br><span class="line">\c blogdb;</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> ROLE blog_read_only <span class="keyword">WITH</span> LOGIN PASSWORD <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> ROLE blog_read_write <span class="keyword">WITH</span> LOGIN PASSWORD <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> ROLE blog_admin <span class="keyword">WITH</span> LOGIN PASSWORD <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> <span class="keyword">ALL</span> TABLES <span class="keyword">IN</span> SCHEMA public <span class="keyword">TO</span> blog_read_only;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>, <span class="keyword">DELETE</span> <span class="keyword">ON</span> <span class="keyword">ALL</span> TABLES <span class="keyword">IN</span> SCHEMA public <span class="keyword">TO</span> blog_read_write;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> <span class="keyword">ALL</span> TABLES <span class="keyword">IN</span> SCHEMA public <span class="keyword">TO</span> blog_admin;</span><br></pre></td></tr></table></figure>
-
-<h2 id="curd-example"><a href="#curd-example" class="headerlink" title="curd example"></a>curd example</h2><p>完成了pg的安装配置，接下来就是写一个demo测试了，首先，找一个数据表导入</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 获取countries.csv数据</span></span><br><span class="line">curl <span class="string">&#x27;https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv&#x27;</span> \</span><br><span class="line">    --output ./countries.csv</span><br></pre></td></tr></table></figure>
-
-<p>创建数据库blogdb，并导入countries.csv</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">create</span> database blogdb;</span><br><span class="line">\c blogdb;</span><br><span class="line"></span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> countries (</span><br><span class="line">  id <span class="type">integer</span> <span class="keyword">primary</span> key generated always <span class="keyword">as</span> <span class="keyword">identity</span>,</span><br><span class="line">  name text <span class="keyword">not</span> <span class="keyword">null</span> <span class="keyword">unique</span>,</span><br><span class="line">  alpha_2 <span class="type">char</span>(<span class="number">2</span>) <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">  alpha_3 <span class="type">char</span>(<span class="number">3</span>) <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">  numeric_3 <span class="type">char</span>(<span class="number">3</span>) <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">  iso_3166_2 text <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">  region text,</span><br><span class="line">  sub_region text,</span><br><span class="line">  intermediate_region text,</span><br><span class="line">  region_code <span class="type">char</span>(<span class="number">3</span>),</span><br><span class="line">  sub_region_code <span class="type">char</span>(<span class="number">3</span>),</span><br><span class="line">  intermediate_region_code <span class="type">char</span>(<span class="number">3</span>)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">copy</span> countries (</span><br><span class="line">  name,</span><br><span class="line">  alpha_2,</span><br><span class="line">  alpha_3,</span><br><span class="line">  numeric_3,</span><br><span class="line">  iso_3166_2,</span><br><span class="line">  region,</span><br><span class="line">  sub_region,</span><br><span class="line">  intermediate_region,</span><br><span class="line">  region_code,</span><br><span class="line">  sub_region_code,</span><br><span class="line">  intermediate_region_code</span><br><span class="line">)</span><br><span class="line"><span class="keyword">from</span> <span class="string">&#x27;/var/lib/pgsql/data/countries.csv&#x27;</span></span><br><span class="line">delimiter <span class="string">&#x27;,&#x27;</span> csv header;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Check that the data got loaded into the table ok.</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> countries limit <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Should say 249.</span></span><br><span class="line"><span class="keyword">select</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">from</span> countries;</span><br></pre></td></tr></table></figure>
-
-<p>使用golang写一个简单的app，查询countries数据，到这里完成!</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/jackc/pgx/v5&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	ctx := context.Background()</span><br><span class="line"></span><br><span class="line">	conn, err := pgx.Connect(ctx, <span class="string">&quot;postgres://postgres:your_password@192.168.33.10:5432/blogdb?sslmode=disable&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close(ctx)</span><br><span class="line"></span><br><span class="line">	rows, err := conn.Query(ctx, <span class="string">&quot;SELECT id, name FROM countries LIMIT 10&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> rows.Close()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> rows.Next() &#123;</span><br><span class="line">		<span class="keyword">var</span> id <span class="type">int</span></span><br><span class="line">		<span class="keyword">var</span> name <span class="type">string</span></span><br><span class="line">		err = rows.Scan(&amp;id, &amp;name)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="built_in">panic</span>(err)</span><br><span class="line">		&#125;</span><br><span class="line">		fmt.Println(id, <span class="string">&quot;-&quot;</span>, name)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="开启ssl"><a href="#开启ssl" class="headerlink" title="开启ssl"></a>开启ssl</h3><p>如果想要在本地提前体验ssl加密配置的过程，那么按照下面的流程，先生成self-signed证书、私钥，最后修改配置</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">su - postgres</span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入数据存储目录</span></span><br><span class="line"><span class="built_in">cd</span> /var/lib/pgsql/data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成self-signed ssl相关证书、私钥</span></span><br><span class="line">openssl req -new -x509 -days 365 -nodes -text -out server.crt \</span><br><span class="line">  -keyout server.key -subj <span class="string">&quot;/CN=dbhost.yourdomain.com&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除other、group的访问权限</span></span><br><span class="line"><span class="built_in">chmod</span> og-rwx server.key</span><br></pre></td></tr></table></figure>
-
-<p>修改<code>postgresql.conf</code>文件，取消下面三行注释，需要保证证书放置在data目录，生产环境如果使用授权ca证书，修改的命令就不是ssl_cert_file以及ssl_key_file，按官网描述修改</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssl = on</span><br><span class="line">ssl_cert_file = &#x27;server.crt&#x27;</span><br><span class="line">ssl_key_file = &#x27;server.key&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>最后，demo里dsn移除<code>sslmode=disable</code>，然后重新运行验证</p>
-]]></content>
-      <tags>
-        <tag>postgresql</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>PHP扩展开发 - Part 2</title>
     <url>/php-extension-writing-part2/</url>
     <content><![CDATA[<p>PHP扩展开发第二章，主要介绍函数参数获取、zval数据类型、数组及数组遍历以及$GLOBALS全局变量访问</p>
@@ -1085,6 +989,102 @@
 
 <h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><p><a href="https://github.com/Y2k38/php_ext_tutorial">php_ext_tutorial</a></p>
 <h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><del><a href="https://devzone.zend.com/317/extension-writing-part-ii-parameters-arrays-and-zvals/">Extension Writing Part II: Parameters, Arrays, and ZVALs (Unable To Access)</a></del><br><del><a href="https://devzone.zend.com/318/extension-writing-part-ii-parameters-arrays-and-zvals-continued/">Extension Writing Part II: Parameters, Arrays, and ZVALs [continued] (Unable To Access)</a></del><br><a href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-II:-Parameters,-Arrays,-and-ZVALs">Extension Writing Part II: Parameters, Arrays, and ZVALs</a><br><a href="https://wiki.php.net/phpng-upgrading">Upgrading PHP extensions from PHP5 to NG</a><br><a href="http://www.phpinternalsbook.com/">PHP Internals Book</a><br><a href="https://wiki.php.net/internals/references">References about Maintaining and Extending PHP</a><br><a href="https://nikic.github.io/2015/05/05/Internal-value-representation-in-PHP-7-part-1.html">Internal value representation in PHP 7 - Part 1 </a><br><a href="https://nikic.github.io/2015/06/19/Internal-value-representation-in-PHP-7-part-2.html">Internal value representation in PHP 7 - Part 2</a><br><a href="https://nikic.github.io/2014/12/22/PHPs-new-hashtable-implementation.html">PHP’s new hashtable implementation</a></p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>php extension</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>postgresql安装配置</title>
+    <url>/postgres-setup-example/</url>
+    <content><![CDATA[<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="前置依赖"><a href="#前置依赖" class="headerlink" title="前置依赖"></a>前置依赖</h3><p>系统是ubuntu 24.04 LTS，开机启动使用了systemd，所以先安装相关依赖包</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install libsystemd-dev</span><br></pre></td></tr></table></figure>
+
+<h3 id="编译安装"><a href="#编译安装" class="headerlink" title="编译安装"></a>编译安装</h3><p>官网推荐使用pre-packaged方式，稳定可靠，适合生产环境。不过我想用最新版，就直接用源码编译安装了</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 进入源代码目录</span></span><br><span class="line"><span class="built_in">cd</span> postgresql-16.4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定安装目录、设置支持systemd</span></span><br><span class="line">./configure --prefix=/usr/local/postgresql-16.4 --with-systemd --with-ssl=openssl</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编译安装</span></span><br><span class="line">make</span><br><span class="line"><span class="built_in">sudo</span> make install</span><br><span class="line"></span><br><span class="line"><span class="comment"># 软连接，方便升级用</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">ln</span> -s /usr/local/postgresql-16.4 /usr/local/pgsql</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建用户</span></span><br><span class="line"><span class="built_in">sudo</span> adduser postgres</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据库数据存储目录，与app目录分离</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /var/lib/pgsql/data</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chown</span> -R postgres /var/lib/pgsql</span><br><span class="line"></span><br><span class="line"><span class="comment"># 切换到postgres用户</span></span><br><span class="line">su - postgres</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化数据库目录、启动实例</span></span><br><span class="line">/usr/local/pgsql/bin/initdb -D /var/lib/pgsql/data</span><br><span class="line">/usr/local/pgsql/bin/pg_ctl -D /var/lib/pgsql/data -l logfile start</span><br><span class="line"><span class="comment"># 验证</span></span><br><span class="line">/usr/local/pgsql/bin/psql</span><br><span class="line"><span class="comment"># 关闭实例</span></span><br><span class="line"><span class="comment"># /usr/local/pgsql/bin/pg_ctl -D /var/lib/pgsql/data/ -l logfile stop</span></span><br></pre></td></tr></table></figure>
+
+<p>到这里，postgresql完成安装、初始化</p>
+<h3 id="systemd配置"><a href="#systemd配置" class="headerlink" title="systemd配置"></a>systemd配置</h3><p>开机启动配置systemd，添加配置文件<code>/etc/systemd/system/postgresql.service</code>，内容如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=PostgreSQL database server</span><br><span class="line">Documentation=man:postgres(1)</span><br><span class="line">After=network-online.target</span><br><span class="line">Wants=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=notify</span><br><span class="line">User=postgres</span><br><span class="line">ExecStart=/usr/local/pgsql/bin/postgres -D /var/lib/pgsql/data</span><br><span class="line">ExecReload=/bin/kill -HUP $MAINPID</span><br><span class="line">KillMode=mixed</span><br><span class="line">KillSignal=SIGINT</span><br><span class="line">TimeoutSec=infinity</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>使用systemd启动postgresql</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl daemon-reload</span><br><span class="line"><span class="built_in">sudo</span> systemctl start postgresql</span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> postgresql</span><br></pre></td></tr></table></figure>
+
+<h2 id="pgsql配置"><a href="#pgsql配置" class="headerlink" title="pgsql配置"></a>pgsql配置</h2><p>以上完成pg安装，本地可以直接访问使用。接下来是配置数据库提供对外访问能力，如配置tcp监听地址、添加用户、配置权限等</p>
+<p>进入pg的data数据存储目录，修改相关配置文件</p>
+<h3 id="tcp配置"><a href="#tcp配置" class="headerlink" title="tcp配置"></a>tcp配置</h3><p>修改<code>postgresql.conf</code>文件，配置监听地址</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 默认localhost，改为&#x27;*&#x27;</span><br><span class="line">listen_addresses = &#x27;*&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="auth配置"><a href="#auth配置" class="headerlink" title="auth配置"></a>auth配置</h3><p>PS: pg的授权配置没有像mysql一样开箱即用，先简单配置下吧</p>
+<p>修改<code>pg_hba.conf</code>文件，开放数据库&#x2F;用户对外访问权限</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># TYPE  DATABASE        USER            ADDRESS                 METHOD</span><br><span class="line">host    blogdb          all             0.0.0.0/0               scram-sha-256</span><br><span class="line">host    blogdb          all             ::0/0                   scram-sha-256</span><br></pre></td></tr></table></figure>
+
+<p>重启postgresql</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl start postgresql</span><br></pre></td></tr></table></figure>
+
+<p>修改超级用户密码或者创建新角色并授权</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 1. 修改postgres密码</span></span><br><span class="line"><span class="comment">-- alter user postgres password &#x27;your_password&#x27;;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 创建新角色并授权</span></span><br><span class="line">\c blogdb;</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> ROLE blog_read_only <span class="keyword">WITH</span> LOGIN PASSWORD <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> ROLE blog_read_write <span class="keyword">WITH</span> LOGIN PASSWORD <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> ROLE blog_admin <span class="keyword">WITH</span> LOGIN PASSWORD <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> <span class="keyword">ALL</span> TABLES <span class="keyword">IN</span> SCHEMA public <span class="keyword">TO</span> blog_read_only;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>, <span class="keyword">DELETE</span> <span class="keyword">ON</span> <span class="keyword">ALL</span> TABLES <span class="keyword">IN</span> SCHEMA public <span class="keyword">TO</span> blog_read_write;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> <span class="keyword">ALL</span> TABLES <span class="keyword">IN</span> SCHEMA public <span class="keyword">TO</span> blog_admin;</span><br></pre></td></tr></table></figure>
+
+<h2 id="curd-example"><a href="#curd-example" class="headerlink" title="curd example"></a>curd example</h2><p>完成了pg的安装配置，接下来就是写一个demo测试了，首先，找一个数据表导入</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 获取countries.csv数据</span></span><br><span class="line">curl <span class="string">&#x27;https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv&#x27;</span> \</span><br><span class="line">    --output ./countries.csv</span><br></pre></td></tr></table></figure>
+
+<p>创建数据库blogdb，并导入countries.csv</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">create</span> database blogdb;</span><br><span class="line">\c blogdb;</span><br><span class="line"></span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> countries (</span><br><span class="line">  id <span class="type">integer</span> <span class="keyword">primary</span> key generated always <span class="keyword">as</span> <span class="keyword">identity</span>,</span><br><span class="line">  name text <span class="keyword">not</span> <span class="keyword">null</span> <span class="keyword">unique</span>,</span><br><span class="line">  alpha_2 <span class="type">char</span>(<span class="number">2</span>) <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">  alpha_3 <span class="type">char</span>(<span class="number">3</span>) <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">  numeric_3 <span class="type">char</span>(<span class="number">3</span>) <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">  iso_3166_2 text <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">  region text,</span><br><span class="line">  sub_region text,</span><br><span class="line">  intermediate_region text,</span><br><span class="line">  region_code <span class="type">char</span>(<span class="number">3</span>),</span><br><span class="line">  sub_region_code <span class="type">char</span>(<span class="number">3</span>),</span><br><span class="line">  intermediate_region_code <span class="type">char</span>(<span class="number">3</span>)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">copy</span> countries (</span><br><span class="line">  name,</span><br><span class="line">  alpha_2,</span><br><span class="line">  alpha_3,</span><br><span class="line">  numeric_3,</span><br><span class="line">  iso_3166_2,</span><br><span class="line">  region,</span><br><span class="line">  sub_region,</span><br><span class="line">  intermediate_region,</span><br><span class="line">  region_code,</span><br><span class="line">  sub_region_code,</span><br><span class="line">  intermediate_region_code</span><br><span class="line">)</span><br><span class="line"><span class="keyword">from</span> <span class="string">&#x27;/var/lib/pgsql/data/countries.csv&#x27;</span></span><br><span class="line">delimiter <span class="string">&#x27;,&#x27;</span> csv header;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Check that the data got loaded into the table ok.</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> countries limit <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Should say 249.</span></span><br><span class="line"><span class="keyword">select</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">from</span> countries;</span><br></pre></td></tr></table></figure>
+
+<p>使用golang写一个简单的app，查询countries数据，到这里完成!</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/jackc/pgx/v5&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	ctx := context.Background()</span><br><span class="line"></span><br><span class="line">	conn, err := pgx.Connect(ctx, <span class="string">&quot;postgres://postgres:your_password@192.168.33.10:5432/blogdb?sslmode=disable&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close(ctx)</span><br><span class="line"></span><br><span class="line">	rows, err := conn.Query(ctx, <span class="string">&quot;SELECT id, name FROM countries LIMIT 10&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> rows.Close()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> rows.Next() &#123;</span><br><span class="line">		<span class="keyword">var</span> id <span class="type">int</span></span><br><span class="line">		<span class="keyword">var</span> name <span class="type">string</span></span><br><span class="line">		err = rows.Scan(&amp;id, &amp;name)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="built_in">panic</span>(err)</span><br><span class="line">		&#125;</span><br><span class="line">		fmt.Println(id, <span class="string">&quot;-&quot;</span>, name)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="开启ssl"><a href="#开启ssl" class="headerlink" title="开启ssl"></a>开启ssl</h3><p>如果想要在本地提前体验ssl加密配置的过程，那么按照下面的流程，先生成self-signed证书、私钥，最后修改配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">su - postgres</span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入数据存储目录</span></span><br><span class="line"><span class="built_in">cd</span> /var/lib/pgsql/data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成self-signed ssl相关证书、私钥</span></span><br><span class="line">openssl req -new -x509 -days 365 -nodes -text -out server.crt \</span><br><span class="line">  -keyout server.key -subj <span class="string">&quot;/CN=dbhost.yourdomain.com&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除other、group的访问权限</span></span><br><span class="line"><span class="built_in">chmod</span> og-rwx server.key</span><br></pre></td></tr></table></figure>
+
+<p>修改<code>postgresql.conf</code>文件，取消下面三行注释，需要保证证书放置在data目录，生产环境如果使用授权ca证书，修改的命令就不是ssl_cert_file以及ssl_key_file，按官网描述修改</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssl = on</span><br><span class="line">ssl_cert_file = &#x27;server.crt&#x27;</span><br><span class="line">ssl_key_file = &#x27;server.key&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>最后，demo里dsn移除<code>sslmode=disable</code>，然后重新运行验证</p>
+]]></content>
+      <tags>
+        <tag>postgresql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PHP扩展开发 - Part 3</title>
+    <url>/php-extension-writing-part3/</url>
+    <content><![CDATA[<p>本文将简单介绍资源类型、资源的创建、访问、销毁操作。不再建议使用资源类型，使用类更为合适</p>
+<h2 id="资源类型"><a href="#资源类型" class="headerlink" title="资源类型"></a>资源类型</h2><p><code>zval</code>可以表示大部分的PHP数据类型，但有一样不能很好的表示其结构：指针。由于不透明的结构、无法使用传统运算符进行操作等，使得指针在PHP的表示变得困难。因此PHP用一个特殊的标记表示指针：资源，为了使资源标记具有意义，必须先注册到zend engine才能使用。</p>
+<p>在头文件定义结构体<code>php_test_person</code>以及资源名称，放置在<code>#define</code>语句后，<code>PHP_MINIT_FUNCTION(test);</code>之前</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    zend_string *name;</span><br><span class="line">    zend_long age;</span><br><span class="line">&#125; php_test_person;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PHP_TEST_PERSON_RES_NAME <span class="string">&quot;Person Data&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>源文件定义<code>le_*</code>全局变量，MINIT阶段注册，用于获取资源类型、字面意义名称、析构函数</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(<span class="literal">NULL</span>, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="初始化资源"><a href="#初始化资源" class="headerlink" title="初始化资源"></a>初始化资源</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_new)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = emalloc(<span class="keyword">sizeof</span>(php_test_person));</span><br><span class="line">    person-&gt;name = zend_string_copy(name); <span class="comment">// estrndup + zend_string =&gt; zend_string_copy</span></span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数接收参数name以及age，参数进行校验通过后，申请一段内存空间并写入数据，<code>return_value</code>返回该资源。PHP不需要知道资源的具体内部表示，只需要获取该资源存储的指针以及资源类型</p>
+<h2 id="函数接收资源参数"><a href="#函数接收资源参数" class="headerlink" title="函数接收资源参数"></a>函数接收资源参数</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_greet)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person;</span><br><span class="line">    zval *zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    person = (php_test_person *) zend_fetch_resource_ex(zperson, PHP_TEST_PERSON_RES_NAME, le_test_person);</span><br><span class="line"></span><br><span class="line">    php_printf(<span class="string">&quot;Hello &quot;</span>);</span><br><span class="line">    PHPWRITE(ZSTR_VAL(person-&gt;name), ZSTR_LEN(person-&gt;name));</span><br><span class="line">    php_printf(<span class="string">&quot;!\nAccording to my records, you are %ld years old.\n&quot;</span>, person-&gt;age);</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>ZEND_FETCH_RESOURCE</code>在PHP7中已被删除，目前获取资源的函数是<code>zend_fetch_resource</code>、<code>zend_fetch_resource_ex</code>。<code>zend_fetch_resource_ex</code>函数需要一个zval、字面意义名称、资源类型，返回一个指针。函数内部切记不要<code>free</code>该指针</p>
+<h2 id="销毁资源"><a href="#销毁资源" class="headerlink" title="销毁资源"></a>销毁资源</h2><p>在PHP中使用<code>fopen</code>打开文件并获得一个资源句柄<code>$fp</code>，接下来<code>unset($fp)</code>时文件被关闭，即使没有使用<code>fclose</code>函数。其中的奥秘在<code>zend_register_list_destructors_ex</code>，该函数第一个参数为常规资源的析构函数，第二个为持久化资源的析构函数，当离开资源变量所在作用域时，自动调用清理&#x2F;析构函数，释放内存、关闭连接或执行其他清理操作</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_person_dtor</span><span class="params">(zend_resource *res)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name); <span class="comment">// efree zend_string =&gt; zend_string_release</span></span><br><span class="line">        &#125;</span><br><span class="line">        efree(person);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="强制销毁资源"><a href="#强制销毁资源" class="headerlink" title="强制销毁资源"></a>强制销毁资源</h2><p>使用<code>zend_list_delete</code>销毁资源，该函数可销毁任何资源类型变量</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_delete)</span><br><span class="line">&#123;</span><br><span class="line">    zval * zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    zend_list_delete(Z_RES_P(zperson));</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="持久化资源"><a href="#持久化资源" class="headerlink" title="持久化资源"></a>持久化资源</h2><p>持久化资源与常规资源不同的地方在析构函数声明注册的位置，数据内存申请使用<code>pemalloc</code>代替<code>emalloc</code></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person_persist;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">    le_test_person_persist = zend_register_list_destructors_ex(<span class="literal">NULL</span>, php_test_person_persist_dtor, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通常情况下，<code>php_test_person_dtor</code>会在请求结束后调用，<code>php_test_person_persist_dtor</code>在扩展shutdown阶段调用</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_person_persist_dtor</span><span class="params">(zend_resource *res)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name);</span><br><span class="line">        &#125;</span><br><span class="line">        pefree(person, <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_dup(name, <span class="number">1</span>);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person_persist));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>test_person_pnew</code>与<code>test_person_new</code>仅在数据初始化、资源类型方面有差异</p>
+<h2 id="查找已存在的持久化资源"><a href="#查找已存在的持久化资源" class="headerlink" title="查找已存在的持久化资源"></a>查找已存在的持久化资源</h2><p>为了可以重用持久化资源，需要将其保存在一个安全的地方，zend engine提供了一个executor global通过<code>EG(persistent_list)</code>访问，该变量类型为<code>HashTable</code></p>
+<p>重新修改t<code>est_person_pnew</code></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew2)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    <span class="type">char</span> * key_raw;</span><br><span class="line">    <span class="type">size_t</span> key_len;</span><br><span class="line">    zend_string * name, * key;</span><br><span class="line">    zend_long age;</span><br><span class="line">    zval * zperson = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    key_len = spprintf(&amp;key_raw, <span class="number">0</span>, <span class="string">&quot;test_person_%s_%ld\n&quot;</span>, ZSTR_VAL(name), age);</span><br><span class="line">    key = zend_string_init(key_raw, key_len, <span class="number">1</span>);</span><br><span class="line">    efree(key_raw);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((zperson = zend_hash_find(&amp;EG(persistent_list), key)) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        person = (php_test_person *) zend_fetch_resource_ex(zperson, PHP_TEST_PERSON_RES_NAME, le_test_person_persist);</span><br><span class="line"></span><br><span class="line">        ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">        zend_string_release(key);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_copy(name);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">    zend_string_release(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>test_person_pnew2</code>先确定<code>EG(persistent_list)</code>是否已经存在，已存在则直接使用，不存在则申请内存初始化资源</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><del><a href="https://devzone.zend.com/446/extension-writing-part-iii-resources/">Extension Writing Part III: Resources</a></del><br><a href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-III:-Resources">Extension Writing Part III: Resources</a><br><a href="https://wiki.php.net/phpng-upgrading">Upgrading PHP extensions from PHP5 to NG</a><br><a href="http://www.phpinternalsbook.com/">PHP Internals Book</a><br><a href="https://wiki.php.net/internals/references">References about Maintaining and Extending PHP</a></p>
 ]]></content>
       <tags>
         <tag>php</tag>
