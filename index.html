@@ -176,7 +176,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2024-08-28 15:37:57 / 修改时间：16:00:31" itemprop="dateCreated datePublished" datetime="2024-08-28T15:37:57+08:00">2024-08-28</time>
+      <time title="创建时间：2024-08-28 15:37:57 / 修改时间：16:21:10" itemprop="dateCreated datePublished" datetime="2024-08-28T15:37:57+08:00">2024-08-28</time>
     </span>
 
   
@@ -315,10 +315,12 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment</span><br></pre></td></tr></table></figure>
 
 <ol start="2">
-<li><p>查看service <code>kubectl get svc</code>，输出如下</p>
-</li>
-<li><p>配置ingress规则</p>
-</li>
+<li>查看service <code>kubectl get svc</code>，输出如下</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NAME               TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE</span><br><span class="line">kubernetes         ClusterIP   10.96.0.1      &lt;none&gt;        443/TCP   12d</span><br><span class="line">nginx-deployment   ClusterIP   10.106.19.73   &lt;none&gt;        80/TCP    12m</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>配置ingress规则</li>
 </ol>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># example-ingress.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"> <span class="attr">name:</span> <span class="string">example-ingress</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"> <span class="attr">rules:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">www.noname.io</span></span><br><span class="line">   <span class="attr">http:</span></span><br><span class="line">     <span class="attr">paths:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="attr">pathType:</span> <span class="string">Prefix</span></span><br><span class="line">       <span class="attr">path:</span> <span class="string">&quot;/&quot;</span></span><br><span class="line">       <span class="attr">backend:</span></span><br><span class="line">         <span class="attr">service:</span></span><br><span class="line">           <span class="attr">name:</span> <span class="string">nginx-deployment</span></span><br><span class="line">           <span class="attr">port:</span></span><br><span class="line">             <span class="attr">number:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
 
@@ -328,7 +330,8 @@
 <p>访问<code>LoadBalancer</code>地址</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
 
-<p><a target="_blank" rel="noopener" href="https://medium.com/@seanlinsanity/how-to-expose-applications-running-in-kubernetes-cluster-to-public-access-65c2fa959a3b">3 Ways to Expose Applications Running in Kubernetes Cluster to Public Access</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/ingress/">Ingress</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/tasks/access-application-cluster/ingress-minikube/">在 Minikube 环境中使用 NGINX Ingress 控制器配置 Ingress</a><br><a target="_blank" rel="noopener" href="https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/baremetal.md">Bare-metal considerations</a><br><a target="_blank" rel="noopener" href="https://medium.com/tektutor/using-nginx-ingress-controller-in-kubernetes-bare-metal-setup-890eb4e7772">Using Nginx Ingress Controller in Kubernetes bare-metal setup</a><br><a target="_blank" rel="noopener" href="https://medium.com/tektutor/using-metal-lb-on-a-bare-metal-onprem-kubernetes-setup-6d036af1d20c">Using Metal LB on a bare-metal(OnPrem) Kubernetes Setup</a></p>
+<p>done</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://medium.com/@seanlinsanity/how-to-expose-applications-running-in-kubernetes-cluster-to-public-access-65c2fa959a3b">3 Ways to Expose Applications Running in Kubernetes Cluster to Public Access</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/ingress/">Ingress</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/tasks/access-application-cluster/ingress-minikube/">在 Minikube 环境中使用 NGINX Ingress 控制器配置 Ingress</a><br><a target="_blank" rel="noopener" href="https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/baremetal.md">Bare-metal considerations</a><br><a target="_blank" rel="noopener" href="https://medium.com/tektutor/using-nginx-ingress-controller-in-kubernetes-bare-metal-setup-890eb4e7772">Using Nginx Ingress Controller in Kubernetes bare-metal setup</a><br><a target="_blank" rel="noopener" href="https://medium.com/tektutor/using-metal-lb-on-a-bare-metal-onprem-kubernetes-setup-6d036af1d20c">Using Metal LB on a bare-metal(OnPrem) Kubernetes Setup</a></p>
 
       
     </div>
