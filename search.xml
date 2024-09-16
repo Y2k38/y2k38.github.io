@@ -177,208 +177,6 @@
       </tags>
   </entry>
   <entry>
-    <title>怎样从公网访问k8s服务</title>
-    <url>/how-to-access-k8s-service-from-public-network/</url>
-    <content><![CDATA[<p>默认情况下，k8s内创建的服务是无法对公网提供访问的，如果要从公网访问k8s服务，一般有三种方式，NodePort、LoadBalancer、Ingress，下面简单介绍NodePort、LoadBalancer，着重讲解Ingress</p>
-<p>本文使用的deployment同官方教程<a href="https://kubernetes.io/docs/tasks/run-application/run-stateless-application-deployment/">nginx-deployment</a>，图片是从ingress-nginx官方文档拷贝过来借用，如侵必删</p>
-<h2 id="NodePort"><a href="#NodePort" class="headerlink" title="NodePort"></a>NodePort</h2><p><img src="/images/nodeport.jpg" alt="nodeport"></p>
-<p>如上图所示，客户端访问集群内任意机器端口30100，k8s自动将请求转发到对应的服务</p>
-<ol>
-<li>创建NodePort类型的service，不指定nodeport的情况下，默认从30000-32767中挑选一个端口使用</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment --<span class="built_in">type</span>=<span class="string">&quot;NodePort&quot;</span> --port 80</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>查看service <code>kubectl get svc</code>，输出如下</li>
-</ol>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE</span><br><span class="line">kubernetes         ClusterIP   10.96.0.1        &lt;none&gt;        443/TCP        12d</span><br><span class="line">nginx-deployment   NodePort    10.110.255.135   &lt;none&gt;        80:31402/TCP   4s</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li><p>在物理机上访问服务<code>curl http://vm1:31402</code>，对比在虚拟机上执行<code>curl http://10.110.255.135</code>，你会发现输出是一样的</p>
-</li>
-<li><p>删除service</p>
-</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl delete svc nginx-deployment</span><br></pre></td></tr></table></figure>
-
-<p><strong>注意</strong>：考虑到线上一般是直接通过域名访问，如果不想以<code>www.noname.io:31402</code>的方式访问服务，那么你还需要使用nginx&#x2F;haproxy建立一个反向代理的网关进行管理</p>
-<h2 id="LoadBalancer"><a href="#LoadBalancer" class="headerlink" title="LoadBalancer"></a>LoadBalancer</h2><p><img src="/images/metallb.jpg" alt="metallb"></p>
-<p>如上图所示，客户端的请求会抵达LoadBalancer指定的IP，然后流量会转发到对应的服务</p>
-<p>一般情况下，各个云服务厂商有提供专门支持k8s的LoadBalancer，本文依赖的k8s是自建的裸集群（bare-metal），需要使用metallb</p>
-<h3 id="metallb安装"><a href="#metallb安装" class="headerlink" title="metallb安装"></a>metallb安装</h3><ol>
-<li>下载配置文件，修改image地址，然后使用kubectl执行</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl apply -f ./metallb-native.yaml</span><br><span class="line"><span class="comment"># 如果你的网络正常</span></span><br><span class="line"><span class="comment"># kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml</span></span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>查看pod运行状态</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pods -n metallb-system -o wide</span><br></pre></td></tr></table></figure>
-
-<p>输出如下</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME                        READY   STATUS    RESTARTS   AGE   IP                NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">controller-f6d7bd7b-7kg47   1/1     Running   0          51s   10.0.2.19         vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-8fgzx               1/1     Running   0          51s   192.168.122.235   vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-bfbtk               1/1     Running   0          51s   192.168.122.11    vm1    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-t4lv8               1/1     Running   0          51s   192.168.122.126   vm2    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>配置IP池</li>
-</ol>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># vi ip-address-pool.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">metallb.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">IPAddressPool</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">metallb-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">addresses:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.122</span><span class="number">.20</span><span class="number">-192.168</span><span class="number">.122</span><span class="number">.25</span></span><br><span class="line">  <span class="attr">autoAssign:</span> <span class="literal">true</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">metallb.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">L2Advertisement</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">metallb-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ipAddressPools:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">default</span></span><br></pre></td></tr></table></figure>
-
-<p>执行命令<code>kubectl apply -f ip-address-pool.yaml</code></p>
-<p>到这里就创建好了</p>
-<h3 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h3><ol>
-<li>创建LoadBalancer类型的service</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment --<span class="built_in">type</span>=<span class="string">&quot;LoadBalancer&quot;</span> --port 80</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>查看service <code>kubectl get svc</code>，输出如下</li>
-</ol>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME               TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)        AGE</span><br><span class="line">kubernetes         ClusterIP      10.96.0.1        &lt;none&gt;           443/TCP        12d</span><br><span class="line">nginx-deployment   LoadBalancer   10.111.110.163   192.168.122.20   80:30804/TCP   8s</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li><p>在物理机上访问服务<code>curl -D- http://192.168.122.20 -H &#39;Host: www.noname.io&#39;</code>，对比在虚拟机上执行<code>curl -D- http://10.111.110.163</code>，你会发现输出是一样的</p>
-</li>
-<li><p>删除service</p>
-</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl delete svc nginx-deployment</span><br></pre></td></tr></table></figure>
-
-<h2 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h2><p>ingress在整个k8s架构中扮演着集群网关的角色，提供了如负载均衡、SSL终结和基于名称的虚拟托管功能，目前支持的协议是http，后续的继任者gateway支持更多协议、流量管理、更灵活的配置等</p>
-<p>本文使用的ingress是ingress-nginx，当然，你也可以选择envoy或higress等</p>
-<h3 id="ingress-nginx"><a href="#ingress-nginx" class="headerlink" title="ingress-nginx"></a>ingress-nginx</h3><p>ingress的运行方式有好几种，其中比较常见的是NodePort以及LoadBalancer，外部流量抵达ingress，ingress根据路由规则转发到指定的服务</p>
-<p>将repo下载到本地，地址：<a href="https://github.com/kubernetes/ingress-nginx%EF%BC%8Ck8s%E4%BE%9D%E8%B5%96%E7%9A%84%E9%83%A8%E7%BD%B2%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60deploy/static/provider/%60%E7%9B%AE%E5%BD%95%E4%B8%8B%EF%BC%8CNodePort%E6%96%B9%E5%BC%8F%E7%9A%84%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60baremetal%60%EF%BC%8C%E8%80%8CLoadBalancer%E6%96%B9%E5%BC%8F%E7%9A%84%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60cloud">https://github.com/kubernetes/ingress-nginx，k8s依赖的部署文件放在`deploy/static/provider/`目录下，NodePort方式的文件放在`baremetal`，而LoadBalancer方式的文件放在`cloud</a></p>
-<ol>
-<li><p>拷贝文件夹<code>baremetal</code>或<code>cloud</code>，修改deploy.yaml中的image地址</p>
-</li>
-<li><p>执行命令<code>kubectl apply -k .</code></p>
-</li>
-<li><p>查看pod运行状况</p>
-</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pods -o wide -n ingress-nginx</span><br></pre></td></tr></table></figure>
-
-<p>输出如下</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME                                        READY   STATUS      RESTARTS   AGE     IP           NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">ingress-nginx-admission-create-6mmd6        0/1     Completed   0          2m33s   10.0.2.178   vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">ingress-nginx-admission-patch-clnr4         0/1     Completed   0          2m33s   10.0.1.235   vm2    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">ingress-nginx-controller-5989548bf5-tjv5t   1/1     Running     0          2m33s   10.0.2.12    vm3    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
-
-<ol start="4">
-<li>查看controller运行状况</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get svc ingress-nginx-controller -n ingress-nginx</span><br></pre></td></tr></table></figure>
-
-<p><code>LoadBalancer</code>输出如下</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME                       TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)                      AGE</span><br><span class="line">ingress-nginx-controller   LoadBalancer   10.109.74.112   192.168.122.20   80:31608/TCP,443:30939/TCP   77m</span><br></pre></td></tr></table></figure>
-
-<p><code>NodePort</code>输出如下</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME                       TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE</span><br><span class="line">ingress-nginx-controller   NodePort   10.104.202.43   &lt;none&gt;        80:31880/TCP,443:30184/TCP   3m27s</span><br></pre></td></tr></table></figure>
-
-<ol start="5">
-<li>验证</li>
-</ol>
-<p>访问<code>LoadBalancer</code>地址</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>或者，访问<code>NodePort</code>地址</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -D- http://vm1:31880 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>输出如下</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">HTTP/1.1 404 Not Found</span><br><span class="line">Date: Wed, 28 Aug 2024 04:09:19 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 146</span><br><span class="line">Connection: keep-alive</span><br><span class="line"></span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;&lt;title&gt;404 Not Found&lt;/title&gt;&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;center&gt;&lt;h1&gt;404 Not Found&lt;/h1&gt;&lt;/center&gt;</span><br><span class="line">&lt;hr&gt;&lt;center&gt;nginx&lt;/center&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>到这里，ingress安装完成</p>
-<h3 id="实践-1"><a href="#实践-1" class="headerlink" title="实践"></a>实践</h3><ol>
-<li>创建默认类型为ClusterIP的服务服务</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>查看service <code>kubectl get svc</code>，输出如下</li>
-</ol>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME               TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE</span><br><span class="line">kubernetes         ClusterIP   10.96.0.1      &lt;none&gt;        443/TCP   12d</span><br><span class="line">nginx-deployment   ClusterIP   10.106.19.73   &lt;none&gt;        80/TCP    12m</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>配置ingress规则</li>
-</ol>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># example-ingress.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"> <span class="attr">name:</span> <span class="string">example-ingress</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"> <span class="attr">rules:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">www.noname.io</span></span><br><span class="line">   <span class="attr">http:</span></span><br><span class="line">     <span class="attr">paths:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="attr">pathType:</span> <span class="string">Prefix</span></span><br><span class="line">       <span class="attr">path:</span> <span class="string">&quot;/&quot;</span></span><br><span class="line">       <span class="attr">backend:</span></span><br><span class="line">         <span class="attr">service:</span></span><br><span class="line">           <span class="attr">name:</span> <span class="string">nginx-deployment</span></span><br><span class="line">           <span class="attr">port:</span></span><br><span class="line">             <span class="attr">number:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
-
-<ol start="4">
-<li>验证</li>
-</ol>
-<p>访问<code>LoadBalancer</code>地址</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>done</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://medium.com/@seanlinsanity/how-to-expose-applications-running-in-kubernetes-cluster-to-public-access-65c2fa959a3b">3 Ways to Expose Applications Running in Kubernetes Cluster to Public Access</a><br><a href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/ingress/">Ingress</a><br><a href="https://kubernetes.io/zh-cn/docs/tasks/access-application-cluster/ingress-minikube/">在 Minikube 环境中使用 NGINX Ingress 控制器配置 Ingress</a><br><a href="https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/baremetal.md">Bare-metal considerations</a><br><a href="https://medium.com/tektutor/using-nginx-ingress-controller-in-kubernetes-bare-metal-setup-890eb4e7772">Using Nginx Ingress Controller in Kubernetes bare-metal setup</a><br><a href="https://medium.com/tektutor/using-metal-lb-on-a-bare-metal-onprem-kubernetes-setup-6d036af1d20c">Using Metal LB on a bare-metal(OnPrem) Kubernetes Setup</a></p>
-]]></content>
-      <tags>
-        <tag>kubernetes</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何下载网站视频</title>
-    <url>/how-to-download-online-video/</url>
-    <content><![CDATA[<p>现在的在线视频网站为了打击盗版、保护资源&#x2F;网络流量，不再直接使用mp4等视频格式，而是转而使用m3u8文件（播放索引列表）+ts文件（视频分段技术），其中有的视频还用了加密，下面简单展示下如何下载ts文件并合并为mp4</p>
-<h2 id="m3u8索引"><a href="#m3u8索引" class="headerlink" title="m3u8索引"></a>m3u8索引</h2><p>从浏览器的dev tool找到m3u8文件的连接并下载，该m3u8文件内有所有的ts文件列表，你可以将他们复制出来，通过编辑器补全制作成完整的url，通过下载器批量下载</p>
-<h2 id="未加密"><a href="#未加密" class="headerlink" title="未加密"></a>未加密</h2><p>如果视频没有加密（m3u8文件中#EXT-X-KEY字段为空），那么在下载所有ts文件后，可以直接用linux命令合并</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># ts段一般都有固定格式，如example_1.ts</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;ts_link_in_m3u8_file_&#x27;</span>&#123;number_first..number_end&#125;.ts | <span class="built_in">tr</span> <span class="string">&quot;&quot;</span> <span class="string">&quot;\n&quot;</span> &gt; tslist</span><br><span class="line"><span class="comment"># 将所有相关的ts文件合并</span></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> line; <span class="keyword">do</span> <span class="built_in">cat</span> <span class="variable">$line</span> &gt;&gt; the_final_video.mp4; <span class="keyword">done</span> &lt; tslist</span><br></pre></td></tr></table></figure>
-
-<p>到这里就不需要再往下看了</p>
-<h2 id="加密"><a href="#加密" class="headerlink" title="加密"></a>加密</h2><p>如果视频加密（m3u8文件中#EXT-X-KEY字段不为空），如下所示</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;https://hentai.com/xxxxxx&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">https://hentai.com/xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
-
-<p>处理步骤：</p>
-<ol>
-<li>下载必须的文件</li>
-<li>修改m3u8文件</li>
-<li>使用ffmpeg合并</li>
-</ol>
-<h3 id="下载必须的文件"><a href="#下载必须的文件" class="headerlink" title="下载必须的文件"></a>下载必须的文件</h3><ol>
-<li>通过浏览器dev tool找到m3u8文件url</li>
-<li>复制m3u8文件内所有ts文件地址到下载器下载，这里可能还需要通过编辑器补全url</li>
-<li>复制m3u8文件内记录的key的地址（从EXT-X-KEY字段获取链接）到下载器下载，可进一步重命名，如改为crypt.key，该文件文件大小一般是16字节</li>
-</ol>
-<h3 id="修改m3u8文件"><a href="#修改m3u8文件" class="headerlink" title="修改m3u8文件"></a>修改m3u8文件</h3><ol>
-<li>修改key的地址，将url改为本地文件路径</li>
-<li>如果ts文件url是http链接，那么也改为本地文件路径</li>
-</ol>
-<p>示例如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;crypt.key&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
-
-<h3 id="使用ffmpeg合并"><a href="#使用ffmpeg合并" class="headerlink" title="使用ffmpeg合并"></a>使用ffmpeg合并</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ffmpeg -allowed_extensions ALL -protocol_whitelist <span class="string">&quot;file,http,crypto,tcp&quot;</span> -i example.m3u8 -c copy the_final_video.mp4</span><br></pre></td></tr></table></figure>
-
-<p>done</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.cnblogs.com/warcraft/p/13388280.html">记一次加密的ts视频下载</a></p>
-]]></content>
-      <tags>
-        <tag>ffmpeg</tag>
-        <tag>hls</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>生成火焰图分析php代码</title>
-    <url>/how-to-generate-php-flamegraphs/</url>
-    <content><![CDATA[<p>flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间。下面简单介绍如何使用xdebug以及flamegraph生成火焰图</p>
-<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>配置xdebug参数</p>
-<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.trace_output_name</span> = xdebug.trace.%t.%s</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.trace_output_dir</span> = /tmp</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger_value</span> = <span class="string">&quot;&lt;secret key&gt;&quot;</span></span><br><span class="line"><span class="attr">xdebug.trace_format</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
-
-<p>下载flamegraph，<code>git clone https://github.com/brendangregg/FlameGraph.git</code>，放置在任意位置</p>
-<h2 id="flamegraph"><a href="#flamegraph" class="headerlink" title="flamegraph"></a>flamegraph</h2><p>获取堆栈数据</p>
-<p>请求页面&#x2F;接口url，在url后面增加<code>?XDEBUG_TRACE=&lt;secret key&gt;</code>，获取php堆栈数据 <code>curl http://youdomain.com?XDEBUG_TRACE=&lt;secret key&gt;</code>，如果是命令行命令，则在php命令后使用参数<code>php -d xdebug.auto_trace=1</code></p>
-<p>转换堆栈数据</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./stackcollapse-xdebug.php /tmp/xdebug.trace.1579703170._data_www_yii2_web_index_php.xt &gt; out.folded</span><br></pre></td></tr></table></figure>
-
-<p>生成火焰图</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; out.svg</span><br></pre></td></tr></table></figure>
-
-<p>示例</p>
-<p><img src="/images/yii2-flamegraph-example.svg" alt="yii2 flamegraph example"></p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://daniellockyer.com/php-flame-graphs/">How to generate PHP Flamegraphs</a><br><a href="https://github.com/brendangregg/FlameGraph">Flame Graphs visualize profiled code</a></p>
-]]></content>
-      <tags>
-        <tag>php</tag>
-        <tag>flamegraph</tag>
-        <tag>profiling</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>搭建shadowsocks服务</title>
     <url>/deploy-shadowsocks-service/</url>
     <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>由于国内恶劣的网络环境，作为一名频繁访问外网的Web开发者，不得不自建一个VPN服务，以下简单介绍Shadowsocks的搭建过程。</p>
@@ -465,6 +263,212 @@
       </tags>
   </entry>
   <entry>
+    <title>如何下载网站视频</title>
+    <url>/how-to-download-online-video/</url>
+    <content><![CDATA[<p>现在的在线视频网站为了打击盗版、保护资源&#x2F;网络流量，不再直接使用mp4等视频格式，而是转而使用m3u8文件（播放索引列表）+ts文件（视频分段技术），其中有的视频还用了加密，下面简单展示下如何下载ts文件并合并为mp4</p>
+<h2 id="m3u8索引"><a href="#m3u8索引" class="headerlink" title="m3u8索引"></a>m3u8索引</h2><p>从浏览器的dev tool找到m3u8文件的连接并下载，该m3u8文件内有所有的ts文件列表，你可以将他们复制出来，通过编辑器补全制作成完整的url，通过下载器批量下载</p>
+<h2 id="未加密"><a href="#未加密" class="headerlink" title="未加密"></a>未加密</h2><p>如果视频没有加密（m3u8文件中#EXT-X-KEY字段为空），那么在下载所有ts文件后，可以直接用linux命令合并</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># ts段一般都有固定格式，如example_1.ts</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;ts_link_in_m3u8_file_&#x27;</span>&#123;number_first..number_end&#125;.ts | <span class="built_in">tr</span> <span class="string">&quot;&quot;</span> <span class="string">&quot;\n&quot;</span> &gt; tslist</span><br><span class="line"><span class="comment"># 将所有相关的ts文件合并</span></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> line; <span class="keyword">do</span> <span class="built_in">cat</span> <span class="variable">$line</span> &gt;&gt; the_final_video.mp4; <span class="keyword">done</span> &lt; tslist</span><br></pre></td></tr></table></figure>
+
+<p>到这里就不需要再往下看了</p>
+<h2 id="加密"><a href="#加密" class="headerlink" title="加密"></a>加密</h2><p>如果视频加密（m3u8文件中#EXT-X-KEY字段不为空），如下所示</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;https://hentai.com/xxxxxx&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">https://hentai.com/xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
+
+<p>处理步骤：</p>
+<ol>
+<li>下载必须的文件</li>
+<li>修改m3u8文件</li>
+<li>使用ffmpeg合并</li>
+</ol>
+<h3 id="下载必须的文件"><a href="#下载必须的文件" class="headerlink" title="下载必须的文件"></a>下载必须的文件</h3><ol>
+<li>通过浏览器dev tool找到m3u8文件url</li>
+<li>复制m3u8文件内所有ts文件地址到下载器下载，这里可能还需要通过编辑器补全url</li>
+<li>复制m3u8文件内记录的key的地址（从EXT-X-KEY字段获取链接）到下载器下载，可进一步重命名，如改为crypt.key，该文件文件大小一般是16字节</li>
+</ol>
+<h3 id="修改m3u8文件"><a href="#修改m3u8文件" class="headerlink" title="修改m3u8文件"></a>修改m3u8文件</h3><ol>
+<li>修改key的地址，将url改为本地文件路径</li>
+<li>如果ts文件url是http链接，那么也改为本地文件路径</li>
+</ol>
+<p>示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;crypt.key&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用ffmpeg合并"><a href="#使用ffmpeg合并" class="headerlink" title="使用ffmpeg合并"></a>使用ffmpeg合并</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ffmpeg -allowed_extensions ALL -protocol_whitelist <span class="string">&quot;file,http,crypto,tcp&quot;</span> -i example.m3u8 -c copy the_final_video.mp4</span><br></pre></td></tr></table></figure>
+
+<p>done</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.cnblogs.com/warcraft/p/13388280.html">记一次加密的ts视频下载</a></p>
+]]></content>
+      <tags>
+        <tag>ffmpeg</tag>
+        <tag>hls</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>怎样从公网访问k8s服务</title>
+    <url>/how-to-access-k8s-service-from-public-network/</url>
+    <content><![CDATA[<p>默认情况下，k8s创建的服务是无法对公网提供访问的，如果要从公网访问k8s服务，一般有三种方式，NodePort、LoadBalancer、Ingress，下面简单介绍NodePort、LoadBalancer，着重讲解Ingress</p>
+<p>本文使用的deployment同官方教程<a href="https://kubernetes.io/docs/tasks/run-application/run-stateless-application-deployment/">nginx-deployment</a>，图片是从ingress-nginx官方文档拷贝过来借用，如侵必删</p>
+<h2 id="NodePort"><a href="#NodePort" class="headerlink" title="NodePort"></a>NodePort</h2><p><img src="/images/nodeport.jpg" alt="nodeport"></p>
+<p>如上图所示，客户端访问集群内任意机器端口30100，k8s自动将请求转发到对应的服务</p>
+<ol>
+<li>创建NodePort类型的service（不指定nodeport的情况下，默认从30000-32767中挑选一个端口使用）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment --<span class="built_in">type</span>=<span class="string">&quot;NodePort&quot;</span> --port 80</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看service <code>kubectl get svc</code>，输出如下</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE</span><br><span class="line">kubernetes         ClusterIP   10.96.0.1        &lt;none&gt;        443/TCP        12d</span><br><span class="line">nginx-deployment   NodePort    10.110.255.135   &lt;none&gt;        80:31402/TCP   4s</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>验证</li>
+</ol>
+<p>外部客户端先访问集群内任意节点端口31402，然后节点会转发到与端口关联的k8s内部服务nginx-deployment。</p>
+<p>在物理机上访问服务<code>curl http://vm1:31402</code>，对比在虚拟机如vm1上执行<code>curl http://10.110.255.135</code>，两者的输出是一致的</p>
+<ol start="4">
+<li>删除service</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl delete svc nginx-deployment</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意</strong>：考虑到线上一般是直接通过域名访问，如果不想在域名后还要添加端口访问服务，如<code>www.noname.io:31402</code>，那么还需要使用nginx&#x2F;haproxy建立一个反向代理的网关进行管理</p>
+<h2 id="LoadBalancer"><a href="#LoadBalancer" class="headerlink" title="LoadBalancer"></a>LoadBalancer</h2><p><img src="/images/metallb.jpg" alt="metallb"></p>
+<p>如上图所示，客户端的请求抵达LoadBalancer指定的IP（这里的IP有点奇怪，应该是与节点IP同一个CIDR但被保留的IP才对，看下面metallb），然后机器将流量转发到对应的服务</p>
+<p>一般情况下，各个云服务厂商有提供专门支持k8s的LoadBalancer，本文依赖的k8s是自建的裸集群（bare-metal），默认不支持LoadBalancer，因此需要先安装metallb</p>
+<h3 id="metallb安装"><a href="#metallb安装" class="headerlink" title="metallb安装"></a>metallb安装</h3><ol>
+<li>下载配置文件，修改image地址，然后使用kubectl执行</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl apply -f ./metallb-native.yaml</span><br><span class="line"><span class="comment"># 如果你的网络正常</span></span><br><span class="line"><span class="comment"># kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看pod运行状态</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pods -n metallb-system -o wide</span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME                        READY   STATUS    RESTARTS   AGE   IP                NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">controller-f6d7bd7b-7kg47   1/1     Running   0          51s   10.0.2.19         vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-8fgzx               1/1     Running   0          51s   192.168.122.235   vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-bfbtk               1/1     Running   0          51s   192.168.122.11    vm1    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-t4lv8               1/1     Running   0          51s   192.168.122.126   vm2    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>配置IP池</li>
+</ol>
+<p>配置IP池用于LoadBalancer分配，注意，要确保这部分IP不要被dhcp分配给其他任何机器</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># vi ip-address-pool.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">metallb.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">IPAddressPool</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">metallb-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">addresses:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.122</span><span class="number">.20</span><span class="number">-192.168</span><span class="number">.122</span><span class="number">.25</span></span><br><span class="line">  <span class="attr">autoAssign:</span> <span class="literal">true</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">metallb.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">L2Advertisement</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">metallb-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ipAddressPools:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">default</span></span><br></pre></td></tr></table></figure>
+
+<p>执行命令<code>kubectl apply -f ip-address-pool.yaml</code></p>
+<p>到这里就创建好了</p>
+<h3 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h3><ol>
+<li>创建LoadBalancer类型的service</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment --<span class="built_in">type</span>=<span class="string">&quot;LoadBalancer&quot;</span> --port 80</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看service <code>kubectl get svc</code>，输出如下</li>
+</ol>
+<p>192.168.122.20这个地址不是节点IP，而是从IP池里挑选的未被使用的</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME               TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)        AGE</span><br><span class="line">kubernetes         ClusterIP      10.96.0.1        &lt;none&gt;           443/TCP        12d</span><br><span class="line">nginx-deployment   LoadBalancer   10.111.110.163   192.168.122.20   80:30804/TCP   8s</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>验证</li>
+</ol>
+<p>在物理机上访问服务<code>curl -D- http://192.168.122.20 -H &#39;Host: www.noname.io&#39;</code>，对比在虚拟机上执行<code>curl -D- http://10.111.110.163</code>，两者的输出是一致的</p>
+<ol start="4">
+<li>删除service</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl delete svc nginx-deployment</span><br></pre></td></tr></table></figure>
+
+<h2 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h2><p>Ingress在整个k8s架构中扮演着集群网关的角色，提供了如负载均衡、SSL终结和基于名称的虚拟托管功能，当然，你可以用在a&#x2F;b测试、版本升级这种用途，目前支持的协议是http，后续的继任者Gateway提供了更强大的功能，如支持更多协议、流量管理、更灵活的配置等，但这里暂不做过多介绍</p>
+<p>Ingress的运行方式有好几种，其中比较常见的是NodePort以及LoadBalancer。其工作原理是：客户端通过NodePort或者LoadBalancer的方式访问ingress，ingress再通过路由转发到指定的k8s内部服务</p>
+<p>本文使用的ingress是ingress-nginx，当然，你也可以选择envoy或higress等</p>
+<h3 id="ingress-nginx"><a href="#ingress-nginx" class="headerlink" title="ingress-nginx"></a>ingress-nginx</h3><p>将repo下载到本地，地址：<a href="https://github.com/kubernetes/ingress-nginx%EF%BC%8Ck8s%E4%BE%9D%E8%B5%96%E7%9A%84%E9%83%A8%E7%BD%B2%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60deploy/static/provider/%60%E7%9B%AE%E5%BD%95%E4%B8%8B%EF%BC%8CNodePort%E6%96%B9%E5%BC%8F%E7%9A%84%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60baremetal%60%EF%BC%8C%E8%80%8CLoadBalancer%E6%96%B9%E5%BC%8F%E7%9A%84%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60cloud%60">https://github.com/kubernetes/ingress-nginx，k8s依赖的部署文件放在`deploy/static/provider/`目录下，NodePort方式的文件放在`baremetal`，而LoadBalancer方式的文件放在`cloud`</a></p>
+<ol>
+<li><p>拷贝文件夹<code>baremetal</code>或<code>cloud</code>，修改deploy.yaml中的image地址</p>
+</li>
+<li><p>执行命令<code>kubectl apply -k .</code></p>
+</li>
+<li><p>查看pod运行状况</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get pods -o wide -n ingress-nginx</span><br></pre></td></tr></table></figure>
+
+<p>输出如下，前两个是一次性的job，忽略</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME                                        READY   STATUS      RESTARTS   AGE     IP           NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">ingress-nginx-admission-create-6mmd6        0/1     Completed   0          2m33s   10.0.2.178   vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">ingress-nginx-admission-patch-clnr4         0/1     Completed   0          2m33s   10.0.1.235   vm2    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">ingress-nginx-controller-5989548bf5-tjv5t   1/1     Running     0          2m33s   10.0.2.12    vm3    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>查看controller运行状况</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get svc ingress-nginx-controller -n ingress-nginx</span><br></pre></td></tr></table></figure>
+
+<p>如果你执行的是<code>cloud</code>配置，也就是<code>LoadBalancer</code>方式，输出如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME                       TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)                      AGE</span><br><span class="line">ingress-nginx-controller   LoadBalancer   10.109.74.112   192.168.122.20   80:31608/TCP,443:30939/TCP   77m</span><br></pre></td></tr></table></figure>
+
+<p>如果你执行的是<code>baremetal</code>配置，也就是<code>NodePort</code>方式，输出如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME                       TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE</span><br><span class="line">ingress-nginx-controller   NodePort   10.104.202.43   &lt;none&gt;        80:31880/TCP,443:30184/TCP   3m27s</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>验证</li>
+</ol>
+<p>访问ingress地址</p>
+<p><code>LoadBalancer</code>方式如下</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># LoadBalancer如下</span></span><br><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># NodePort如下</span></span><br><span class="line">curl -D- http://vm1:31880 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">HTTP/1.1 404 Not Found</span><br><span class="line">Date: Wed, 28 Aug 2024 04:09:19 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 146</span><br><span class="line">Connection: keep-alive</span><br><span class="line"></span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;&lt;title&gt;404 Not Found&lt;/title&gt;&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;center&gt;&lt;h1&gt;404 Not Found&lt;/h1&gt;&lt;/center&gt;</span><br><span class="line">&lt;hr&gt;&lt;center&gt;nginx&lt;/center&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>到这里，ingress安装完成</p>
+<h3 id="实践-1"><a href="#实践-1" class="headerlink" title="实践"></a>实践</h3><ol>
+<li>创建默认类型为ClusterIP的服务（该服务无法在集群外部访问，适合验证我们创建的ingress）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看service <code>kubectl get svc</code>，输出如下</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME               TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE</span><br><span class="line">kubernetes         ClusterIP   10.96.0.1      &lt;none&gt;        443/TCP   12d</span><br><span class="line">nginx-deployment   ClusterIP   10.106.19.73   &lt;none&gt;        80/TCP    12m</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>配置ingress规则</li>
+</ol>
+<p>该规则指定<a href="http://www.noname.io的所有流量都转发到nginx-deployment服务/">www.noname.io的所有流量都转发到nginx-deployment服务</a></p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># example-ingress.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"> <span class="attr">name:</span> <span class="string">example-ingress</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"> <span class="attr">rules:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">www.noname.io</span></span><br><span class="line">   <span class="attr">http:</span></span><br><span class="line">     <span class="attr">paths:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="attr">pathType:</span> <span class="string">Prefix</span></span><br><span class="line">       <span class="attr">path:</span> <span class="string">&quot;/&quot;</span></span><br><span class="line">       <span class="attr">backend:</span></span><br><span class="line">         <span class="attr">service:</span></span><br><span class="line">           <span class="attr">name:</span> <span class="string">nginx-deployment</span></span><br><span class="line">           <span class="attr">port:</span></span><br><span class="line">             <span class="attr">number:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>验证</li>
+</ol>
+<p>访问ingress地址，仅展示LoadBalancer方式</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>done</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://medium.com/@seanlinsanity/how-to-expose-applications-running-in-kubernetes-cluster-to-public-access-65c2fa959a3b">3 Ways to Expose Applications Running in Kubernetes Cluster to Public Access</a><br><a href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/ingress/">Ingress</a><br><a href="https://kubernetes.io/zh-cn/docs/tasks/access-application-cluster/ingress-minikube/">在 Minikube 环境中使用 NGINX Ingress 控制器配置 Ingress</a><br><a href="https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/baremetal.md">Bare-metal considerations</a><br><a href="https://medium.com/tektutor/using-nginx-ingress-controller-in-kubernetes-bare-metal-setup-890eb4e7772">Using Nginx Ingress Controller in Kubernetes bare-metal setup</a><br><a href="https://medium.com/tektutor/using-metal-lb-on-a-bare-metal-onprem-kubernetes-setup-6d036af1d20c">Using Metal LB on a bare-metal(OnPrem) Kubernetes Setup</a></p>
+]]></content>
+      <tags>
+        <tag>kubernetes</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>生成火焰图分析php代码</title>
+    <url>/how-to-generate-php-flamegraphs/</url>
+    <content><![CDATA[<p>flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间。下面简单介绍如何使用xdebug以及flamegraph生成火焰图</p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>配置xdebug参数</p>
+<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.trace_output_name</span> = xdebug.trace.%t.%s</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.trace_output_dir</span> = /tmp</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger_value</span> = <span class="string">&quot;&lt;secret key&gt;&quot;</span></span><br><span class="line"><span class="attr">xdebug.trace_format</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>下载flamegraph，<code>git clone https://github.com/brendangregg/FlameGraph.git</code>，放置在任意位置</p>
+<h2 id="flamegraph"><a href="#flamegraph" class="headerlink" title="flamegraph"></a>flamegraph</h2><p>获取堆栈数据</p>
+<p>请求页面&#x2F;接口url，在url后面增加<code>?XDEBUG_TRACE=&lt;secret key&gt;</code>，获取php堆栈数据 <code>curl http://youdomain.com?XDEBUG_TRACE=&lt;secret key&gt;</code>，如果是命令行命令，则在php命令后使用参数<code>php -d xdebug.auto_trace=1</code></p>
+<p>转换堆栈数据</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./stackcollapse-xdebug.php /tmp/xdebug.trace.1579703170._data_www_yii2_web_index_php.xt &gt; out.folded</span><br></pre></td></tr></table></figure>
+
+<p>生成火焰图</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; out.svg</span><br></pre></td></tr></table></figure>
+
+<p>示例</p>
+<p><img src="/images/yii2-flamegraph-example.svg" alt="yii2 flamegraph example"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://daniellockyer.com/php-flame-graphs/">How to generate PHP Flamegraphs</a><br><a href="https://github.com/brendangregg/FlameGraph">Flame Graphs visualize profiled code</a></p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>flamegraph</tag>
+        <tag>profiling</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何在ubuntu服务器上管理Wi-Fi</title>
     <url>/how-to-manage-wifi-on-ubuntu-server/</url>
     <content><![CDATA[<p>当没有桌面时，ubuntu服务器该如何连接宽带、共享Wi-Fi热点，就像一台路由器一样运作，或者如何连接Wi-Fi，以下简单介绍这几个操作的过程</p>
@@ -545,67 +549,36 @@
       </tags>
   </entry>
   <entry>
-    <title>k8s config和secret配置教程</title>
-    <url>/k8s-config-and-secret-setup-tutorial/</url>
-    <content><![CDATA[<p>简单的配置管理，可以把信息写入文件放在项目里，然后打包发布，但这样会有信息泄露的安全风险，经常会看到谁谁谁把项目上传到github，然后公司数据库&#x2F;敏感密钥泄漏等。所以，现在的公司一般会自建发布平台，通过发布平台管理配置，流程：配置修改-&gt;审核-&gt;发布。了解到这背景，我们就知道config跟secret在整个软件开发过程中扮演的角色，接下来就学习如何配置config&#x2F;secret并使用</p>
-<blockquote>
-<p>当然，一般情况下，配置管理没有那么简单，要考虑多种环境如dev&#x2F;test&#x2F;release以及地区区分，操作需小心谨慎，一不小心就出现遗漏、错配，此外，还有多人开发时配置冲突等，这些都是开发过程中要注意的问题</p>
-</blockquote>
-<h2 id="Config"><a href="#Config" class="headerlink" title="Config"></a>Config</h2><p>以下展示configMap的简单配置，必须字段apiVersion、kind、metadata、data&#x2F;binaryData。data可以是key-value键值对，也可以是文件名-文件内容，数据的大小不能超过1MB，具体可以查看官网api描述文档</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># game-demo.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">game-demo</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="comment"># 1. key-value</span></span><br><span class="line">  <span class="attr">player_initial_lives:</span> <span class="string">&quot;3&quot;</span></span><br><span class="line">  <span class="attr">ui_properties_file_name:</span> <span class="string">&quot;user-interface.properties&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 2. filename-content</span></span><br><span class="line">  <span class="attr">game.properties:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    enemy.types=aliens,monsters</span></span><br><span class="line"><span class="string">    player.maximum-lives=5    </span></span><br><span class="line"><span class="string"></span>  <span class="attr">user-interface.properties:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    color.good=purple</span></span><br><span class="line"><span class="string">    color.bad=yellow</span></span><br><span class="line"><span class="string">    allow.textmode=true </span></span><br></pre></td></tr></table></figure>
+    <title>解决ubuntu系统monospace字体显示异常的问题</title>
+    <url>/linux-monofonts-render-incorrectly/</url>
+    <content><![CDATA[<p>很长的一段时间，被xubuntu下的一个monospace字体显示问题困扰着，在网上找了很多方法也没有解决问题，在一次误打误撞的情况下解决了，简单把自己问题的过程记录下来，希望给一些小伙伴们帮助</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>xubuntu下monospace在浏览器以及vscode下显示异常，具体如下图所示</p>
+<p>浏览器chrome&#x2F;firefox下的monospace</p>
+<p><img src="/images/monofont_display_incorrect_in_browser.png" alt="monofont display incorrect in browser"></p>
+<p>vscode下的monospace</p>
+<p><img src="/images/monofont_display_incorrect_in_vscode.png" alt="monofont display incorrect in vscode"></p>
+<p>网上搜索结果大部分指示，是由于libfreetype6 2.8.1-2ubuntu2的一个bug导致，需要升级到最新的libfreetype2.9或者降级到libfreetype2.8.0，按照搜索的文档进行libfreetype的升级&#x2F;降级后，显示效果依旧，问题没有得到解决</p>
+<h2 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h2><p>在我放弃治疗后过了一段时间，突然想起，一直以来都忽略了验证linux的字体信息。首先，获取显示异常的字体font-family，如下图</p>
+<p><img src="/images/browser_get_font_family.png" alt="browser get font family"></p>
+<p>使用fc-match验证字体</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ fc-match monospace</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match consolas</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match Menlo</span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;PingFang SC&quot;</span></span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;Microsoft YaHei&quot;</span></span><br><span class="line">NotoSansCJK-Regular.ttc: <span class="string">&quot;Noto Sans CJK SC&quot;</span> <span class="string">&quot;Regular&quot;</span></span><br></pre></td></tr></table></figure>
 
-<p>执行命令写入k8s，查看并验证配置信息</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 写入k8s</span></span><br><span class="line">kubectl apply -f game-demo.yam</span><br><span class="line"><span class="comment"># </span></span><br><span class="line">kubectl get cm game-demo</span><br><span class="line"><span class="comment"># 查看config数据</span></span><br><span class="line">kubectl describe cm game-demo</span><br></pre></td></tr></table></figure>
+<p>可以看到Menlo、”PingFang SC”、”Microsoft YaHei”的实际字体跟monospace并不一致，抱着死马当活马医的心态，编辑字体配置文件<code>~/.config/fontconfig/fonts.conf</code>，内容如下，</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&#x27;1.0&#x27;?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&#x27;fonts.dtd&#x27;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">alias</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">prefer</span>&gt;</span><span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span><span class="tag">&lt;/<span class="name">prefer</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p>有了配置信息，怎么搭配container使用？有4种使用方式可供参考</p>
-<ol>
-<li>在容器命令和参数内</li>
-<li>容器的环境变量</li>
-<li>在只读卷里面添加一个文件，让应用来读取</li>
-<li>编写代码在 Pod 中运行，使用 Kubernetes API 来读取 ConfigMap</li>
-</ol>
-<p>以下启动一个pod，在启动时打印输出config信息，主要展示的是环境变量跟配置文件两种方式，也就是上面的2和3</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">configmap-demo-pod</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">demo</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">registry.noname.io:5000/alpine:3.20.1</span></span><br><span class="line">      <span class="attr">command:</span> </span><br><span class="line">        <span class="bullet">-</span> <span class="string">/bin/sh</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;-c&quot;</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">|</span></span><br><span class="line"><span class="string">          echo $PLAYER_INITIAL_LIVES;</span></span><br><span class="line"><span class="string">          echo $UI_PROPERTIES_FILE_NAME;</span></span><br><span class="line"><span class="string">          ls -l /config/game.properties;</span></span><br><span class="line"><span class="string">          cat /config/game.properties;</span></span><br><span class="line"><span class="string">          ls -l /config/user-interface.properties;</span></span><br><span class="line"><span class="string">          cat /config/user-interface.properties;</span></span><br><span class="line"><span class="string"></span>      <span class="comment"># 方式2：configMap-&gt;环境变量</span></span><br><span class="line">      <span class="attr">env:</span></span><br><span class="line">        <span class="comment"># 定义环境变量</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">PLAYER_INITIAL_LIVES</span>    <span class="comment"># 请注意这里和 ConfigMap 中的键名是不一样的</span></span><br><span class="line">          <span class="attr">valueFrom:</span></span><br><span class="line">            <span class="attr">configMapKeyRef:</span></span><br><span class="line">              <span class="attr">name:</span> <span class="string">game-demo</span>           <span class="comment"># 这个值来自 ConfigMap</span></span><br><span class="line">              <span class="attr">key:</span> <span class="string">player_initial_lives</span> <span class="comment"># 需要取值的键</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">UI_PROPERTIES_FILE_NAME</span></span><br><span class="line">          <span class="attr">valueFrom:</span></span><br><span class="line">            <span class="attr">configMapKeyRef:</span></span><br><span class="line">              <span class="attr">name:</span> <span class="string">game-demo</span></span><br><span class="line">              <span class="attr">key:</span> <span class="string">ui_properties_file_name</span></span><br><span class="line">      <span class="comment"># 方式3：configMap-&gt;文件</span></span><br><span class="line">      <span class="attr">volumeMounts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">config</span></span><br><span class="line">        <span class="attr">mountPath:</span> <span class="string">&quot;/config&quot;</span></span><br><span class="line">        <span class="attr">readOnly:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">  <span class="comment"># 你可以在 Pod 级别设置卷，然后将其挂载到 Pod 内的容器中</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">config</span></span><br><span class="line">    <span class="attr">configMap:</span></span><br><span class="line">      <span class="comment"># ConfigMap的名字</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">game-demo</span></span><br><span class="line">      <span class="comment"># 指定key创建为path文件</span></span><br><span class="line">      <span class="attr">items:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;game.properties&quot;</span></span><br><span class="line">        <span class="attr">path:</span> <span class="string">&quot;game.properties&quot;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;user-interface.properties&quot;</span></span><br><span class="line">        <span class="attr">path:</span> <span class="string">&quot;user-interface.properties&quot;</span></span><br></pre></td></tr></table></figure>
+<p>退出，重新登录，发现这个困扰了很久的问题终于解决，如下图</p>
+<p><img src="/images/monofont_the_correct_view.png" alt="monofont the correct view"></p>
+<p>vscode可以通过更改font-family恢复正常的显示效果</p>
+<p><strong>注意</strong></p>
+<p>ubuntu&#x2F;xubuntu、中文&#x2F;英文的系统默认的字体会有些许差异，以上的操作可能不一定生效，可以新增<code>~/.config/fontconfig/conf.d/00-menlo.conf</code></p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;fonts.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">alias</span> <span class="attr">binding</span>=<span class="string">&quot;same&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">accept</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">accept</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p>执行命令</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建pod</span></span><br><span class="line">kubectl apply -f configmap-demo-pod.yaml</span><br><span class="line"><span class="comment"># 查看configmap-demo-pod运行情况</span></span><br><span class="line">kubectl get pod | grep configmap-demo-pod</span><br><span class="line"><span class="comment"># pod是否有其他异常</span></span><br><span class="line">kubectl describe pod configmap-demo-pod</span><br><span class="line"><span class="comment"># 查看command输出日志</span></span><br><span class="line">kubectl logs configmap-demo-pod</span><br><span class="line"><span class="comment"># 清理config、pod</span></span><br><span class="line">kubectl delete -f game-demo.yaml</span><br><span class="line">kubectl delete -f configmap-demo-pod.yaml</span><br></pre></td></tr></table></figure>
-
-<h2 id="Secret"><a href="#Secret" class="headerlink" title="Secret"></a>Secret</h2><p>secret的应用场景想到的只有数据库密码，如果真的要跟数据库其他配置分离也挺蛋疼的，以下简单展示如何使用</p>
-<p>secret与config非常相似，有如下相同点</p>
-<ol>
-<li>key&#x2F;value 的形式</li>
-<li>属于某个特定的 namespace</li>
-<li>可以导出到环境变量</li>
-<li>可以通过目录&#x2F;文件形式挂载 (支持挂载所有 key 和部分 key)</li>
-</ol>
-<p>不同点：</p>
-<ol>
-<li>secret 可以被 ServerAccount 关联 (使用)</li>
-<li>secret 可以存储 register 的鉴权信息，用在 ImagePullSecret 参数中，用于拉取私有仓库的镜像</li>
-<li>secret 支持 Base64 加密</li>
-<li>secret 文件存储在 tmpfs 文件系统中，Pod删除后secret文件也会对应的删除</li>
-</ol>
-<p>配置secret</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># dotfile-secret.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Secret</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">dotfile-secret</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="string">.secret-file:</span> <span class="string">dmFsdWUtMg0KDQo=</span></span><br></pre></td></tr></table></figure>
-
-<p>验证</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get secret dotfile-secret -o json | jq <span class="string">&#x27;.data | map_values(@base64d)&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>使用secret，有以下几种方式</p>
-<ol>
-<li>作为挂载到一个或多个容器上的卷中的文件</li>
-<li>作为容器的环境变量</li>
-<li>由kubelet在为Pod拉取镜像时使用</li>
-</ol>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># secret-dotfiles-pod.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">secret-dotfiles-pod</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">secret-volume</span></span><br><span class="line">      <span class="attr">secret:</span></span><br><span class="line">        <span class="attr">secretName:</span> <span class="string">dotfile-secret</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">dotfile-test-container</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">registry.noname.io:5000/alpine:3.20.1</span></span><br><span class="line">      <span class="attr">command:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">ls</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;-la&quot;</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;/etc/secret-volume&quot;</span></span><br><span class="line">      <span class="comment"># /etc/secret-volume/.secret-file</span></span><br><span class="line">      <span class="attr">volumeMounts:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">secret-volume</span></span><br><span class="line">          <span class="attr">readOnly:</span> <span class="literal">true</span></span><br><span class="line">          <span class="attr">mountPath:</span> <span class="string">&quot;/etc/secret-volume&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>执行命令</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建pod</span></span><br><span class="line">kubectl apply -f secret-dotfiles-pod.yaml</span><br><span class="line"><span class="comment"># 查看secret-dotfiles-pod运行情况</span></span><br><span class="line">kubectl get pod | grep secret-dotfiles-pod</span><br><span class="line"><span class="comment"># pod是否有其他异常</span></span><br><span class="line">kubectl describe pod secret-dotfiles-pod</span><br><span class="line"><span class="comment"># 查看command输出日志</span></span><br><span class="line">kubectl logs secret-dotfiles-pod</span><br><span class="line"><span class="comment"># 清理config、pod</span></span><br><span class="line">kubectl delete -f dotfile-secret.yaml</span><br><span class="line">kubectl delete -f secret-dotfiles-pod.yaml</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMaps</a><br><a href="https://kubernetes.io/docs/concepts/configuration/secret/">Secrets</a></p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/adobe/brackets/issues/14290">[Ubuntu 18.04 LTS] Font not rendering properly</a><br><a href="https://stackoverflow.com/questions/50114376/ubuntu-18-04-lts-font-not-rendering-properly">Ubuntu 18.04 LTS Font not rendering properly</a><br><a href="https://superuser.com/questions/930572/why-doesnt-fc-match-respect-my-match-and-edit-rule-for-courier-when-it-does-for">Why doesn’t fc-match respect my match and edit rule for Courier when it does for Consolas?</a></p>
 ]]></content>
       <tags>
-        <tag>kubernetes</tag>
+        <tag>ubuntu</tag>
+        <tag>vscode</tag>
+        <tag>monospace fonts</tag>
       </tags>
   </entry>
   <entry>
@@ -673,39 +646,6 @@
       </tags>
   </entry>
   <entry>
-    <title>解决ubuntu系统monospace字体显示异常的问题</title>
-    <url>/linux-monofonts-render-incorrectly/</url>
-    <content><![CDATA[<p>很长的一段时间，被xubuntu下的一个monospace字体显示问题困扰着，在网上找了很多方法也没有解决问题，在一次误打误撞的情况下解决了，简单把自己问题的过程记录下来，希望给一些小伙伴们帮助</p>
-<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>xubuntu下monospace在浏览器以及vscode下显示异常，具体如下图所示</p>
-<p>浏览器chrome&#x2F;firefox下的monospace</p>
-<p><img src="/images/monofont_display_incorrect_in_browser.png" alt="monofont display incorrect in browser"></p>
-<p>vscode下的monospace</p>
-<p><img src="/images/monofont_display_incorrect_in_vscode.png" alt="monofont display incorrect in vscode"></p>
-<p>网上搜索结果大部分指示，是由于libfreetype6 2.8.1-2ubuntu2的一个bug导致，需要升级到最新的libfreetype2.9或者降级到libfreetype2.8.0，按照搜索的文档进行libfreetype的升级&#x2F;降级后，显示效果依旧，问题没有得到解决</p>
-<h2 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h2><p>在我放弃治疗后过了一段时间，突然想起，一直以来都忽略了验证linux的字体信息。首先，获取显示异常的字体font-family，如下图</p>
-<p><img src="/images/browser_get_font_family.png" alt="browser get font family"></p>
-<p>使用fc-match验证字体</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ fc-match monospace</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match consolas</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match Menlo</span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;PingFang SC&quot;</span></span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;Microsoft YaHei&quot;</span></span><br><span class="line">NotoSansCJK-Regular.ttc: <span class="string">&quot;Noto Sans CJK SC&quot;</span> <span class="string">&quot;Regular&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>可以看到Menlo、”PingFang SC”、”Microsoft YaHei”的实际字体跟monospace并不一致，抱着死马当活马医的心态，编辑字体配置文件<code>~/.config/fontconfig/fonts.conf</code>，内容如下，</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&#x27;1.0&#x27;?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&#x27;fonts.dtd&#x27;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">alias</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">prefer</span>&gt;</span><span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span><span class="tag">&lt;/<span class="name">prefer</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>退出，重新登录，发现这个困扰了很久的问题终于解决，如下图</p>
-<p><img src="/images/monofont_the_correct_view.png" alt="monofont the correct view"></p>
-<p>vscode可以通过更改font-family恢复正常的显示效果</p>
-<p><strong>注意</strong></p>
-<p>ubuntu&#x2F;xubuntu、中文&#x2F;英文的系统默认的字体会有些许差异，以上的操作可能不一定生效，可以新增<code>~/.config/fontconfig/conf.d/00-menlo.conf</code></p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;fonts.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">alias</span> <span class="attr">binding</span>=<span class="string">&quot;same&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">accept</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">accept</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/adobe/brackets/issues/14290">[Ubuntu 18.04 LTS] Font not rendering properly</a><br><a href="https://stackoverflow.com/questions/50114376/ubuntu-18-04-lts-font-not-rendering-properly">Ubuntu 18.04 LTS Font not rendering properly</a><br><a href="https://superuser.com/questions/930572/why-doesnt-fc-match-respect-my-match-and-edit-rule-for-courier-when-it-does-for">Why doesn’t fc-match respect my match and edit rule for Courier when it does for Consolas?</a></p>
-]]></content>
-      <tags>
-        <tag>ubuntu</tag>
-        <tag>vscode</tag>
-        <tag>monospace fonts</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>使用github pages搭建个人博客</title>
     <url>/personal-blog-using-github-pages/</url>
     <content><![CDATA[<p>简单介绍如何使用github pages服务以及hexo搭建一个免费的个人博客</p>
@@ -731,6 +671,70 @@
       <tags>
         <tag>github pages</tag>
         <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>k8s config和secret配置教程</title>
+    <url>/k8s-config-and-secret-setup-tutorial/</url>
+    <content><![CDATA[<p>简单的配置管理，可以把信息写入文件放在项目里，然后打包发布，但这样会有信息泄露的安全风险，经常会看到谁谁谁把项目上传到github，然后公司数据库&#x2F;敏感密钥泄漏等。所以，现在的公司一般会自建发布平台，通过发布平台管理配置，流程：配置修改-&gt;审核-&gt;发布。了解到这背景，我们就知道config跟secret在整个软件开发过程中扮演的角色，接下来就学习如何配置config&#x2F;secret并使用</p>
+<blockquote>
+<p>当然，一般情况下，配置管理没有那么简单，要考虑多种环境如dev&#x2F;test&#x2F;release以及地区区分，操作需小心谨慎，一不小心就出现遗漏、错配，此外，还有多人开发时配置冲突等，这些都是开发过程中要注意的问题</p>
+</blockquote>
+<h2 id="Config"><a href="#Config" class="headerlink" title="Config"></a>Config</h2><p>以下展示configMap的简单配置，必须字段apiVersion、kind、metadata、data&#x2F;binaryData。data可以是key-value键值对，也可以是文件名-文件内容，数据的大小不能超过1MB，具体可以查看官网api描述文档</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># game-demo.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">game-demo</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="comment"># 1. key-value</span></span><br><span class="line">  <span class="attr">player_initial_lives:</span> <span class="string">&quot;3&quot;</span></span><br><span class="line">  <span class="attr">ui_properties_file_name:</span> <span class="string">&quot;user-interface.properties&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 2. filename-content</span></span><br><span class="line">  <span class="attr">game.properties:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    enemy.types=aliens,monsters</span></span><br><span class="line"><span class="string">    player.maximum-lives=5    </span></span><br><span class="line"><span class="string"></span>  <span class="attr">user-interface.properties:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    color.good=purple</span></span><br><span class="line"><span class="string">    color.bad=yellow</span></span><br><span class="line"><span class="string">    allow.textmode=true </span></span><br></pre></td></tr></table></figure>
+
+<p>执行命令写入k8s，查看并验证配置信息</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 写入k8s</span></span><br><span class="line">kubectl apply -f game-demo.yam</span><br><span class="line"><span class="comment"># </span></span><br><span class="line">kubectl get cm game-demo</span><br><span class="line"><span class="comment"># 查看config数据</span></span><br><span class="line">kubectl describe cm game-demo</span><br></pre></td></tr></table></figure>
+
+<p>有了配置信息，怎么搭配container使用？有4种使用方式可供参考</p>
+<ol>
+<li>在容器命令和参数内</li>
+<li>容器的环境变量</li>
+<li>在只读卷里面添加一个文件，让应用来读取</li>
+<li>编写代码在 Pod 中运行，使用 Kubernetes API 来读取 ConfigMap</li>
+</ol>
+<p>以下启动一个pod，在启动时打印输出config信息，主要展示的是环境变量跟配置文件两种方式，也就是上面的2和3</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">configmap-demo-pod</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">demo</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">registry.noname.io:5000/alpine:3.20.1</span></span><br><span class="line">      <span class="attr">command:</span> </span><br><span class="line">        <span class="bullet">-</span> <span class="string">/bin/sh</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;-c&quot;</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">|</span></span><br><span class="line"><span class="string">          echo $PLAYER_INITIAL_LIVES;</span></span><br><span class="line"><span class="string">          echo $UI_PROPERTIES_FILE_NAME;</span></span><br><span class="line"><span class="string">          ls -l /config/game.properties;</span></span><br><span class="line"><span class="string">          cat /config/game.properties;</span></span><br><span class="line"><span class="string">          ls -l /config/user-interface.properties;</span></span><br><span class="line"><span class="string">          cat /config/user-interface.properties;</span></span><br><span class="line"><span class="string"></span>      <span class="comment"># 方式2：configMap-&gt;环境变量</span></span><br><span class="line">      <span class="attr">env:</span></span><br><span class="line">        <span class="comment"># 定义环境变量</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">PLAYER_INITIAL_LIVES</span>    <span class="comment"># 请注意这里和 ConfigMap 中的键名是不一样的</span></span><br><span class="line">          <span class="attr">valueFrom:</span></span><br><span class="line">            <span class="attr">configMapKeyRef:</span></span><br><span class="line">              <span class="attr">name:</span> <span class="string">game-demo</span>           <span class="comment"># 这个值来自 ConfigMap</span></span><br><span class="line">              <span class="attr">key:</span> <span class="string">player_initial_lives</span> <span class="comment"># 需要取值的键</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">UI_PROPERTIES_FILE_NAME</span></span><br><span class="line">          <span class="attr">valueFrom:</span></span><br><span class="line">            <span class="attr">configMapKeyRef:</span></span><br><span class="line">              <span class="attr">name:</span> <span class="string">game-demo</span></span><br><span class="line">              <span class="attr">key:</span> <span class="string">ui_properties_file_name</span></span><br><span class="line">      <span class="comment"># 方式3：configMap-&gt;文件</span></span><br><span class="line">      <span class="attr">volumeMounts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">config</span></span><br><span class="line">        <span class="attr">mountPath:</span> <span class="string">&quot;/config&quot;</span></span><br><span class="line">        <span class="attr">readOnly:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">  <span class="comment"># 你可以在 Pod 级别设置卷，然后将其挂载到 Pod 内的容器中</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">config</span></span><br><span class="line">    <span class="attr">configMap:</span></span><br><span class="line">      <span class="comment"># ConfigMap的名字</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">game-demo</span></span><br><span class="line">      <span class="comment"># 指定key创建为path文件</span></span><br><span class="line">      <span class="attr">items:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;game.properties&quot;</span></span><br><span class="line">        <span class="attr">path:</span> <span class="string">&quot;game.properties&quot;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;user-interface.properties&quot;</span></span><br><span class="line">        <span class="attr">path:</span> <span class="string">&quot;user-interface.properties&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>执行命令</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建pod</span></span><br><span class="line">kubectl apply -f configmap-demo-pod.yaml</span><br><span class="line"><span class="comment"># 查看configmap-demo-pod运行情况</span></span><br><span class="line">kubectl get pod | grep configmap-demo-pod</span><br><span class="line"><span class="comment"># pod是否有其他异常</span></span><br><span class="line">kubectl describe pod configmap-demo-pod</span><br><span class="line"><span class="comment"># 查看command输出日志</span></span><br><span class="line">kubectl logs configmap-demo-pod</span><br><span class="line"><span class="comment"># 清理config、pod</span></span><br><span class="line">kubectl delete -f game-demo.yaml</span><br><span class="line">kubectl delete -f configmap-demo-pod.yaml</span><br></pre></td></tr></table></figure>
+
+<h2 id="Secret"><a href="#Secret" class="headerlink" title="Secret"></a>Secret</h2><p>secret的应用场景想到的只有数据库密码，如果真的要跟数据库其他配置分离也挺蛋疼的，以下简单展示如何使用</p>
+<p>secret与config非常相似，有如下相同点</p>
+<ol>
+<li>key&#x2F;value 的形式</li>
+<li>属于某个特定的 namespace</li>
+<li>可以导出到环境变量</li>
+<li>可以通过目录&#x2F;文件形式挂载 (支持挂载所有 key 和部分 key)</li>
+</ol>
+<p>不同点：</p>
+<ol>
+<li>secret 可以被 ServerAccount 关联 (使用)</li>
+<li>secret 可以存储 register 的鉴权信息，用在 ImagePullSecret 参数中，用于拉取私有仓库的镜像</li>
+<li>secret 支持 Base64 加密</li>
+<li>secret 文件存储在 tmpfs 文件系统中，Pod删除后secret文件也会对应的删除</li>
+</ol>
+<p>配置secret</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># dotfile-secret.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Secret</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">dotfile-secret</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="string">.secret-file:</span> <span class="string">dmFsdWUtMg0KDQo=</span></span><br></pre></td></tr></table></figure>
+
+<p>验证</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get secret dotfile-secret -o json | jq <span class="string">&#x27;.data | map_values(@base64d)&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>使用secret，有以下几种方式</p>
+<ol>
+<li>作为挂载到一个或多个容器上的卷中的文件</li>
+<li>作为容器的环境变量</li>
+<li>由kubelet在为Pod拉取镜像时使用</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># secret-dotfiles-pod.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">secret-dotfiles-pod</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">secret-volume</span></span><br><span class="line">      <span class="attr">secret:</span></span><br><span class="line">        <span class="attr">secretName:</span> <span class="string">dotfile-secret</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">dotfile-test-container</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">registry.noname.io:5000/alpine:3.20.1</span></span><br><span class="line">      <span class="attr">command:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">ls</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;-la&quot;</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;/etc/secret-volume&quot;</span></span><br><span class="line">      <span class="comment"># /etc/secret-volume/.secret-file</span></span><br><span class="line">      <span class="attr">volumeMounts:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">secret-volume</span></span><br><span class="line">          <span class="attr">readOnly:</span> <span class="literal">true</span></span><br><span class="line">          <span class="attr">mountPath:</span> <span class="string">&quot;/etc/secret-volume&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>执行命令</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建pod</span></span><br><span class="line">kubectl apply -f secret-dotfiles-pod.yaml</span><br><span class="line"><span class="comment"># 查看secret-dotfiles-pod运行情况</span></span><br><span class="line">kubectl get pod | grep secret-dotfiles-pod</span><br><span class="line"><span class="comment"># pod是否有其他异常</span></span><br><span class="line">kubectl describe pod secret-dotfiles-pod</span><br><span class="line"><span class="comment"># 查看command输出日志</span></span><br><span class="line">kubectl logs secret-dotfiles-pod</span><br><span class="line"><span class="comment"># 清理config、pod</span></span><br><span class="line">kubectl delete -f dotfile-secret.yaml</span><br><span class="line">kubectl delete -f secret-dotfiles-pod.yaml</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMaps</a><br><a href="https://kubernetes.io/docs/concepts/configuration/secret/">Secrets</a></p>
+]]></content>
+      <tags>
+        <tag>kubernetes</tag>
       </tags>
   </entry>
   <entry>
@@ -782,108 +786,6 @@
 
 <h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><p><a href="https://github.com/Y2k38/php_ext_tutorial">php_ext_tutorial</a></p>
 <h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/bigbes/bigbes.github.io/wiki/PHP-Extensions-Made-Eldrich:-Classes">PHP Extensions Made Eldrich: Classes</a></p>
-]]></content>
-      <tags>
-        <tag>php</tag>
-        <tag>php extension</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PHP扩展开发 - Part 1</title>
-    <url>/php-extension-writing-part1/</url>
-    <content><![CDATA[<p>在网上找到几篇基于PHP5的扩展开发的文章，有些古老，与PHP7不完全兼容，自己做了些简单的翻译、修改。</p>
-<p>建议开发者先阅读<a href="http://www.phpinternalsbook.com/">PHP Internals Book</a>这份在线文档，里面对PHP做了比较全面的讲解。由于PHP扩展开发的资料比较少，也鲜有PHP开发者触及到这块，编写扩展时如果遇到问题，最好是先查找PHP源代码是否有相关的使用案例，再通过网上论坛、QQ等方式寻求帮助。</p>
-<p>本文是PHP扩展开发系列的第一篇，主要介绍如何开发一个简单的PHP扩展、如何获取ini配置参数、如何配置全局变量</p>
-<p>前期准备：</p>
-<p>PHP编译选项加入<code>--enable-debug</code>以及<code>--enable-maintainer-zts</code>。<code>--enable-debug</code>生成额外的调试符号，并将优化等级设置为<code>-O0</code>，报告内存泄露等错误，使使用gdb进行debug时更为准确；<code>--enable-maintainer-zts</code>启用线程安全，开启<code>ZTS</code>宏定义，配置PHP为TSRM机制，用于编写调试多线程代码</p>
-<h2 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h2><h3 id="扩展目录结构"><a href="#扩展目录结构" class="headerlink" title="扩展目录结构"></a>扩展目录结构</h3><p>你可能会使用PHP源代码自带的脚本<code>ext/ext_skel.php</code>生成扩展骨架，但这里选择极简方式创建一个扩展，最基本的扩展只需要三个文件：配置文件<code>config.m4</code>，头文件<code>php_test.h</code>，源文件<code>test.c</code></p>
-<p><code>test</code>扩展目录结构</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">php-7.4.1</span><br><span class="line">└── ext</span><br><span class="line">    └── <span class="built_in">test</span></span><br><span class="line">        ├── config.m4</span><br><span class="line">        ├── php_test.h</span><br><span class="line">        └── test.c</span><br></pre></td></tr></table></figure>
-
-<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dnl 用于生成configure及其他文件</span><br><span class="line">dnl `dnl`开头的行为注释内容</span><br><span class="line">dnl 若扩展依赖外部库，使用--with，否则默认使用--enable</span><br><span class="line">PHP_ARG_ENABLE(test, whether to enable test support,</span><br><span class="line">[  --enable-test          Enable test support], no)</span><br><span class="line"></span><br><span class="line">if test &quot;$PHP_TEST&quot; != &quot;no&quot;; then</span><br><span class="line">  AC_DEFINE(HAVE_TEST, 1, [ Have test support ])</span><br><span class="line">  PHP_NEW_EXTENSION(test, test.c, $ext_shared)</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
-
-<h3 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h3><p>头文件默认格式为<code>php_extname.h</code></p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> PHP_TEST_H</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> PHP_TEST_H</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* PHP扩展结构zend_module_entry */</span></span><br><span class="line"><span class="keyword">extern</span> zend_module_entry test_module_entry;</span><br><span class="line"><span class="meta"># <span class="keyword">define</span> phpext_test_ptr &amp;test_module_entry</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* version扩展版本号 */</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> PHP_TEST_VERSION <span class="string">&quot;0.1.0&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 自定义函数声明PHP_FUNCTION(your_function_name) */</span></span><br><span class="line">PHP_FUNCTION(test);</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">if</span> defined(ZTS) &amp;&amp; defined(COMPILE_DL_TEST)</span></span><br><span class="line">ZEND_TSRMLS_CACHE_EXTERN()</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
-
-<h3 id="源文件"><a href="#源文件" class="headerlink" title="源文件"></a>源文件</h3><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifdef</span> HAVE_CONFIG_H</span></span><br><span class="line"><span class="meta"># <span class="keyword">include</span> <span class="string">&quot;config.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;php.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;php_test.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 自定义函数注册，最终*test_functions注册到模块声明test_module_entry */</span></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_functions[] = &#123;</span><br><span class="line">    <span class="comment">/* </span></span><br><span class="line"><span class="comment">     * 注册`test`函数，格式为PHP_FE(func_name, arg_info)，arg_info声明参数信息，如是否是引用等，这里先忽略</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    PHP_FE(test, <span class="literal">NULL</span>)</span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 模块注册 */</span></span><br><span class="line">zend_module_entry test_module_entry = &#123;</span><br><span class="line">    STANDARD_MODULE_HEADER,</span><br><span class="line">    <span class="string">&quot;test&quot;</span>,                    <span class="comment">/* 扩展名称 */</span></span><br><span class="line">    test_functions,            <span class="comment">/* 自定义函数注册 */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_MINIT */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_MSHUTDOWN */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_RINIT */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_RSHUTDOWN */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_MINFO */</span></span><br><span class="line">    PHP_TEST_VERSION,          <span class="comment">/* version */</span></span><br><span class="line">    STANDARD_MODULE_PROPERTIES</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 函数test */</span></span><br><span class="line">PHP_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    RETURN_STRING(<span class="string">&quot;Hello World&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> COMPILE_DL_TEST</span></span><br><span class="line"><span class="meta"># <span class="keyword">ifdef</span> ZTS</span></span><br><span class="line">ZEND_TSRMLS_CACHE_DEFINE()</span><br><span class="line"><span class="meta"># <span class="keyword">endif</span></span></span><br><span class="line">ZEND_GET_MODULE(test)</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
-
-<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">phpize</span><br><span class="line">./configure</span><br><span class="line"><span class="comment"># 除非config.m4有改动，否则只执行以下命令</span></span><br><span class="line">make &amp;&amp; <span class="built_in">sudo</span> make install</span><br></pre></td></tr></table></figure>
-
-<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>在<code>php.ini</code>添加<code>extension=test.so</code>，执行脚本获取输出</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">php -r <span class="string">&quot;echo test();&quot;</span> <span class="comment"># 输出：Hello World</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="INI参数"><a href="#INI参数" class="headerlink" title="INI参数"></a>INI参数</h2><p>Zend Engine提供了两种方式访问ini参数，以下是第一种较为简单的方式，第二种方式与全局变量搭配使用，后面介绍</p>
-<p>我们在PHP的声明周期MINIT阶段注册ini参数，在<code>php_test.h</code>添加MINIT原型声明</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// test模块初始化</span></span><br><span class="line">PHP_MINIT_FUNCTION(test);</span><br><span class="line"><span class="comment">// test模块关闭清理函数</span></span><br><span class="line">PHP_MSHUTDOWN_FUNCTION(test);</span><br></pre></td></tr></table></figure>
-
-<p><code>test.c</code>做以下调整，注册MINIT，init参数声明</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;php_ini.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">zend_module_entry test_module_entry = &#123;</span><br><span class="line">    STANDARD_MODULE_HEADER,</span><br><span class="line">    <span class="string">&quot;test&quot;</span>,</span><br><span class="line">    test_functions,</span><br><span class="line">    PHP_MINIT(test),      <span class="comment">/* 注册MINIT */</span></span><br><span class="line">    PHP_MSHUTDOWN(test),  <span class="comment">/* 注册MSHUTDOWN */</span></span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    PHP_TEST_VERSION,</span><br><span class="line">    STANDARD_MODULE_PROPERTIES</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ini参数获取代码块</span></span><br><span class="line">PHP_INI_BEGIN()</span><br><span class="line">    <span class="comment">// ini参数test.foo声明</span></span><br><span class="line">    PHP_INI_ENTRY(<span class="string">&quot;test.foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, PHP_INI_ALL, <span class="literal">NULL</span>)</span><br><span class="line">PHP_INI_END();</span><br><span class="line"><span class="comment">// 以上宏等同于声明zend_ini_entry_def[]变量</span></span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    REGISTER_INI_ENTRIES();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_MSHUTDOWN_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    UNREGISTER_INI_ENTRIES();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    RETURN_STRING(INI_STR(<span class="string">&quot;test.foo&quot;</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>ini参数声明放置在<code>PHP_INI_BEGIN</code>、<code>PHP_INI_END</code>，参数声明使用宏<code>PHP_INI_ENTRY</code>，具体格式为<code>PHP_INI_ENTRY(param_name, default_val, access_mode_modifier, validator)</code></p>
-<p><code>access_mode_modifier</code>决定ini参数可在什么地方被修改，主要有</p>
-<ul>
-<li>PHP_INI_ALL: 值可通过php.ini、.htaccess、ini_set修改</li>
-<li>PHP_INI_SYSTEM: 只可通过php.ini修改</li>
-<li>PHP_INI_PERDIR: 只可通过.htaccess修改</li>
-</ul>
-<p><code>validator</code>校验这里先忽略</p>
-<p>ini参数值获取方式如下</p>
-<table>
-<thead>
-<tr>
-<th align="left">当前值local value</th>
-<th align="left">默认值master value</th>
-<th align="left">返回值类型</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">INI_STR</td>
-<td align="left">INI_ORIG_STR</td>
-<td align="left">char *</td>
-</tr>
-<tr>
-<td align="left">INI_INT</td>
-<td align="left">INI_ORIG_STR</td>
-<td align="left">zend_long</td>
-</tr>
-<tr>
-<td align="left">INI_FLT</td>
-<td align="left">INI_ORIG_STR</td>
-<td align="left">double</td>
-</tr>
-<tr>
-<td align="left">INI_BOOL</td>
-<td align="left">INI_ORIG_STR</td>
-<td align="left">zend_bool</td>
-</tr>
-</tbody></table>
-<p>配置PHP，在<code>php.ini</code>添加<code>test.foo=helloworld</code>，执行脚本获取输出</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">php -r <span class="string">&quot;echo test();&quot;</span> <span class="comment"># 输出：helloworld</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="全局变量"><a href="#全局变量" class="headerlink" title="全局变量"></a>全局变量</h2><p>上面部分的ini参数获取代码有几个问题，第一，每次读取ini参数值时，都需要系统扫描ini设置表，并转换成相应的类型；第二，没有校验用户输入，这样用户使用<code>ini_set</code>可以设置任意数据</p>
-<p>我们可以配置ini参数到全局变量，避免每次扫描ini设置表，在这之前，先看看如何使用全局变量编写一个计数器</p>
-<p>头文件<code>php_test.h</code>添加全局变量声明，并定义一个宏来访问我们的全局变量</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifdef</span> ZTS</span></span><br><span class="line"><span class="meta"># <span class="keyword">include</span> <span class="string">&quot;TSRM.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 全局变量声明 */</span></span><br><span class="line">ZEND_BEGIN_MODULE_GLOBALS(test)</span><br><span class="line">    <span class="type">long</span> counter;</span><br><span class="line">ZEND_END_MODULE_GLOBALS(test)</span><br><span class="line"><span class="comment">/* </span></span><br><span class="line"><span class="comment"> * 上面代码等同</span></span><br><span class="line"><span class="comment"> * typedef struct _zend_pib_globals &#123;</span></span><br><span class="line"><span class="comment"> *     long counter;</span></span><br><span class="line"><span class="comment"> * &#125; zend_test_globals;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 宏定义 TEST_G - 全局变量访问 */</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> ZTS</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> TEST_G(v) TSRMG(test_globals_id, zend_test_globals *, v)</span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> TEST_G(v) (test_globals.v)</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 请求初始化 */</span></span><br><span class="line">PHP_MINIT_FUNCTION(test);</span><br></pre></td></tr></table></figure>
-
-<p>源文件初始化全局变量，MINIT只会在进程或线程创建时执行一次，而一个进程可以服务多个请求，我们需要计数器在每个请求开始时清零，需要RINIT函数清零counter</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 初始化zend_test_globals */</span></span><br><span class="line">ZEND_DECLARE_MODULE_GLOBALS(test)</span><br><span class="line"><span class="comment">/* 等同于 zend_test_globals test_globals; */</span></span><br><span class="line"></span><br><span class="line">zend_module_entry test_module_entry = &#123;</span><br><span class="line">    STANDARD_MODULE_HEADER,</span><br><span class="line">    <span class="string">&quot;test&quot;</span>,</span><br><span class="line">    test_functions,</span><br><span class="line">    PHP_MINIT(test),</span><br><span class="line">    PHP_MSHUTDOWN(test),</span><br><span class="line">    PHP_RINIT(test),     <span class="comment">/* 注册请求初始化函数 */</span></span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    PHP_TEST_VERSION,</span><br><span class="line">    STANDARD_MODULE_PROPERTIES</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 全局变量初始化，仅在进程/线程创建时初始化 */</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_init_globals</span><span class="params">(zend_test_globals *test_globals)</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 请求初始化</span></span><br><span class="line">PHP_RINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* 因一个进程可服务多个请求，我们需要每个请求都有独立的counter */</span></span><br><span class="line">    TEST_G(counter) = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 模块初始化</span></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* 全局变量表注册 */</span></span><br><span class="line">    ZEND_INIT_MODULE_GLOBALS(test, php_test_init_globals, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    REGISTER_INI_ENTRIES();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>执行PHP脚本获取输出验证</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">php -r <span class="string">&quot;test(); echo test();&quot;</span> <span class="comment"># 输出：2</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="INI注册全局变量"><a href="#INI注册全局变量" class="headerlink" title="INI注册全局变量"></a>INI注册全局变量</h2><p>有了上面的认识，在这里，将ini参数<code>test.direction</code>注册到全局变量，并添加validator校验</p>
-<p>头文件添加参数声明</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">ZEND_BEGIN_MODULE_GLOBALS(test)</span><br><span class="line">    <span class="type">long</span> counter;</span><br><span class="line">    zend_bool direction;</span><br><span class="line">ZEND_END_MODULE_GLOBALS(test)</span><br></pre></td></tr></table></figure>
-
-<p>源文件修改为以下</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_INI_BEGIN()</span><br><span class="line">    PHP_INI_ENTRY(<span class="string">&quot;test.foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, PHP_INI_ALL, <span class="literal">NULL</span>)</span><br><span class="line">    <span class="comment">// STD_PHP_INI_ENTRY(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr)</span></span><br><span class="line">    STD_PHP_INI_ENTRY(<span class="string">&quot;test.direction&quot;</span>, <span class="string">&quot;1&quot;</span>, PHP_INI_ALL, OnUpdateBool, direction, zend_test_globals, test_globals)</span><br><span class="line">PHP_INI_END();</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_init_globals</span><span class="params">(zend_test_globals *test_globals)</span> &#123;</span><br><span class="line">    <span class="comment">/* direction初始化，0|1 */</span></span><br><span class="line">    test_globals-&gt;direction = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (TEST_G(direction)) &#123;</span><br><span class="line">        TEST_G(counter)++;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        TEST_G(counter)--;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    RETURN_LONG(TEST_G(counter));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>STD_PHP_INI_ENTRY</code>可以使用更多参数，这里我们将参数写入全局变量<code>test_globals</code>。关联第四个参数<code>on_modify</code>校验输入值，如果成功，写入到全局变量，默认为<code>onUpdateLongGEZero</code>，其他的宏还有<code>OnUpdateLong</code>、<code>OnUpdateBool</code>、<code>OnUpdateReal</code>、<code>OnUpdateString</code>、<code>OnUpdateStringUnempty</code></p>
-<p>配置PHP，在<code>php.ini</code>添加<code>test.direction=0</code>，执行脚本获取输出</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">php -r <span class="string">&quot;echo test();&quot;</span> <span class="comment"># 输出：-1</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><p><a href="https://github.com/Y2k38/php_ext_tutorial">php_ext_tutorial</a></p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://stackoverflow.com/questions/3632160/how-to-make-a-php-extension">How to make a PHP extension</a><br><a href="https://wiki.php.net/phpng-upgrading">Upgrading PHP extensions from PHP5 to NG</a><br><del><a href="https://devzone.zend.com/303/extension-writing-part-i-introduction-to-php-and-zend/">Extension Writing Part I: Introduction to PHP and Zend (已失效)</a></del><br><a href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-I:-Introduction-to-PHP-and-Zend">Extension Writing Part I: Introduction to PHP and Zend</a><br><a href="http://www.phpinternalsbook.com/">PHP Internals Book</a><br><a href="https://wiki.php.net/internals/references">References about Maintaining and Extending PHP</a></p>
 ]]></content>
       <tags>
         <tag>php</tag>
@@ -996,6 +898,152 @@
       </tags>
   </entry>
   <entry>
+    <title>PHP扩展开发 - Part 1</title>
+    <url>/php-extension-writing-part1/</url>
+    <content><![CDATA[<p>在网上找到几篇基于PHP5的扩展开发的文章，有些古老，与PHP7不完全兼容，自己做了些简单的翻译、修改。</p>
+<p>建议开发者先阅读<a href="http://www.phpinternalsbook.com/">PHP Internals Book</a>这份在线文档，里面对PHP做了比较全面的讲解。由于PHP扩展开发的资料比较少，也鲜有PHP开发者触及到这块，编写扩展时如果遇到问题，最好是先查找PHP源代码是否有相关的使用案例，再通过网上论坛、QQ等方式寻求帮助。</p>
+<p>本文是PHP扩展开发系列的第一篇，主要介绍如何开发一个简单的PHP扩展、如何获取ini配置参数、如何配置全局变量</p>
+<p>前期准备：</p>
+<p>PHP编译选项加入<code>--enable-debug</code>以及<code>--enable-maintainer-zts</code>。<code>--enable-debug</code>生成额外的调试符号，并将优化等级设置为<code>-O0</code>，报告内存泄露等错误，使使用gdb进行debug时更为准确；<code>--enable-maintainer-zts</code>启用线程安全，开启<code>ZTS</code>宏定义，配置PHP为TSRM机制，用于编写调试多线程代码</p>
+<h2 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h2><h3 id="扩展目录结构"><a href="#扩展目录结构" class="headerlink" title="扩展目录结构"></a>扩展目录结构</h3><p>你可能会使用PHP源代码自带的脚本<code>ext/ext_skel.php</code>生成扩展骨架，但这里选择极简方式创建一个扩展，最基本的扩展只需要三个文件：配置文件<code>config.m4</code>，头文件<code>php_test.h</code>，源文件<code>test.c</code></p>
+<p><code>test</code>扩展目录结构</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">php-7.4.1</span><br><span class="line">└── ext</span><br><span class="line">    └── <span class="built_in">test</span></span><br><span class="line">        ├── config.m4</span><br><span class="line">        ├── php_test.h</span><br><span class="line">        └── test.c</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dnl 用于生成configure及其他文件</span><br><span class="line">dnl `dnl`开头的行为注释内容</span><br><span class="line">dnl 若扩展依赖外部库，使用--with，否则默认使用--enable</span><br><span class="line">PHP_ARG_ENABLE(test, whether to enable test support,</span><br><span class="line">[  --enable-test          Enable test support], no)</span><br><span class="line"></span><br><span class="line">if test &quot;$PHP_TEST&quot; != &quot;no&quot;; then</span><br><span class="line">  AC_DEFINE(HAVE_TEST, 1, [ Have test support ])</span><br><span class="line">  PHP_NEW_EXTENSION(test, test.c, $ext_shared)</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<h3 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h3><p>头文件默认格式为<code>php_extname.h</code></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> PHP_TEST_H</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> PHP_TEST_H</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* PHP扩展结构zend_module_entry */</span></span><br><span class="line"><span class="keyword">extern</span> zend_module_entry test_module_entry;</span><br><span class="line"><span class="meta"># <span class="keyword">define</span> phpext_test_ptr &amp;test_module_entry</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* version扩展版本号 */</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> PHP_TEST_VERSION <span class="string">&quot;0.1.0&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 自定义函数声明PHP_FUNCTION(your_function_name) */</span></span><br><span class="line">PHP_FUNCTION(test);</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">if</span> defined(ZTS) &amp;&amp; defined(COMPILE_DL_TEST)</span></span><br><span class="line">ZEND_TSRMLS_CACHE_EXTERN()</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="源文件"><a href="#源文件" class="headerlink" title="源文件"></a>源文件</h3><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifdef</span> HAVE_CONFIG_H</span></span><br><span class="line"><span class="meta"># <span class="keyword">include</span> <span class="string">&quot;config.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;php.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;php_test.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 自定义函数注册，最终*test_functions注册到模块声明test_module_entry */</span></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> zend_function_entry test_functions[] = &#123;</span><br><span class="line">    <span class="comment">/* </span></span><br><span class="line"><span class="comment">     * 注册`test`函数，格式为PHP_FE(func_name, arg_info)，arg_info声明参数信息，如是否是引用等，这里先忽略</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    PHP_FE(test, <span class="literal">NULL</span>)</span><br><span class="line">    PHP_FE_END</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 模块注册 */</span></span><br><span class="line">zend_module_entry test_module_entry = &#123;</span><br><span class="line">    STANDARD_MODULE_HEADER,</span><br><span class="line">    <span class="string">&quot;test&quot;</span>,                    <span class="comment">/* 扩展名称 */</span></span><br><span class="line">    test_functions,            <span class="comment">/* 自定义函数注册 */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_MINIT */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_MSHUTDOWN */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_RINIT */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_RSHUTDOWN */</span></span><br><span class="line">    <span class="literal">NULL</span>,                      <span class="comment">/* PHP_MINFO */</span></span><br><span class="line">    PHP_TEST_VERSION,          <span class="comment">/* version */</span></span><br><span class="line">    STANDARD_MODULE_PROPERTIES</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 函数test */</span></span><br><span class="line">PHP_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    RETURN_STRING(<span class="string">&quot;Hello World&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> COMPILE_DL_TEST</span></span><br><span class="line"><span class="meta"># <span class="keyword">ifdef</span> ZTS</span></span><br><span class="line">ZEND_TSRMLS_CACHE_DEFINE()</span><br><span class="line"><span class="meta"># <span class="keyword">endif</span></span></span><br><span class="line">ZEND_GET_MODULE(test)</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">phpize</span><br><span class="line">./configure</span><br><span class="line"><span class="comment"># 除非config.m4有改动，否则只执行以下命令</span></span><br><span class="line">make &amp;&amp; <span class="built_in">sudo</span> make install</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>在<code>php.ini</code>添加<code>extension=test.so</code>，执行脚本获取输出</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">php -r <span class="string">&quot;echo test();&quot;</span> <span class="comment"># 输出：Hello World</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="INI参数"><a href="#INI参数" class="headerlink" title="INI参数"></a>INI参数</h2><p>Zend Engine提供了两种方式访问ini参数，以下是第一种较为简单的方式，第二种方式与全局变量搭配使用，后面介绍</p>
+<p>我们在PHP的声明周期MINIT阶段注册ini参数，在<code>php_test.h</code>添加MINIT原型声明</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// test模块初始化</span></span><br><span class="line">PHP_MINIT_FUNCTION(test);</span><br><span class="line"><span class="comment">// test模块关闭清理函数</span></span><br><span class="line">PHP_MSHUTDOWN_FUNCTION(test);</span><br></pre></td></tr></table></figure>
+
+<p><code>test.c</code>做以下调整，注册MINIT，init参数声明</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;php_ini.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">zend_module_entry test_module_entry = &#123;</span><br><span class="line">    STANDARD_MODULE_HEADER,</span><br><span class="line">    <span class="string">&quot;test&quot;</span>,</span><br><span class="line">    test_functions,</span><br><span class="line">    PHP_MINIT(test),      <span class="comment">/* 注册MINIT */</span></span><br><span class="line">    PHP_MSHUTDOWN(test),  <span class="comment">/* 注册MSHUTDOWN */</span></span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    PHP_TEST_VERSION,</span><br><span class="line">    STANDARD_MODULE_PROPERTIES</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ini参数获取代码块</span></span><br><span class="line">PHP_INI_BEGIN()</span><br><span class="line">    <span class="comment">// ini参数test.foo声明</span></span><br><span class="line">    PHP_INI_ENTRY(<span class="string">&quot;test.foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, PHP_INI_ALL, <span class="literal">NULL</span>)</span><br><span class="line">PHP_INI_END();</span><br><span class="line"><span class="comment">// 以上宏等同于声明zend_ini_entry_def[]变量</span></span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    REGISTER_INI_ENTRIES();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_MSHUTDOWN_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    UNREGISTER_INI_ENTRIES();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    RETURN_STRING(INI_STR(<span class="string">&quot;test.foo&quot;</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ini参数声明放置在<code>PHP_INI_BEGIN</code>、<code>PHP_INI_END</code>，参数声明使用宏<code>PHP_INI_ENTRY</code>，具体格式为<code>PHP_INI_ENTRY(param_name, default_val, access_mode_modifier, validator)</code></p>
+<p><code>access_mode_modifier</code>决定ini参数可在什么地方被修改，主要有</p>
+<ul>
+<li>PHP_INI_ALL: 值可通过php.ini、.htaccess、ini_set修改</li>
+<li>PHP_INI_SYSTEM: 只可通过php.ini修改</li>
+<li>PHP_INI_PERDIR: 只可通过.htaccess修改</li>
+</ul>
+<p><code>validator</code>校验这里先忽略</p>
+<p>ini参数值获取方式如下</p>
+<table>
+<thead>
+<tr>
+<th align="left">当前值local value</th>
+<th align="left">默认值master value</th>
+<th align="left">返回值类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">INI_STR</td>
+<td align="left">INI_ORIG_STR</td>
+<td align="left">char *</td>
+</tr>
+<tr>
+<td align="left">INI_INT</td>
+<td align="left">INI_ORIG_STR</td>
+<td align="left">zend_long</td>
+</tr>
+<tr>
+<td align="left">INI_FLT</td>
+<td align="left">INI_ORIG_STR</td>
+<td align="left">double</td>
+</tr>
+<tr>
+<td align="left">INI_BOOL</td>
+<td align="left">INI_ORIG_STR</td>
+<td align="left">zend_bool</td>
+</tr>
+</tbody></table>
+<p>配置PHP，在<code>php.ini</code>添加<code>test.foo=helloworld</code>，执行脚本获取输出</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">php -r <span class="string">&quot;echo test();&quot;</span> <span class="comment"># 输出：helloworld</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="全局变量"><a href="#全局变量" class="headerlink" title="全局变量"></a>全局变量</h2><p>上面部分的ini参数获取代码有几个问题，第一，每次读取ini参数值时，都需要系统扫描ini设置表，并转换成相应的类型；第二，没有校验用户输入，这样用户使用<code>ini_set</code>可以设置任意数据</p>
+<p>我们可以配置ini参数到全局变量，避免每次扫描ini设置表，在这之前，先看看如何使用全局变量编写一个计数器</p>
+<p>头文件<code>php_test.h</code>添加全局变量声明，并定义一个宏来访问我们的全局变量</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifdef</span> ZTS</span></span><br><span class="line"><span class="meta"># <span class="keyword">include</span> <span class="string">&quot;TSRM.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 全局变量声明 */</span></span><br><span class="line">ZEND_BEGIN_MODULE_GLOBALS(test)</span><br><span class="line">    <span class="type">long</span> counter;</span><br><span class="line">ZEND_END_MODULE_GLOBALS(test)</span><br><span class="line"><span class="comment">/* </span></span><br><span class="line"><span class="comment"> * 上面代码等同</span></span><br><span class="line"><span class="comment"> * typedef struct _zend_pib_globals &#123;</span></span><br><span class="line"><span class="comment"> *     long counter;</span></span><br><span class="line"><span class="comment"> * &#125; zend_test_globals;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 宏定义 TEST_G - 全局变量访问 */</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> ZTS</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> TEST_G(v) TSRMG(test_globals_id, zend_test_globals *, v)</span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> TEST_G(v) (test_globals.v)</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 请求初始化 */</span></span><br><span class="line">PHP_MINIT_FUNCTION(test);</span><br></pre></td></tr></table></figure>
+
+<p>源文件初始化全局变量，MINIT只会在进程或线程创建时执行一次，而一个进程可以服务多个请求，我们需要计数器在每个请求开始时清零，需要RINIT函数清零counter</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 初始化zend_test_globals */</span></span><br><span class="line">ZEND_DECLARE_MODULE_GLOBALS(test)</span><br><span class="line"><span class="comment">/* 等同于 zend_test_globals test_globals; */</span></span><br><span class="line"></span><br><span class="line">zend_module_entry test_module_entry = &#123;</span><br><span class="line">    STANDARD_MODULE_HEADER,</span><br><span class="line">    <span class="string">&quot;test&quot;</span>,</span><br><span class="line">    test_functions,</span><br><span class="line">    PHP_MINIT(test),</span><br><span class="line">    PHP_MSHUTDOWN(test),</span><br><span class="line">    PHP_RINIT(test),     <span class="comment">/* 注册请求初始化函数 */</span></span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    PHP_TEST_VERSION,</span><br><span class="line">    STANDARD_MODULE_PROPERTIES</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 全局变量初始化，仅在进程/线程创建时初始化 */</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_init_globals</span><span class="params">(zend_test_globals *test_globals)</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 请求初始化</span></span><br><span class="line">PHP_RINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* 因一个进程可服务多个请求，我们需要每个请求都有独立的counter */</span></span><br><span class="line">    TEST_G(counter) = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 模块初始化</span></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* 全局变量表注册 */</span></span><br><span class="line">    ZEND_INIT_MODULE_GLOBALS(test, php_test_init_globals, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    REGISTER_INI_ENTRIES();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行PHP脚本获取输出验证</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">php -r <span class="string">&quot;test(); echo test();&quot;</span> <span class="comment"># 输出：2</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="INI注册全局变量"><a href="#INI注册全局变量" class="headerlink" title="INI注册全局变量"></a>INI注册全局变量</h2><p>有了上面的认识，在这里，将ini参数<code>test.direction</code>注册到全局变量，并添加validator校验</p>
+<p>头文件添加参数声明</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">ZEND_BEGIN_MODULE_GLOBALS(test)</span><br><span class="line">    <span class="type">long</span> counter;</span><br><span class="line">    zend_bool direction;</span><br><span class="line">ZEND_END_MODULE_GLOBALS(test)</span><br></pre></td></tr></table></figure>
+
+<p>源文件修改为以下</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_INI_BEGIN()</span><br><span class="line">    PHP_INI_ENTRY(<span class="string">&quot;test.foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, PHP_INI_ALL, <span class="literal">NULL</span>)</span><br><span class="line">    <span class="comment">// STD_PHP_INI_ENTRY(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr)</span></span><br><span class="line">    STD_PHP_INI_ENTRY(<span class="string">&quot;test.direction&quot;</span>, <span class="string">&quot;1&quot;</span>, PHP_INI_ALL, OnUpdateBool, direction, zend_test_globals, test_globals)</span><br><span class="line">PHP_INI_END();</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_init_globals</span><span class="params">(zend_test_globals *test_globals)</span> &#123;</span><br><span class="line">    <span class="comment">/* direction初始化，0|1 */</span></span><br><span class="line">    test_globals-&gt;direction = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PHP_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (TEST_G(direction)) &#123;</span><br><span class="line">        TEST_G(counter)++;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        TEST_G(counter)--;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    RETURN_LONG(TEST_G(counter));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>STD_PHP_INI_ENTRY</code>可以使用更多参数，这里我们将参数写入全局变量<code>test_globals</code>。关联第四个参数<code>on_modify</code>校验输入值，如果成功，写入到全局变量，默认为<code>onUpdateLongGEZero</code>，其他的宏还有<code>OnUpdateLong</code>、<code>OnUpdateBool</code>、<code>OnUpdateReal</code>、<code>OnUpdateString</code>、<code>OnUpdateStringUnempty</code></p>
+<p>配置PHP，在<code>php.ini</code>添加<code>test.direction=0</code>，执行脚本获取输出</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">php -r <span class="string">&quot;echo test();&quot;</span> <span class="comment"># 输出：-1</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><p><a href="https://github.com/Y2k38/php_ext_tutorial">php_ext_tutorial</a></p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://stackoverflow.com/questions/3632160/how-to-make-a-php-extension">How to make a PHP extension</a><br><a href="https://wiki.php.net/phpng-upgrading">Upgrading PHP extensions from PHP5 to NG</a><br><del><a href="https://devzone.zend.com/303/extension-writing-part-i-introduction-to-php-and-zend/">Extension Writing Part I: Introduction to PHP and Zend (已失效)</a></del><br><a href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-I:-Introduction-to-PHP-and-Zend">Extension Writing Part I: Introduction to PHP and Zend</a><br><a href="http://www.phpinternalsbook.com/">PHP Internals Book</a><br><a href="https://wiki.php.net/internals/references">References about Maintaining and Extending PHP</a></p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>php extension</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PHP扩展开发 - Part 3</title>
+    <url>/php-extension-writing-part3/</url>
+    <content><![CDATA[<p>本文将简单介绍资源类型、资源的创建、访问、销毁操作。不再建议使用资源类型，使用类更为合适</p>
+<h2 id="资源类型"><a href="#资源类型" class="headerlink" title="资源类型"></a>资源类型</h2><p><code>zval</code>可以表示大部分的PHP数据类型，但有一样不能很好的表示其结构：指针。由于不透明的结构、无法使用传统运算符进行操作等，使得指针在PHP的表示变得困难。因此PHP用一个特殊的标记表示指针：资源，为了使资源标记具有意义，必须先注册到zend engine才能使用。</p>
+<p>在头文件定义结构体<code>php_test_person</code>以及资源名称，放置在<code>#define</code>语句后，<code>PHP_MINIT_FUNCTION(test);</code>之前</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    zend_string *name;</span><br><span class="line">    zend_long age;</span><br><span class="line">&#125; php_test_person;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PHP_TEST_PERSON_RES_NAME <span class="string">&quot;Person Data&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>源文件定义<code>le_*</code>全局变量，MINIT阶段注册，用于获取资源类型、字面意义名称、析构函数</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(<span class="literal">NULL</span>, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="初始化资源"><a href="#初始化资源" class="headerlink" title="初始化资源"></a>初始化资源</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_new)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = emalloc(<span class="keyword">sizeof</span>(php_test_person));</span><br><span class="line">    person-&gt;name = zend_string_copy(name); <span class="comment">// estrndup + zend_string =&gt; zend_string_copy</span></span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数接收参数name以及age，参数进行校验通过后，申请一段内存空间并写入数据，<code>return_value</code>返回该资源。PHP不需要知道资源的具体内部表示，只需要获取该资源存储的指针以及资源类型</p>
+<h2 id="函数接收资源参数"><a href="#函数接收资源参数" class="headerlink" title="函数接收资源参数"></a>函数接收资源参数</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_greet)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person;</span><br><span class="line">    zval *zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    person = (php_test_person *) zend_fetch_resource_ex(zperson, PHP_TEST_PERSON_RES_NAME, le_test_person);</span><br><span class="line"></span><br><span class="line">    php_printf(<span class="string">&quot;Hello &quot;</span>);</span><br><span class="line">    PHPWRITE(ZSTR_VAL(person-&gt;name), ZSTR_LEN(person-&gt;name));</span><br><span class="line">    php_printf(<span class="string">&quot;!\nAccording to my records, you are %ld years old.\n&quot;</span>, person-&gt;age);</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>ZEND_FETCH_RESOURCE</code>在PHP7中已被删除，目前获取资源的函数是<code>zend_fetch_resource</code>、<code>zend_fetch_resource_ex</code>。<code>zend_fetch_resource_ex</code>函数需要一个zval、字面意义名称、资源类型，返回一个指针。函数内部切记不要<code>free</code>该指针</p>
+<h2 id="销毁资源"><a href="#销毁资源" class="headerlink" title="销毁资源"></a>销毁资源</h2><p>在PHP中使用<code>fopen</code>打开文件并获得一个资源句柄<code>$fp</code>，接下来<code>unset($fp)</code>时文件被关闭，即使没有使用<code>fclose</code>函数。其中的奥秘在<code>zend_register_list_destructors_ex</code>，该函数第一个参数为常规资源的析构函数，第二个为持久化资源的析构函数，当离开资源变量所在作用域时，自动调用清理&#x2F;析构函数，释放内存、关闭连接或执行其他清理操作</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_person_dtor</span><span class="params">(zend_resource *res)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name); <span class="comment">// efree zend_string =&gt; zend_string_release</span></span><br><span class="line">        &#125;</span><br><span class="line">        efree(person);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="强制销毁资源"><a href="#强制销毁资源" class="headerlink" title="强制销毁资源"></a>强制销毁资源</h2><p>使用<code>zend_list_delete</code>销毁资源，该函数可销毁任何资源类型变量</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_delete)</span><br><span class="line">&#123;</span><br><span class="line">    zval * zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    zend_list_delete(Z_RES_P(zperson));</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="持久化资源"><a href="#持久化资源" class="headerlink" title="持久化资源"></a>持久化资源</h2><p>持久化资源与常规资源不同的地方在析构函数声明注册的位置，数据内存申请使用<code>pemalloc</code>代替<code>emalloc</code></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person_persist;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">    le_test_person_persist = zend_register_list_destructors_ex(<span class="literal">NULL</span>, php_test_person_persist_dtor, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通常情况下，<code>php_test_person_dtor</code>会在请求结束后调用，<code>php_test_person_persist_dtor</code>在扩展shutdown阶段调用</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_person_persist_dtor</span><span class="params">(zend_resource *res)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name);</span><br><span class="line">        &#125;</span><br><span class="line">        pefree(person, <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_dup(name, <span class="number">1</span>);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person_persist));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>test_person_pnew</code>与<code>test_person_new</code>仅在数据初始化、资源类型方面有差异</p>
+<h2 id="查找已存在的持久化资源"><a href="#查找已存在的持久化资源" class="headerlink" title="查找已存在的持久化资源"></a>查找已存在的持久化资源</h2><p>为了可以重用持久化资源，需要将其保存在一个安全的地方，zend engine提供了一个executor global通过<code>EG(persistent_list)</code>访问，该变量类型为<code>HashTable</code></p>
+<p>重新修改t<code>est_person_pnew</code></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew2)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    <span class="type">char</span> * key_raw;</span><br><span class="line">    <span class="type">size_t</span> key_len;</span><br><span class="line">    zend_string * name, * key;</span><br><span class="line">    zend_long age;</span><br><span class="line">    zval * zperson = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    key_len = spprintf(&amp;key_raw, <span class="number">0</span>, <span class="string">&quot;test_person_%s_%ld\n&quot;</span>, ZSTR_VAL(name), age);</span><br><span class="line">    key = zend_string_init(key_raw, key_len, <span class="number">1</span>);</span><br><span class="line">    efree(key_raw);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((zperson = zend_hash_find(&amp;EG(persistent_list), key)) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        person = (php_test_person *) zend_fetch_resource_ex(zperson, PHP_TEST_PERSON_RES_NAME, le_test_person_persist);</span><br><span class="line"></span><br><span class="line">        ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">        zend_string_release(key);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_copy(name);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">    zend_string_release(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>test_person_pnew2</code>先确定<code>EG(persistent_list)</code>是否已经存在，已存在则直接使用，不存在则申请内存初始化资源</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><del><a href="https://devzone.zend.com/446/extension-writing-part-iii-resources/">Extension Writing Part III: Resources</a></del><br><a href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-III:-Resources">Extension Writing Part III: Resources</a><br><a href="https://wiki.php.net/phpng-upgrading">Upgrading PHP extensions from PHP5 to NG</a><br><a href="http://www.phpinternalsbook.com/">PHP Internals Book</a><br><a href="https://wiki.php.net/internals/references">References about Maintaining and Extending PHP</a></p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>php extension</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>postgresql安装配置</title>
     <url>/postgres-setup-example/</url>
     <content><![CDATA[<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="前置依赖"><a href="#前置依赖" class="headerlink" title="前置依赖"></a>前置依赖</h3><p>系统是ubuntu 24.04 LTS，开机启动使用了systemd，所以先安装相关依赖包</p>
@@ -1045,80 +1093,6 @@
 ]]></content>
       <tags>
         <tag>postgresql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PHP扩展开发 - Part 3</title>
-    <url>/php-extension-writing-part3/</url>
-    <content><![CDATA[<p>本文将简单介绍资源类型、资源的创建、访问、销毁操作。不再建议使用资源类型，使用类更为合适</p>
-<h2 id="资源类型"><a href="#资源类型" class="headerlink" title="资源类型"></a>资源类型</h2><p><code>zval</code>可以表示大部分的PHP数据类型，但有一样不能很好的表示其结构：指针。由于不透明的结构、无法使用传统运算符进行操作等，使得指针在PHP的表示变得困难。因此PHP用一个特殊的标记表示指针：资源，为了使资源标记具有意义，必须先注册到zend engine才能使用。</p>
-<p>在头文件定义结构体<code>php_test_person</code>以及资源名称，放置在<code>#define</code>语句后，<code>PHP_MINIT_FUNCTION(test);</code>之前</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    zend_string *name;</span><br><span class="line">    zend_long age;</span><br><span class="line">&#125; php_test_person;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PHP_TEST_PERSON_RES_NAME <span class="string">&quot;Person Data&quot;</span></span></span><br></pre></td></tr></table></figure>
-
-<p>源文件定义<code>le_*</code>全局变量，MINIT阶段注册，用于获取资源类型、字面意义名称、析构函数</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(<span class="literal">NULL</span>, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="初始化资源"><a href="#初始化资源" class="headerlink" title="初始化资源"></a>初始化资源</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_new)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = emalloc(<span class="keyword">sizeof</span>(php_test_person));</span><br><span class="line">    person-&gt;name = zend_string_copy(name); <span class="comment">// estrndup + zend_string =&gt; zend_string_copy</span></span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>函数接收参数name以及age，参数进行校验通过后，申请一段内存空间并写入数据，<code>return_value</code>返回该资源。PHP不需要知道资源的具体内部表示，只需要获取该资源存储的指针以及资源类型</p>
-<h2 id="函数接收资源参数"><a href="#函数接收资源参数" class="headerlink" title="函数接收资源参数"></a>函数接收资源参数</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_greet)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person;</span><br><span class="line">    zval *zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    person = (php_test_person *) zend_fetch_resource_ex(zperson, PHP_TEST_PERSON_RES_NAME, le_test_person);</span><br><span class="line"></span><br><span class="line">    php_printf(<span class="string">&quot;Hello &quot;</span>);</span><br><span class="line">    PHPWRITE(ZSTR_VAL(person-&gt;name), ZSTR_LEN(person-&gt;name));</span><br><span class="line">    php_printf(<span class="string">&quot;!\nAccording to my records, you are %ld years old.\n&quot;</span>, person-&gt;age);</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>ZEND_FETCH_RESOURCE</code>在PHP7中已被删除，目前获取资源的函数是<code>zend_fetch_resource</code>、<code>zend_fetch_resource_ex</code>。<code>zend_fetch_resource_ex</code>函数需要一个zval、字面意义名称、资源类型，返回一个指针。函数内部切记不要<code>free</code>该指针</p>
-<h2 id="销毁资源"><a href="#销毁资源" class="headerlink" title="销毁资源"></a>销毁资源</h2><p>在PHP中使用<code>fopen</code>打开文件并获得一个资源句柄<code>$fp</code>，接下来<code>unset($fp)</code>时文件被关闭，即使没有使用<code>fclose</code>函数。其中的奥秘在<code>zend_register_list_destructors_ex</code>，该函数第一个参数为常规资源的析构函数，第二个为持久化资源的析构函数，当离开资源变量所在作用域时，自动调用清理&#x2F;析构函数，释放内存、关闭连接或执行其他清理操作</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_person_dtor</span><span class="params">(zend_resource *res)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name); <span class="comment">// efree zend_string =&gt; zend_string_release</span></span><br><span class="line">        &#125;</span><br><span class="line">        efree(person);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="强制销毁资源"><a href="#强制销毁资源" class="headerlink" title="强制销毁资源"></a>强制销毁资源</h2><p>使用<code>zend_list_delete</code>销毁资源，该函数可销毁任何资源类型变量</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_delete)</span><br><span class="line">&#123;</span><br><span class="line">    zval * zperson;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">        Z_PARAM_RESOURCE(zperson);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    zend_list_delete(Z_RES_P(zperson));</span><br><span class="line"></span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="持久化资源"><a href="#持久化资源" class="headerlink" title="持久化资源"></a>持久化资源</h2><p>持久化资源与常规资源不同的地方在析构函数声明注册的位置，数据内存申请使用<code>pemalloc</code>代替<code>emalloc</code></p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person_persist;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(php_test_person_dtor, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">    le_test_person_persist = zend_register_list_destructors_ex(<span class="literal">NULL</span>, php_test_person_persist_dtor, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>通常情况下，<code>php_test_person_dtor</code>会在请求结束后调用，<code>php_test_person_persist_dtor</code>在扩展shutdown阶段调用</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">php_test_person_persist_dtor</span><span class="params">(zend_resource *res)</span></span><br><span class="line">&#123;</span><br><span class="line">    php_test_person *person = (php_test_person *) res-&gt;ptr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (person) &#123;</span><br><span class="line">        <span class="keyword">if</span> (person-&gt;name) &#123;</span><br><span class="line">            zend_string_release(person-&gt;name);</span><br><span class="line">        &#125;</span><br><span class="line">        pefree(person, <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    zend_string * name;</span><br><span class="line">    zend_long age;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_dup(name, <span class="number">1</span>);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    RETURN_RES(zend_register_resource(person, le_test_person_persist));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>test_person_pnew</code>与<code>test_person_new</code>仅在数据初始化、资源类型方面有差异</p>
-<h2 id="查找已存在的持久化资源"><a href="#查找已存在的持久化资源" class="headerlink" title="查找已存在的持久化资源"></a>查找已存在的持久化资源</h2><p>为了可以重用持久化资源，需要将其保存在一个安全的地方，zend engine提供了一个executor global通过<code>EG(persistent_list)</code>访问，该变量类型为<code>HashTable</code></p>
-<p>重新修改t<code>est_person_pnew</code></p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">PHP_FUNCTION(test_person_pnew2)</span><br><span class="line">&#123;</span><br><span class="line">    php_test_person * person;</span><br><span class="line">    <span class="type">char</span> * key_raw;</span><br><span class="line">    <span class="type">size_t</span> key_len;</span><br><span class="line">    zend_string * name, * key;</span><br><span class="line">    zend_long age;</span><br><span class="line">    zval * zperson = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name);</span><br><span class="line">        Z_PARAM_LONG(age);</span><br><span class="line">    ZEND_PARSE_PARAMETERS_END();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (age &lt; <span class="number">0</span> || age &gt; <span class="number">255</span>) &#123;</span><br><span class="line">        php_error_docref(<span class="literal">NULL</span>, E_WARNING, <span class="string">&quot;Nonsense age (%ld) given, person resource not created.&quot;</span>, age);</span><br><span class="line">        RETURN_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    key_len = spprintf(&amp;key_raw, <span class="number">0</span>, <span class="string">&quot;test_person_%s_%ld\n&quot;</span>, ZSTR_VAL(name), age);</span><br><span class="line">    key = zend_string_init(key_raw, key_len, <span class="number">1</span>);</span><br><span class="line">    efree(key_raw);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((zperson = zend_hash_find(&amp;EG(persistent_list), key)) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        person = (php_test_person *) zend_fetch_resource_ex(zperson, PHP_TEST_PERSON_RES_NAME, le_test_person_persist);</span><br><span class="line"></span><br><span class="line">        ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">        zend_string_release(key);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    person = pemalloc(<span class="keyword">sizeof</span>(php_test_person), <span class="number">1</span>);</span><br><span class="line">    person-&gt;name = zend_string_copy(name);</span><br><span class="line">    person-&gt;age = age;</span><br><span class="line"></span><br><span class="line">    ZVAL_RES(return_value, zend_register_persistent_resource_ex(key, person, le_test_person_persist));</span><br><span class="line">    zend_string_release(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>test_person_pnew2</code>先确定<code>EG(persistent_list)</code>是否已经存在，已存在则直接使用，不存在则申请内存初始化资源</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><del><a href="https://devzone.zend.com/446/extension-writing-part-iii-resources/">Extension Writing Part III: Resources</a></del><br><a href="https://github.com/bigbes/bigbes.github.io/wiki/Extension-Writing-Part-III:-Resources">Extension Writing Part III: Resources</a><br><a href="https://wiki.php.net/phpng-upgrading">Upgrading PHP extensions from PHP5 to NG</a><br><a href="http://www.phpinternalsbook.com/">PHP Internals Book</a><br><a href="https://wiki.php.net/internals/references">References about Maintaining and Extending PHP</a></p>
-]]></content>
-      <tags>
-        <tag>php</tag>
-        <tag>php extension</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>记一次xdebug异常</title>
-    <url>/vagrant-xdebug-not-working/</url>
-    <content><![CDATA[<p>工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴</p>
-<h2 id="问题及解决过程"><a href="#问题及解决过程" class="headerlink" title="问题及解决过程"></a>问题及解决过程</h2><h3 id="异常情况"><a href="#异常情况" class="headerlink" title="异常情况"></a>异常情况</h3><p>xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错；监测网络数据，只有初次请求数据，无结果返回</p>
-<h3 id="客户端-服务器配置信息"><a href="#客户端-服务器配置信息" class="headerlink" title="客户端&#x2F;服务器配置信息"></a>客户端&#x2F;服务器配置信息</h3><p>服务器是vagrant + ubuntu 18.04 + PHP 7.4，客户端是Windows 10，编辑器是vscode</p>
-<p>初始xdebug配置如下</p>
-<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="section">[xdebug]</span></span><br><span class="line"><span class="attr">xdebug.remote_enable</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_autostart</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_port</span> = <span class="number">9001</span></span><br><span class="line"><span class="attr">xdebug.remote_handler</span> = <span class="string">&quot;dbgp&quot;</span></span><br><span class="line"><span class="attr">xdebug.remote_mode</span> = req</span><br><span class="line"><span class="attr">xdebug.remote_connect_back</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.overload_var_dump</span>=<span class="number">0</span></span><br></pre></td></tr></table></figure>
-
-<p>vscode配置launch.json如下</p>
-<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.2.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;configurations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Listen for XDebug&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;php&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">9001</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;pathMappings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;/data/example&quot;</span><span class="punctuation">:</span> <span class="string">&quot;D:\\data\\example&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;log&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="开启xdebug日志监测"><a href="#开启xdebug日志监测" class="headerlink" title="开启xdebug日志监测"></a>开启xdebug日志监测</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.remote_log</span>=/tmp/xdebug.log</span><br></pre></td></tr></table></figure>
-
-<p>再次请求，获取日志数据如下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[140114918627520] Log opened at 2019-09-04 11:49:00</span><br><span class="line">[140114918627520] I: Checking remote connect back address.</span><br><span class="line">[140114918627520] I: Checking header &#x27;HTTP_X_FORWARDED_FOR&#x27;.</span><br><span class="line">[140114918627520] I: Checking header &#x27;REMOTE_ADDR&#x27;.</span><br><span class="line">[140114918627520] I: Remote address found, connecting to 192.168.33.1:9001.</span><br><span class="line">[140114918627520] E: Time-out connecting to client (Waited: 200 ms). :-(</span><br><span class="line">[140114918627520] Log closed at 2019-09-04 11:49:00</span><br></pre></td></tr></table></figure>
-
-<p>日志显示服务端有正常向客户端9001端口发起连接，但客户端无响应导致超时，检查客户端防火墙无异常</p>
-<p>最后，在谷歌上找到一个类似的问题，发现问题与vagrant有关，具体问题描述见参考文档链接</p>
-<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="comment">; 移除 xdebug.remote_connect_back = 1</span></span><br><span class="line"><span class="comment">; 添加</span></span><br><span class="line"><span class="attr">xdebug.remote_host</span>=<span class="number">10.0</span>.<span class="number">2.2</span></span><br></pre></td></tr></table></figure>
-
-<p>重启php-fpm，再次测试，vscode可连接xdebug，问题解决</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://danemacmillan.com/how-to-configure-xdebug-in-phpstorm-through-vagrant/">How to configure Xdebug in PhpStorm through Vagrant</a><br><a href="https://stackoverflow.com/questions/24831707/xdebug-time-out-connecting-to-client-using-phpstorm-7-1-3-vagrant-virtualbo">xdebug Time-out connecting to client</a></p>
-]]></content>
-      <tags>
-        <tag>php</tag>
-        <tag>vagrant</tag>
-        <tag>xdebug</tag>
       </tags>
   </entry>
   <entry>
@@ -1313,11 +1287,41 @@
 </ol>
 <p>这个问题很奇怪，除了前面提到的网络问题，还可能是hash值不匹配</p>
 <p>当时我改了<a href="https://raw.githubusercontent.com/kubernetes/website/main/content/en/examples/controllers/nginx-deployment.yaml">nginx-deployment.yaml</a>里的镜像，而且确认本地已经拉取过来了，但部署时就一直报错，最后我在物理机重新拉取镜像时发现hash值居然对不上，最后重新打tag推送才解决</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/install-kubeadm/">安装 kubeadm</a><br><a href="https://blog.radwell.codes/2022/07/single-node-kubernetes-cluster-via-kubeadm-on-ubuntu-22-04/">Simple Single-node Kubernetes Cluster via kubeadm on Ubuntu 22.04</a><br><a href="https://www.linuxtechi.com/install-kubernetes-cluster-on-debian/">How to Install Kubernetes Cluster on Debian 12 | 11</a><br><a href="https://izsk.me/2023/06/03/cilium-on-kubernetes-install/">cilium在kubernetes中的生产实践二(cilium部署)</a><br><a href="https://www.tutorialworks.com/difference-docker-containerd-runc-crio-oci/#:~:text=runc%20provides%20all%20of%20the,create%20and%20run%20container%20processes.">The differences between Docker, containerd, CRI-O and runc</a><br><a href="https://spacelift.io/blog/kubernetes-dashboard">Kubernetes Dashboard: Tutorial, Best Practices &amp; Alternatives</a><br><a href="https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md">Creating sample user</a><br><a href="https://unix.stackexchange.com/questions/402999/is-it-ok-to-change-etc-machine-id">Is it OK to change &#x2F;etc&#x2F;machine-id?</a></p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/install-kubeadm/">安装 kubeadm</a><br><a href="https://blog.radwell.codes/2022/07/single-node-kubernetes-cluster-via-kubeadm-on-ubuntu-22-04/">Simple Single-node Kubernetes Cluster via kubeadm on Ubuntu 22.04</a><br><a href="https://www.linuxtechi.com/install-kubernetes-cluster-on-debian/">How to Install Kubernetes Cluster on Debian 12 | 11</a><br><a href="https://izsk.me/2023/06/03/cilium-on-kubernetes-install/">cilium在kubernetes中的生产实践二(cilium部署)</a><br><a href="https://www.tutorialworks.com/difference-docker-containerd-runc-crio-oci/#:~:text=runc%20provides%20all%20of%20the,create%20and%20run%20container%20processes.">The differences between Docker, containerd, CRI-O and runc</a><br><a href="https://spacelift.io/blog/kubernetes-dashboard">Kubernetes Dashboard: Tutorial, Best Practices &amp; Alternatives</a><br><a href="https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md">Creating sample user</a><br><a href="https://unix.stackexchange.com/questions/402999/is-it-ok-to-change-etc-machine-id">Is it OK to change &#x2F;etc&#x2F;machine-id?</a><br><a href="https://developer-friendly.blog/blog/2024/03/03/kubernetes-the-hard-way/">Kubernetes The Hard Way</a></p>
 ]]></content>
       <tags>
         <tag>kubernetes</tag>
         <tag>kubeadm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>记一次xdebug异常</title>
+    <url>/vagrant-xdebug-not-working/</url>
+    <content><![CDATA[<p>工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴</p>
+<h2 id="问题及解决过程"><a href="#问题及解决过程" class="headerlink" title="问题及解决过程"></a>问题及解决过程</h2><h3 id="异常情况"><a href="#异常情况" class="headerlink" title="异常情况"></a>异常情况</h3><p>xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错；监测网络数据，只有初次请求数据，无结果返回</p>
+<h3 id="客户端-服务器配置信息"><a href="#客户端-服务器配置信息" class="headerlink" title="客户端&#x2F;服务器配置信息"></a>客户端&#x2F;服务器配置信息</h3><p>服务器是vagrant + ubuntu 18.04 + PHP 7.4，客户端是Windows 10，编辑器是vscode</p>
+<p>初始xdebug配置如下</p>
+<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="section">[xdebug]</span></span><br><span class="line"><span class="attr">xdebug.remote_enable</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_autostart</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_port</span> = <span class="number">9001</span></span><br><span class="line"><span class="attr">xdebug.remote_handler</span> = <span class="string">&quot;dbgp&quot;</span></span><br><span class="line"><span class="attr">xdebug.remote_mode</span> = req</span><br><span class="line"><span class="attr">xdebug.remote_connect_back</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.overload_var_dump</span>=<span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>vscode配置launch.json如下</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.2.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;configurations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Listen for XDebug&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;php&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">9001</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;pathMappings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;/data/example&quot;</span><span class="punctuation">:</span> <span class="string">&quot;D:\\data\\example&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;log&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="开启xdebug日志监测"><a href="#开启xdebug日志监测" class="headerlink" title="开启xdebug日志监测"></a>开启xdebug日志监测</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.remote_log</span>=/tmp/xdebug.log</span><br></pre></td></tr></table></figure>
+
+<p>再次请求，获取日志数据如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[140114918627520] Log opened at 2019-09-04 11:49:00</span><br><span class="line">[140114918627520] I: Checking remote connect back address.</span><br><span class="line">[140114918627520] I: Checking header &#x27;HTTP_X_FORWARDED_FOR&#x27;.</span><br><span class="line">[140114918627520] I: Checking header &#x27;REMOTE_ADDR&#x27;.</span><br><span class="line">[140114918627520] I: Remote address found, connecting to 192.168.33.1:9001.</span><br><span class="line">[140114918627520] E: Time-out connecting to client (Waited: 200 ms). :-(</span><br><span class="line">[140114918627520] Log closed at 2019-09-04 11:49:00</span><br></pre></td></tr></table></figure>
+
+<p>日志显示服务端有正常向客户端9001端口发起连接，但客户端无响应导致超时，检查客户端防火墙无异常</p>
+<p>最后，在谷歌上找到一个类似的问题，发现问题与vagrant有关，具体问题描述见参考文档链接</p>
+<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="comment">; 移除 xdebug.remote_connect_back = 1</span></span><br><span class="line"><span class="comment">; 添加</span></span><br><span class="line"><span class="attr">xdebug.remote_host</span>=<span class="number">10.0</span>.<span class="number">2.2</span></span><br></pre></td></tr></table></figure>
+
+<p>重启php-fpm，再次测试，vscode可连接xdebug，问题解决</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://danemacmillan.com/how-to-configure-xdebug-in-phpstorm-through-vagrant/">How to configure Xdebug in PhpStorm through Vagrant</a><br><a href="https://stackoverflow.com/questions/24831707/xdebug-time-out-connecting-to-client-using-phpstorm-7-1-3-vagrant-virtualbo">xdebug Time-out connecting to client</a></p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>vagrant</tag>
+        <tag>xdebug</tag>
       </tags>
   </entry>
 </search>
