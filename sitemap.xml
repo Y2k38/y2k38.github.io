@@ -237,6 +237,20 @@
   </url>
   
   <url>
+    <loc>https://y2k38.github.io/tags/docker/</loc>
+    <lastmod>2024-09-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/registry/</loc>
+    <lastmod>2024-09-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://y2k38.github.io/tags/shadowsocks/</loc>
     <lastmod>2024-09-22</lastmod>
     <changefreq>weekly</changefreq>
@@ -258,27 +272,6 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/docker/</loc>
-    <lastmod>2024-09-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/registry/</loc>
-    <lastmod>2024-09-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/kubernetes/</loc>
-    <lastmod>2024-09-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://y2k38.github.io/tags/kvm/</loc>
     <lastmod>2024-09-22</lastmod>
     <changefreq>weekly</changefreq>
@@ -287,6 +280,13 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/cockpit/</loc>
+    <lastmod>2024-09-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/kubernetes/</loc>
     <lastmod>2024-09-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
