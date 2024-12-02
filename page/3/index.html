@@ -19,31 +19,25 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="简单介绍如何生成https服务所需要的证书、私钥以及部署，文档分别描述了开发时使用的self-signed证书以及线上使用的let’s encrypt免费证书的生成方法 自签名证书创建证书以及私钥1sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout &#x2F;etc&#x2F;ssl&#x2F;private&#x2F;nginx-selfsigned.ke">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Nginx配置HTTPS访问">
-<meta property="og:url" content="https://y2k38.github.io/configure-nginx-with-https/index.html">
+    <meta name="description" content="个人笔记">
+<meta property="og:type" content="website">
+<meta property="og:title" content="noname">
+<meta property="og:url" content="https://y2k38.github.io/page/3/index.html">
 <meta property="og:site_name" content="noname">
-<meta property="og:description" content="简单介绍如何生成https服务所需要的证书、私钥以及部署，文档分别描述了开发时使用的self-signed证书以及线上使用的let’s encrypt免费证书的生成方法 自签名证书创建证书以及私钥1sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout &#x2F;etc&#x2F;ssl&#x2F;private&#x2F;nginx-selfsigned.ke">
+<meta property="og:description" content="个人笔记">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2019-09-02T10:01:56.000Z">
-<meta property="article:modified_time" content="2024-08-17T07:03:34.809Z">
 <meta property="article:author" content="y2k38">
-<meta property="article:tag" content="nginx">
-<meta property="article:tag" content="ssl">
-<meta property="article:tag" content="https">
-<meta property="article:tag" content="let&#39;s enctypt">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://y2k38.github.io/configure-nginx-with-https/">
+<link rel="canonical" href="https://y2k38.github.io/page/3/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/configure-nginx-with-https/","path":"configure-nginx-with-https/","title":"Nginx配置HTTPS访问"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":true,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"page/3/index.html","title":""}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Nginx配置HTTPS访问 | noname</title>
+<title>noname</title>
   
 
 
@@ -73,7 +67,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <p class="site-title">noname</p>
+      <h1 class="site-title">noname</h1>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -95,7 +89,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+    <div class="sidebar-inner sidebar-overview-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -108,7 +102,6 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6"><span class="nav-number">1.</span> <span class="nav-text">自签名证书</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%AF%81%E4%B9%A6%E4%BB%A5%E5%8F%8A%E7%A7%81%E9%92%A5"><span class="nav-number">1.1.</span> <span class="nav-text">创建证书以及私钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEnginx"><span class="nav-number">1.2.</span> <span class="nav-text">配置nginx</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A3%E5%BC%8F%E8%AF%81%E4%B9%A6"><span class="nav-number">2.</span> <span class="nav-text">正式证书</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#let%E2%80%99t-encrypt%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.</span> <span class="nav-text">let’t encrypt安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E8%AF%81%E4%B9%A6%E4%BB%A5%E5%8F%8A%E7%A7%81%E9%92%A5"><span class="nav-number">2.2.</span> <span class="nav-text">生成证书以及私钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEnginx-1"><span class="nav-number">2.3.</span> <span class="nav-text">配置nginx</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="nav-number">3.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -143,17 +136,16 @@
 
     </div>
 
-    <div class="main-inner post posts-expand">
+    <div class="main-inner index posts-expand">
 
-
-  
+    
 
 
 <div class="post-block">
   
   
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/configure-nginx-with-https/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -167,13 +159,13 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Nginx配置HTTPS访问 | noname">
+      <meta itemprop="name" content="undefined | noname">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Nginx配置HTTPS访问
-        </h1>
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/configure-nginx-with-https/" class="post-title-link" itemprop="url">Nginx配置HTTPS访问</a>
+        </h2>
 
         <div class="post-meta-container">
           <div class="post-meta">
@@ -217,7 +209,8 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>简单介绍如何生成https服务所需要的证书、私钥以及部署，文档分别描述了开发时使用的self-signed证书以及线上使用的let’s encrypt免费证书的生成方法</p>
+    <div class="post-body" itemprop="articleBody">
+          <p>简单介绍如何生成https服务所需要的证书、私钥以及部署，文档分别描述了开发时使用的self-signed证书以及线上使用的let’s encrypt免费证书的生成方法</p>
 <h2 id="自签名证书"><a href="#自签名证书" class="headerlink" title="自签名证书"></a>自签名证书</h2><h3 id="创建证书以及私钥"><a href="#创建证书以及私钥" class="headerlink" title="创建证书以及私钥"></a>创建证书以及私钥</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt</span><br></pre></td></tr></table></figure>
 
 <ul>
@@ -267,6 +260,7 @@
 <p>重启nginx，完成</p>
 <h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-in-ubuntu-18-04">How To Create a Self-Signed SSL Certificate for Nginx in Ubuntu 18.04</a><br><a target="_blank" rel="noopener" href="https://www.linode.com/docs/security/ssl/install-lets-encrypt-to-create-ssl-certificates/">Install Let’s Encrypt to Create SSL Certificates</a><br><a target="_blank" rel="noopener" href="https://gist.github.com/cecilemuller/a26737699a7e70a7093d4dc115915de8">How to setup Let’s Encrypt for Nginx on Ubuntu 18.04 (including IPv6, HTTP&#x2F;2 and A+ SLL rating)</a><br><a target="_blank" rel="noopener" href="https://certbot.eff.org/docs/using.html">Certbot User Guide</a><br><a target="_blank" rel="noopener" href="http://manpages.ubuntu.com/manpages/xenial/man1/letsencrypt.1.html">letsencrypt man</a></p>
 
+      
     </div>
 
     
@@ -274,24 +268,8 @@
     
 
     <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/nginx/" rel="tag"># nginx</a>
-              <a href="/tags/ssl/" rel="tag"># ssl</a>
-              <a href="/tags/https/" rel="tag"># https</a>
-              <a href="/tags/let-s-enctypt/" rel="tag"># let's enctypt</a>
-          </div>
-
-        
-
-          <div class="post-nav">
-            <div class="post-nav-item">
-            </div>
-            <div class="post-nav-item">
-                <a href="/personal-blog-using-github-pages/" rel="next" title="使用github pages搭建个人博客">
-                  使用github pages搭建个人博客 <i class="fa fa-angle-right"></i>
-                </a>
-            </div>
-          </div>
+        <div class="post-eof"></div>
+      
     </footer>
   </article>
 </div>
@@ -299,14 +277,10 @@
 
 
 
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
+  </nav>
 
-
-    
-  
-  <div class="comments giscus-container">
-  </div>
-  
-  
 </div>
   </main>
 
