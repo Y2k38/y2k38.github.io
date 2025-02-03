@@ -114,13 +114,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-count">23</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-count">35</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -137,6 +137,241 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/use-colima-as-an-alternative-to-docker-mac/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/use-colima-as-an-alternative-to-docker-mac/" class="post-title-link" itemprop="url">使用colima作为docker desktop的替代</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-02-03 16:30:30 / 修改时间：16:33:13" itemprop="dateCreated datePublished" datetime="2025-02-03T16:30:30+08:00">2025-02-03</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>296</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>简单介绍下macOS当前docker运行环境的最新选择：colima，一个开源产品，使用体验与vagrant类似，感觉非常不错</p>
+<h2 id="colima"><a href="#colima" class="headerlink" title="colima"></a>colima</h2><p>根据<a target="_blank" rel="noopener" href="https://github.com/abiosoft/colima">colima</a>官方仓库指导安装colima</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install colima</span><br></pre></td></tr></table></figure>
+
+<p>colima默认的runtime是docker，因为k8s已经剥离了docker，只保留containerd，所以为了跟k8s保持一致，另外也不想再多安装一个软件，就选择了只用containerd</p>
+<p>但如果你使用了docker compose，那么最好还是根据教程安装docker以及docker-compose</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 拉取镜像并创建vm</span></span><br><span class="line">colima start --cpu 1 --memory 2 --disk 50 --runtime containerd</span><br><span class="line"><span class="comment"># 这里还可以开启kubernetes支持</span></span><br><span class="line"><span class="comment"># colima start --cpu 4 --memory 8 --disk 100 --runtime containerd --kubernetes</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看vm列表</span></span><br><span class="line">colima list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接vm</span></span><br><span class="line">colima ssh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装nerdctl用于支持containerd</span></span><br><span class="line">colima nerdctl install</span><br></pre></td></tr></table></figure>
+
+<h2 id="nerdctl"><a href="#nerdctl" class="headerlink" title="nerdctl"></a>nerdctl</h2><p>nerdctl是containerd的非核心命令行管理工具，与docker命令完全兼容，<code>containerd + nerdctl = docker</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看docker镜像列表，相当于docker image ls</span></span><br><span class="line">nerdctl image <span class="built_in">ls</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 拉取镜像</span></span><br><span class="line">nerdctl pull mysql:9.2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建container</span></span><br><span class="line">nerdctl run --name mysql9 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=a123456 -d mysql:9.2 --character-set-server=utf8mb4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看container列表</span></span><br><span class="line">nerdctl ps -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接container</span></span><br><span class="line">nerdctl <span class="built_in">exec</span> -it mysql9 bash</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://github.com/abiosoft/colima">colima</a><br><a target="_blank" rel="noopener" href="https://github.com/containerd/nerdctl">nerdctl</a><br><a target="_blank" rel="noopener" href="https://smallsharpsoftwaretools.com/tutorials/use-colima-to-run-docker-containers-on-macos/">Use Colima to Run Docker Containers on macOS</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/the-difference-between-mysql-and-postgresql-for-web-developer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/the-difference-between-mysql-and-postgresql-for-web-developer/" class="post-title-link" itemprop="url">MySQL与PostgreSQL的使用区别</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-02-03 14:43:46 / 修改时间：16:38:04" itemprop="dateCreated datePublished" datetime="2025-02-03T14:43:46+08:00">2025-02-03</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>以<code>MySQL 9</code>以及<code>PostgreSQL 17</code>为例，从Web开发者的角度出发，列举两个数据库在使用方面的差异</p>
+<h2 id="账号管理"><a href="#账号管理" class="headerlink" title="账号管理"></a>账号管理</h2><h3 id="管理员"><a href="#管理员" class="headerlink" title="管理员"></a>管理员</h3><p><code>MySQL</code>创建管理员账户操作如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 创建mydb_admin管理员账户</span></span><br><span class="line"><span class="comment">-- 格式：`CREATE USER &#x27;username&#x27;@&#x27;host&#x27; IDENTIFIED WITH authentication_plugin BY &#x27;password&#x27;;`</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;mydb_admin&#x27;</span>@<span class="string">&#x27;%&#x27;</span> IDENTIFIED <span class="keyword">WITH</span> caching_sha2_password <span class="keyword">BY</span> <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 授权数据库/表访问权限</span></span><br><span class="line"><span class="comment">-- 格式：`GRANT PRIVILEGE ON database.table TO &#x27;username&#x27;@&#x27;host&#x27;;`</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> mydb.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;mydb_admin&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br><span class="line"><span class="comment">-- 如果不清楚有哪些权限，执行</span></span><br><span class="line"><span class="comment">-- SHOW PRIVILEGES;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 立即生效</span></span><br><span class="line">FLUSH PRIVILEGES;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 4. 查看账户列表核对</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> mysql.user;</span><br><span class="line"><span class="comment">-- SELECT * FROM mysql.user WHERE User=&#x27;mydb_admin&#x27; AND Host=&#x27;%&#x27;;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 5.查看账户授权</span></span><br><span class="line"><span class="keyword">SHOW</span> GRANTS <span class="keyword">FOR</span> <span class="string">&#x27;mydb_admin&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>PostgreSQL</code>创建管理员账户操作如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 创建mydb_admin_user管理员账户</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> mydb_admin_user LOGIN PASSWORD <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 授权数据库/表访问权限（需要多条语句）</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> DATABASE mydb <span class="keyword">TO</span> mydb_admin_user;</span><br><span class="line"><span class="comment">-- 连接权限</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">CONNECT</span> <span class="keyword">ON</span> DATABASE mydb <span class="keyword">TO</span> mydb_admin_user;</span><br><span class="line"><span class="comment">-- 所有跟public相关的授权都需要先切换到指定数据库</span></span><br><span class="line">\c mydb;</span><br><span class="line"><span class="comment">-- 授权public</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> SCHEMA public <span class="keyword">TO</span> mydb_admin_user;</span><br><span class="line"><span class="comment">-- 如果不想让账号访问其他db</span></span><br><span class="line"><span class="comment">-- REVOKE CONNECT ON DATABASE otherdb1 FROM PUBLIC;</span></span><br><span class="line"><span class="comment">-- 后续所有变更自动授权</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DEFAULT</span> PRIVILEGES <span class="keyword">IN</span> SCHEMA public <span class="keyword">GRANT</span> <span class="keyword">ALL</span> <span class="keyword">ON</span> TABLES <span class="keyword">TO</span> mydb_admin_user;</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DEFAULT</span> PRIVILEGES <span class="keyword">IN</span> SCHEMA public <span class="keyword">GRANT</span> <span class="keyword">ALL</span> <span class="keyword">ON</span> SEQUENCES <span class="keyword">TO</span> mydb_admin_user;</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DEFAULT</span> PRIVILEGES <span class="keyword">IN</span> SCHEMA public <span class="keyword">GRANT</span> <span class="keyword">ALL</span> <span class="keyword">ON</span> FUNCTIONS <span class="keyword">TO</span> mydb_admin_user;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意</strong></p>
+<p><code>MySQL</code>通过上面配置即可对外提供访问，<code>PostgreSQL</code>还需要配置<code>pg_hba.conf</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># TYPE  DATABASE        USER            ADDRESS                 METHOD</span><br><span class="line"># host  all             all             0.0.0.0/32              scram-sha-256</span><br><span class="line">host    mydb mydb_admin_user 0.0.0.0/32 scram-sha-256</span><br><span class="line"># hostssl mydb mydb_admin_user 0.0.0.0/32 scram-sha-256</span><br></pre></td></tr></table></figure>
+
+<h3 id="Web读写"><a href="#Web读写" class="headerlink" title="Web读写"></a>Web读写</h3><p><code>MySQL</code>创建CRUD账户操作如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 创建读写账户</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;mydb_write&#x27;</span>@<span class="string">&#x27;%&#x27;</span> IDENTIFIED <span class="keyword">WITH</span> caching_sha2_password <span class="keyword">BY</span> <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 授权</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>, <span class="keyword">DELETE</span> <span class="keyword">ON</span> mydb.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;mydb_write&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 创建只读账户</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;mydb_read&#x27;</span>@<span class="string">&#x27;%&#x27;</span> IDENTIFIED <span class="keyword">WITH</span> caching_sha2_password <span class="keyword">BY</span> <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 授权</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> mydb.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;mydb_read&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>PostgreSQL</code>创建CRUD账户操作如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 创建读写账户</span></span><br><span class="line"><span class="comment">-- 创建角色</span></span><br><span class="line"><span class="keyword">CREATE</span> ROLE mydb_write_role;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 角色授权</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">CONNECT</span> <span class="keyword">ON</span> DATABASE mydb <span class="keyword">TO</span> mydb_write_role;</span><br><span class="line"><span class="comment">-- 所有跟public相关的授权都需要先切换到指定数据库</span></span><br><span class="line">\c mydb;</span><br><span class="line"><span class="keyword">GRANT</span> USAGE <span class="keyword">ON</span> SCHEMA public <span class="keyword">TO</span> mydb_write_role;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>, <span class="keyword">DELETE</span> <span class="keyword">ON</span> <span class="keyword">ALL</span> TABLES <span class="keyword">IN</span> SCHEMA public <span class="keyword">TO</span> mydb_write_role;</span><br><span class="line"><span class="comment">-- 后续所有变更自动授权</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DEFAULT</span> PRIVILEGES <span class="keyword">IN</span> SCHEMA public <span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>, <span class="keyword">DELETE</span> <span class="keyword">ON</span> TABLES <span class="keyword">TO</span> mydb_write_role;</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DEFAULT</span> PRIVILEGES <span class="keyword">IN</span> SCHEMA public <span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>, <span class="keyword">DELETE</span> <span class="keyword">ON</span> SEQUENCES <span class="keyword">TO</span> mydb_write_role;</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DEFAULT</span> PRIVILEGES <span class="keyword">IN</span> SCHEMA public <span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>, <span class="keyword">DELETE</span> <span class="keyword">ON</span> FUNCTIONS <span class="keyword">TO</span> mydb_write_role;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 创建用户并关联角色</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> mydb_write_user <span class="keyword">WITH</span> PASSWORD <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"><span class="keyword">GRANT</span> mydb_write_role <span class="keyword">TO</span> mydb_write_user;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 创建只读账户</span></span><br><span class="line"><span class="comment">-- 创建角色</span></span><br><span class="line"><span class="keyword">CREATE</span> ROLE mydb_read_role;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 角色授权</span></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">CONNECT</span> <span class="keyword">ON</span> DATABASE mydb <span class="keyword">TO</span> mydb_read_role;</span><br><span class="line"><span class="comment">-- 所有跟public相关的授权都需要先切换到指定数据库</span></span><br><span class="line">\c mydb;</span><br><span class="line"><span class="keyword">GRANT</span> USAGE <span class="keyword">ON</span> SCHEMA public <span class="keyword">TO</span> mydb_read_role;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> <span class="keyword">ALL</span> TABLES <span class="keyword">IN</span> SCHEMA public <span class="keyword">TO</span> mydb_read_role;</span><br><span class="line"><span class="comment">-- 后续所有变更自动授权</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DEFAULT</span> PRIVILEGES <span class="keyword">IN</span> SCHEMA public <span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> TABLES <span class="keyword">TO</span> mydb_read_role;</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DEFAULT</span> PRIVILEGES <span class="keyword">IN</span> SCHEMA public <span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> SEQUENCES <span class="keyword">TO</span> mydb_read_role;</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DEFAULT</span> PRIVILEGES <span class="keyword">IN</span> SCHEMA public <span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> FUNCTIONS <span class="keyword">TO</span> mydb_read_role;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 创建用户并关联角色</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> mydb_read_user <span class="keyword">WITH</span> PASSWORD <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"><span class="keyword">GRANT</span> mydb_read_role <span class="keyword">TO</span> mydb_read_user;</span><br></pre></td></tr></table></figure>
+
+<h2 id="DDL"><a href="#DDL" class="headerlink" title="DDL"></a>DDL</h2><h3 id="建库"><a href="#建库" class="headerlink" title="建库"></a>建库</h3><p><code>MySQL</code>建库操作如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 列出所有数据库</span></span><br><span class="line"><span class="keyword">SHOW</span> DATABASES;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 创建mydb数据库</span></span><br><span class="line"><span class="keyword">CREATE</span> DATABASE mydb;</span><br><span class="line"><span class="comment">-- 创建并设置charset</span></span><br><span class="line"><span class="comment">-- CREATE DATABASE mydb CHARACTER SET utf8mb4;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 查看建库sql</span></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">CREATE</span> DATABASE mydb;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 4. 查看数据库列表核对</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> information_schema.SCHEMATA;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 5. 切换到mydb</span></span><br><span class="line">USE mydb;</span><br></pre></td></tr></table></figure>
+
+<p><code>PostgreSQL</code>建库操作如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 列出所有数据库</span></span><br><span class="line">\l<span class="operator">+</span></span><br><span class="line"><span class="comment">-- 或者</span></span><br><span class="line"><span class="keyword">SELECT</span> datname <span class="keyword">FROM</span> pg_database;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 创建mydb数据库</span></span><br><span class="line"><span class="keyword">CREATE</span> DATABASE mydb;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 切换到mydb</span></span><br><span class="line">\c mydb</span><br></pre></td></tr></table></figure>
+
+<h3 id="建表"><a href="#建表" class="headerlink" title="建表"></a>建表</h3><p><code>MySQL</code>建表操作如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 创建数据表</span></span><br><span class="line"><span class="comment">-- 指定innodb、纪录备注、创建索引</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> order_main(</span><br><span class="line">  `id` <span class="type">INT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT <span class="keyword">PRIMARY</span> KEY COMMENT &quot;ID&quot;,</span><br><span class="line">  `order_number` <span class="type">VARCHAR</span>(<span class="number">30</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT &quot;order number&quot;,</span><br><span class="line">  `user_id` <span class="type">BIGINT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT &quot;user id&quot;,</span><br><span class="line">  `product_id` <span class="type">BIGINT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT &quot;product id&quot;,</span><br><span class="line">  <span class="comment">-- ...</span></span><br><span class="line">  <span class="keyword">UNIQUE</span> KEY(`order_number`),</span><br><span class="line">  INDEX `idx_user_id` (`user_id`)</span><br><span class="line">) ENGINE InnoDB <span class="keyword">DEFAULT</span> CHARSET utf8mb4 COMMENT &quot;order main&quot;;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 单独创建索引示例如下</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX `idx_product_id` <span class="keyword">ON</span> `order_main`(`product_id`);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 查看数据表列表核对</span></span><br><span class="line"><span class="keyword">SHOW</span> TABLES;</span><br><span class="line"><span class="comment">-- SHOW TABLES LIKE &#x27;%order_main%&#x27;;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 查看建表语句</span></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> order_main;</span><br></pre></td></tr></table></figure>
+
+<p><code>PostgreSQL</code>建表操作如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 创建数据表</span></span><br><span class="line"><span class="comment">-- 与关键字相同的字段需要使用双引号，不支持备注</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> order_main(</span><br><span class="line">  &quot;id&quot; <span class="type">INT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> GENERATED ALWAYS <span class="keyword">AS</span> <span class="keyword">IDENTITY</span> <span class="keyword">PRIMARY</span> KEY,</span><br><span class="line">  &quot;order_number&quot; <span class="type">VARCHAR</span>(<span class="number">30</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  &quot;user_id&quot; <span class="type">BIGINT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  &quot;product_id&quot; <span class="type">BIGINT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  <span class="comment">-- ...</span></span><br><span class="line">  <span class="keyword">UNIQUE</span>(&quot;order_number&quot;)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 非pk以及unique索引需要单独创建，名称需要区分数据表</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX &quot;order_main_idx_product_id&quot; <span class="keyword">ON</span> &quot;order_main&quot;(&quot;product_id&quot;);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 查看数据表列表核对</span></span><br><span class="line">\dt<span class="operator">+</span></span><br><span class="line"><span class="comment">-- 列出所有数据库表</span></span><br><span class="line"><span class="comment">-- \dt *</span></span><br><span class="line"><span class="comment">-- 或者</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> pg_catalog.pg_tables <span class="keyword">WHERE</span> schemaname <span class="operator">!=</span> <span class="string">&#x27;pg_catalog&#x27;</span> <span class="keyword">AND</span> schemaname <span class="operator">!=</span> <span class="string">&#x27;information_schema&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 查看数据表结构，不支持查看建表sql</span></span><br><span class="line">\d order_main</span><br></pre></td></tr></table></figure>
+
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="命令行显示优化"><a href="#命令行显示优化" class="headerlink" title="命令行显示优化"></a>命令行显示优化</h3><p><code>MySQL</code>如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 将;改为\G，以扩展模式输出</span></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> order_main\G</span><br><span class="line"></span><br><span class="line"><span class="comment">-- mysql 所有输出自带命令执行耗时时长，单位：秒</span></span><br></pre></td></tr></table></figure>
+
+<p><code>PostgreSQL</code>如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 当内容长度超过一行自动切换为扩展模式输出</span></span><br><span class="line">\x auto</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 输出sql命令执行使用的时间，单位：毫秒</span></span><br><span class="line">\timing <span class="keyword">on</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="导入-导出sql"><a href="#导入-导出sql" class="headerlink" title="导入&#x2F;导出sql"></a>导入&#x2F;导出sql</h3><p><code>MySQL</code>如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 导入</span></span><br><span class="line">mysql -h localhost -u mydb_admin -P 3306 -p mydb &lt; mydb.sql</span><br><span class="line"></span><br><span class="line"><span class="comment"># 导出</span></span><br><span class="line">mysqldump -h localhost -u mydb_admin -P 3306 -p mydb album &gt; mydb.album.sql</span><br></pre></td></tr></table></figure>
+
+<p>或者使用sql导入文件</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">USE mydb;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 文件需要放在指定目录</span></span><br><span class="line">SOURCE <span class="operator">/</span>tmp<span class="operator">/</span>mydb.album.sql</span><br></pre></td></tr></table></figure>
+
+<p><code>PostgreSQL</code>如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 导入，非if not exists，有数据会报错</span></span><br><span class="line">psql -d mydb -f mydb.sql</span><br><span class="line"></span><br><span class="line"><span class="comment"># 导出</span></span><br><span class="line">pg_dump -t public.album mydb &gt; mydb.album.sql</span><br></pre></td></tr></table></figure>
+
+<h3 id="数据库配置"><a href="#数据库配置" class="headerlink" title="数据库配置"></a>数据库配置</h3><p><code>MySQL</code>如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看服务器相关配置</span></span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看服务器与buffer_pool相关的配置</span></span><br><span class="line"><span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;%buffer_pool%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 修改max_connections</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> max_connections<span class="operator">=</span><span class="number">1024</span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>PostgreSQL</code>如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看服务器相关配置</span></span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">ALL</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看max_connections</span></span><br><span class="line"><span class="keyword">SHOW</span> max_connections;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查看服务器以max开头的配置</span></span><br><span class="line"><span class="keyword">SELECT</span> name, setting <span class="keyword">FROM</span> pg_settings <span class="keyword">WHERE</span> name <span class="keyword">LIKE</span> <span class="string">&#x27;max_%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 修改timezone</span></span><br><span class="line"><span class="keyword">SET</span> timezone<span class="operator">=</span><span class="string">&#x27;Asia/Hong_kong&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="进程管理"><a href="#进程管理" class="headerlink" title="进程管理"></a>进程管理</h3><p><code>MySQL</code>如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看当前活动过进程</span></span><br><span class="line"><span class="keyword">SHOW</span> PROCESSLIST;</span><br><span class="line"><span class="comment">-- SHOW FULL PROCESSLIST;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结束进程</span></span><br><span class="line">KILL _pid_;</span><br></pre></td></tr></table></figure>
+
+<p><code>PostgreSQL</code>如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 查看当前活动过进程</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> pg_stat_activity;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 结束进程</span></span><br><span class="line"><span class="keyword">SELECT</span> pg_cancel_backend(_pid_);</span><br><span class="line"><span class="keyword">SELECT</span> pg_terminate_backend(_pid_);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 重新加载配置</span></span><br><span class="line"><span class="keyword">SELECT</span> pg_reload_conf();</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1020,7 +1255,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-09-15 17:06:07" itemprop="dateModified" datetime="2024-09-15T17:06:07+08:00">2024-09-15</time>
+      <time title="修改时间：2025-01-18 20:48:48" itemprop="dateModified" datetime="2025-01-18T20:48:48+08:00">2025-01-18</time>
     </span>
 
   
@@ -1205,7 +1440,7 @@
 <li>分布式文件系统，负责持久存储</li>
 <li>gateway，负责控制外部流量对集群内服务的访问</li>
 <li>elk，负责日志收集、分析、告警</li>
-<li>prometheus，负责收集指标、链路分析、告警</li>
+<li>jaeger&#x2F;prometheus，负责收集指标、链路分析、告警</li>
 <li>ci&#x2F;cd系统，如gitlab，负责开发-发布系统流程</li>
 <li>管理后台，负责应用管理、发布审核、记录审计信息等</li>
 </ul>
@@ -1390,284 +1625,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/deploy-docker-and-registry-service/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/deploy-docker-and-registry-service/" class="post-title-link" itemprop="url">安装docker并部署registry服务</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2024-07-20 09:56:19" itemprop="dateCreated datePublished" datetime="2024-07-20T09:56:19+08:00">2024-07-20</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-28 14:45:10" itemprop="dateModified" datetime="2024-08-28T14:45:10+08:00">2024-08-28</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h2><p>当前仅展示apt方式安装，离线安装方式不展示</p>
-<h3 id="清理历史残留"><a href="#清理历史残留" class="headerlink" title="清理历史残留"></a>清理历史残留</h3><p>如果系统有预装docker或者先前安装过，先卸载干净在安装</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 第一次安装时输出为空</span></span><br><span class="line"><span class="keyword">for</span> pkg <span class="keyword">in</span> docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; <span class="keyword">do</span> <span class="built_in">sudo</span> apt remove <span class="variable">$pkg</span>; <span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 如果以前有安装过docker，相关数据可以删除掉</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /var/lib/docker</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /var/lib/containerd</span><br></pre></td></tr></table></figure>
-
-<h3 id="apt安装"><a href="#apt安装" class="headerlink" title="apt安装"></a>apt安装</h3><h4 id="设置代理"><a href="#设置代理" class="headerlink" title="设置代理"></a>设置代理</h4><p>由于docker被gfw屏蔽，访问时需要使用vpn，这里使用先前搭建的<a href="/deploy-shadowsocks-service">ss服务</a></p>
-<p>新建<code>apt.conf</code></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> vi /etc/apt/apt.conf</span><br></pre></td></tr></table></figure>
-
-<p>添加proxy配置，默认源地址配置直连，如此后续配置docker源后，使用<code>apt update</code>便可直接访问</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Acquire::http::Proxy &quot;http://127.0.0.1:8118&quot;;</span><br><span class="line">Acquire::http::Proxy &#123;</span><br><span class="line">    archive.ubuntu.com DIRECT;</span><br><span class="line">    security.ubuntu.com DIRECT;</span><br><span class="line">    cn.archive.ubuntu.com DIRECT;</span><br><span class="line">    mirrors.tuna.tsinghua.edu.cn DIRECT;</span><br><span class="line">&#125;</span><br><span class="line">Acquire::https::Proxy &quot;http://127.0.0.1:8118&quot;;</span><br><span class="line">Acquire::https::Proxy &#123;</span><br><span class="line">    archive.ubuntu.com DIRECT;</span><br><span class="line">    security.ubuntu.com DIRECT;</span><br><span class="line">    cn.archive.ubuntu.com DIRECT;</span><br><span class="line">    mirrors.tuna.tsinghua.edu.cn DIRECT;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="配置源并安装"><a href="#配置源并安装" class="headerlink" title="配置源并安装"></a>配置源并安装</h4><p>按照docker官方教材安装docker，其中，下载<code>docker.asc</code>的命令做了一些修改</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Add Docker&#x27;s official GPG key:</span></span><br><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="built_in">sudo</span> apt install ca-certificates curl</span><br><span class="line"><span class="built_in">sudo</span> install -m 0755 -d /etc/apt/keyrings</span><br><span class="line"><span class="comment"># 配置proxy</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8118;<span class="built_in">export</span> https_proxy=http://127.0.0.1:8118;</span><br><span class="line"><span class="comment"># 下载后在使用sudo搬到指定目录</span></span><br><span class="line">curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o docker.asc &amp;&amp; <span class="built_in">sudo</span> <span class="built_in">mv</span> docker.asc /etc/apt/keyrings/docker.asc</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chmod</span> a+r /etc/apt/keyrings/docker.asc</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add the repository to Apt sources:</span></span><br><span class="line"><span class="built_in">echo</span> \</span><br><span class="line">  <span class="string">&quot;deb [arch=<span class="subst">$(dpkg --print-architecture)</span> signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \</span></span><br><span class="line"><span class="string">  <span class="subst">$(. /etc/os-release &amp;&amp; echo <span class="string">&quot;<span class="variable">$VERSION_CODENAME</span>&quot;</span>)</span> stable&quot;</span> | \</span><br><span class="line">  <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/apt/sources.list.d/docker.list &gt; /dev/null</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果是k8s部署，只需要containerd就够了</span></span><br><span class="line"><span class="built_in">sudo</span> apt install containerd.io docker-ce docker-ce-cli docker-buildx-plugin docker-compose-plugin</span><br></pre></td></tr></table></figure>
-
-<h4 id="后续"><a href="#后续" class="headerlink" title="后续"></a>后续</h4><p>将当前用户加入<code>docker</code>用户组</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> groupadd docker</span><br><span class="line"><span class="built_in">sudo</span> usermod -aG docker <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="部署registry"><a href="#部署registry" class="headerlink" title="部署registry"></a>部署registry</h2><h3 id="配置代理"><a href="#配置代理" class="headerlink" title="配置代理"></a>配置代理</h3><p>因为gfw的原因，docker hub的访问会时不时抽风，在使用docker pull前可以先配置代理，当前步骤可跳过</p>
-<p>创建配置文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /etc/systemd/system/docker.service.d</span><br><span class="line"><span class="built_in">sudo</span> vi /etc/systemd/system/docker.service.d/http-proxy.conf</span><br></pre></td></tr></table></figure>
-
-<p>配置proxy</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[Service]</span><br><span class="line">Environment=&quot;HTTP_PROXY=http://127.0.0.1:8118&quot;</span><br><span class="line">Environment=&quot;HTTPS_PROXY=http://127.0.0.1:8118&quot;</span><br><span class="line">Environment=&quot;NO_PROXY=localhost,127.0.0.1,registry.noname.io&quot;</span><br></pre></td></tr></table></figure>
-
-<p>重启并验证docker环境变量</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl daemon-reload</span><br><span class="line"><span class="built_in">sudo</span> systemctl restart docker</span><br><span class="line"><span class="built_in">sudo</span> systemctl show --property=Environment docker</span><br><span class="line"><span class="comment"># 输出如下</span></span><br><span class="line"><span class="comment"># Environment=HTTP_PROXY=http://127.0.0.1:8118 HTTPS_PROXY=http://127.0.0.1:8118 NO_PROXY=localhost,127.0.0.1,registry.noname.io</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="生成ssl证书"><a href="#生成ssl证书" class="headerlink" title="生成ssl证书"></a>生成ssl证书</h3><p>可以直接使用http，但后续k8s镜像的下载必须使用https，没有那么多耐心再去折腾，在这里先解决了，一劳永逸</p>
-<p><code>/data/docker/</code>是我用于专门存放与registry相关的数据，包括certs以及后续docker push上来的镜像数据</p>
-<p>下面命令关键的域名registry.noname.io要填好</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">openssl req \</span><br><span class="line">  -newkey rsa:4096 -nodes -sha256 -keyout /data/docker/certs/noname.io.key \</span><br><span class="line">  -addext <span class="string">&quot;subjectAltName = DNS:registry.noname.io&quot;</span> \</span><br><span class="line">  -x509 -days 365 -out /data/docker/certs/noname.io.crt</span><br></pre></td></tr></table></figure>
-
-<p>由此，https所需要的证书也就准备好了</p>
-<h3 id="创建registry服务"><a href="#创建registry服务" class="headerlink" title="创建registry服务"></a>创建registry服务</h3><h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><ol>
-<li>将<code>/data/docker/certs</code>挂载到container的<code>/data/certs</code>目录</li>
-<li><code>/data/docker/registry</code>挂载到container的<code>/var/lib/registry</code>目录，后续删除重建container时就保留下了image数据</li>
-</ol>
-<h4 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h4><p>如果只是创建一个简单的可运行registry，直接运行docker run</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 5000:5000 --restart always --name registry \</span><br><span class="line">  -v /data/docker/registry:/var/lib/registry \</span><br><span class="line">  -v /data/docker/certs:/data/certs \</span><br><span class="line">  -e REGISTRY_HTTP_TLS_CERTIFICATE=/data/certs/noname.io.crt \</span><br><span class="line">  -e REGISTRY_HTTP_TLS_KEY=/data/certs/noname.io.key \</span><br><span class="line">  registry:2.8.3</span><br></pre></td></tr></table></figure>
-
-<h4 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h4><p>如果涉及比较复杂的配置，像权限管理、接入s3文件系统、缓存配置、中继配置等，则使用配置文件方式比较好</p>
-<p>创建registry配置文件，参考配置文件：<a target="_blank" rel="noopener" href="https://github.com/distribution/distribution/blob/master/cmd/registry/config-example.yml">example YAML file</a>，修改后如下</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="number">0.1</span></span><br><span class="line"><span class="attr">storage:</span></span><br><span class="line">  <span class="attr">filesystem:</span></span><br><span class="line">    <span class="attr">rootdirectory:</span> <span class="string">/var/lib/registry</span></span><br><span class="line"><span class="attr">http:</span></span><br><span class="line">  <span class="attr">addr:</span> <span class="string">:5000</span></span><br><span class="line">  <span class="attr">tls:</span></span><br><span class="line">    <span class="attr">certificate:</span> <span class="string">/data/certs/noname.io.crt</span></span><br><span class="line">    <span class="attr">key:</span> <span class="string">/data/certs/noname.io.key</span></span><br></pre></td></tr></table></figure>
-
-<p>运行docker run</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 5000:5000 --restart always --name registry \</span><br><span class="line">  -v /data/docker/registry:/var/lib/registry \</span><br><span class="line">  -v /data/docker/certs:/data/certs \</span><br><span class="line">  -v /data/docker/config/config.yml:/etc/docker/registry/config.yml \</span><br><span class="line">  registry:2.8.3</span><br></pre></td></tr></table></figure>
-
-<h3 id="修改系统配置"><a href="#修改系统配置" class="headerlink" title="修改系统配置"></a>修改系统配置</h3><h4 id="修改hosts"><a href="#修改hosts" class="headerlink" title="修改hosts"></a>修改hosts</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> vi /etc/hosts</span><br></pre></td></tr></table></figure>
-
-<p>添加私有registry的域名</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1 registry.noname.io</span><br></pre></td></tr></table></figure>
-
-<h4 id="修改docker配置"><a href="#修改docker配置" class="headerlink" title="修改docker配置"></a>修改docker配置</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> /etc/docker</span><br><span class="line"><span class="built_in">sudo</span> vi /etc/docker/daemon.json</span><br></pre></td></tr></table></figure>
-
-<p><code>insecure-registries</code>需要添加registry的域名端口</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;exec-opts&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;native.cgroupdriver=systemd&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;insecure-registries&quot;</span> <span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;registry.noname.io:5000&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<p>重启服务</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl restart docker</span><br></pre></td></tr></table></figure>
-
-<p>如果要开放局域网内的访问，配置防火墙</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 5000/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
-
-<h3 id="测试验证"><a href="#测试验证" class="headerlink" title="测试验证"></a>测试验证</h3><p>访问registry接口，此时因为registry还没有任何image数据，输出为空</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -k https://registry.noname.io:5000/v2/_catalog | jq .</span><br></pre></td></tr></table></figure>
-
-<p>推送镜像测试</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker tag alpine:3.20.1 registry.noname.io:5000/alpine:3.20.1</span><br><span class="line">docker push registry.noname.io:5000/alpine:3.20.1</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/install/ubuntu/">Install Docker Engine on Ubuntu</a><br><a target="_blank" rel="noopener" href="https://distribution.github.io/distribution/">Distribution Registry</a><br><a target="_blank" rel="noopener" href="https://medium.com/@haminhsang1903/private-docker-registry-with-https-and-a-nginx-reverse-proxy-using-docker-compose-6c1335c5e820">Private Docker registry with HTTPS and a Nginx reverse proxy using Docker Compose</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/deploy-kvm-and-cockpit/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/deploy-kvm-and-cockpit/" class="post-title-link" itemprop="url">安装kvm虚拟机</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2024-07-19 22:23:20" itemprop="dateCreated datePublished" datetime="2024-07-19T22:23:20+08:00">2024-07-19</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-28 14:45:36" itemprop="dateModified" datetime="2024-08-28T14:45:36+08:00">2024-08-28</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>454</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一般情况下，日常开发我只使用vagrant跟virtualbox，但后面想搭建一个k8s环境学习，需要一个免费、高性能、便于管理的虚拟机管理软件</p>
-<p>综合考虑了下现在市面上的虚拟机管理软件</p>
-<ol>
-<li>virtualbox 的磁盘性能太差，nat网络所有虚拟机都是同一个IP：10.0.2.15，其他方面也不考虑了</li>
-<li>parallel desktop 太贵太黑心</li>
-<li>vmware 价格也不便宜还很吃电脑资源</li>
-<li>hyper-v 管理界面太难用，同时无法固定虚拟机IP</li>
-</ol>
-<p>最终我选择组装一台台式机，安装了ubuntu系统，并在上面安装使用kvm虚拟机</p>
-<p>cpu是amd 7700，8核心16线程；32GB内存；暂时不需要用到显卡；PC在路由器做了MAC跟IP的绑定，方便使用ssh</p>
-<p>由于virt-manager太难用，最后选择cockpit作为kvm虚拟机管理软件</p>
-<h2 id="kvm安装"><a href="#kvm安装" class="headerlink" title="kvm安装"></a>kvm安装</h2><h3 id="前置工作"><a href="#前置工作" class="headerlink" title="前置工作"></a>前置工作</h3><p>确认cpu开启虚拟化功能</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一般是cpu的核心数量</span></span><br><span class="line">egrep -c <span class="string">&#x27;(vmx|svm)&#x27;</span> /proc/cpuinfo</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装kvm"><a href="#安装kvm" class="headerlink" title="安装kvm"></a>安装kvm</h3><p>安装kvm以及依赖软件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install qemu-system-x86 libvirt-daemon-system virtinst \</span><br><span class="line">  virt-manager virt-viewer ovmf swtpm qemu-utils guestfs-tools \</span><br><span class="line">  libosinfo-bin tuned</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> libvirtd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line"><span class="built_in">sudo</span> virt-host-validate qemu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果有使用window的需要，可以下载virtio</span></span><br><span class="line">wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装后工作"><a href="#安装后工作" class="headerlink" title="安装后工作"></a>安装后工作</h3><p>将用户添加到kvm跟libvirt组</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> usermod -aG kvm <span class="variable">$USER</span></span><br><span class="line"><span class="built_in">sudo</span> usermod -aG libvirt <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="cockpit安装"><a href="#cockpit安装" class="headerlink" title="cockpit安装"></a>cockpit安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install cockpit cockpit-machines</span><br></pre></td></tr></table></figure>
-
-<p>防火墙配置</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 9090/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
-
-<p>浏览器打开访问web管理页面 <a target="_blank" rel="noopener" href="https://192.168.0.105:9090/">https://192.168.0.105:9090</a></p>
-<p><img src="/images/kvm_with_cockpit.png" alt="kvm with cockpit preview"></p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://www.tecmint.com/install-qemu-kvm-ubuntu-create-virtual-machines/">How to Install QEMU&#x2F;KVM on Ubuntu to Create Virtual Machines</a><br><a target="_blank" rel="noopener" href="https://www.tecmint.com/manage-kvm-virtual-machines-using-cockpit-web-console/">Managing KVM Virtual Machines with Cockpit Web Console in Linux</a><br><a target="_blank" rel="noopener" href="https://github.com/bryansteiner/gpu-passthrough-tutorial">gpu-passthrough-tutorial</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1680,7 +1637,7 @@
 
   <div class="copyright">
     &copy; 
-    <span itemprop="copyrightYear">2024</span>
+    <span itemprop="copyrightYear">2025</span>
     <span class="with-love">
       <i class="fa fa-heart"></i>
     </span>
@@ -1691,13 +1648,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">22k</span>
+    <span title="站点总字数">23k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:19</span>
+    <span title="站点阅读时长">1:25</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
