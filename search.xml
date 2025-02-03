@@ -1,6 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>安装kvm虚拟机</title>
+    <url>/deploy-kvm-and-cockpit/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一般情况下，日常开发我只使用vagrant跟virtualbox，但后面想搭建一个k8s环境学习，需要一个免费、高性能、便于管理的虚拟机管理软件</p>
+<p>综合考虑了下现在市面上的虚拟机管理软件</p>
+<ol>
+<li>virtualbox 的磁盘性能太差，nat网络所有虚拟机都是同一个IP：10.0.2.15，其他方面也不考虑了</li>
+<li>parallel desktop 太贵太黑心</li>
+<li>vmware 价格也不便宜还很吃电脑资源</li>
+<li>hyper-v 管理界面太难用，同时无法固定虚拟机IP</li>
+</ol>
+<p>最终我选择组装一台台式机，安装了ubuntu系统，并在上面安装使用kvm虚拟机</p>
+<p>cpu是amd 7700，8核心16线程；32GB内存；暂时不需要用到显卡；PC在路由器做了MAC跟IP的绑定，方便使用ssh</p>
+<p>由于virt-manager太难用，最后选择cockpit作为kvm虚拟机管理软件</p>
+<h2 id="kvm安装"><a href="#kvm安装" class="headerlink" title="kvm安装"></a>kvm安装</h2><h3 id="前置工作"><a href="#前置工作" class="headerlink" title="前置工作"></a>前置工作</h3><p>确认cpu开启虚拟化功能</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一般是cpu的核心数量</span></span><br><span class="line">egrep -c <span class="string">&#x27;(vmx|svm)&#x27;</span> /proc/cpuinfo</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装kvm"><a href="#安装kvm" class="headerlink" title="安装kvm"></a>安装kvm</h3><p>安装kvm以及依赖软件</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install qemu-system-x86 libvirt-daemon-system virtinst \</span><br><span class="line">  virt-manager virt-viewer ovmf swtpm qemu-utils guestfs-tools \</span><br><span class="line">  libosinfo-bin tuned</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> libvirtd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line"><span class="built_in">sudo</span> virt-host-validate qemu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果有使用window的需要，可以下载virtio</span></span><br><span class="line">wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装后工作"><a href="#安装后工作" class="headerlink" title="安装后工作"></a>安装后工作</h3><p>将用户添加到kvm跟libvirt组</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> usermod -aG kvm <span class="variable">$USER</span></span><br><span class="line"><span class="built_in">sudo</span> usermod -aG libvirt <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="cockpit安装"><a href="#cockpit安装" class="headerlink" title="cockpit安装"></a>cockpit安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install cockpit cockpit-machines</span><br></pre></td></tr></table></figure>
+
+<p>防火墙配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 9090/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
+
+<p>浏览器打开访问web管理页面 <a href="https://192.168.0.105:9090/">https://192.168.0.105:9090</a></p>
+<p><img src="/images/kvm_with_cockpit.png" alt="kvm with cockpit preview"></p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.tecmint.com/install-qemu-kvm-ubuntu-create-virtual-machines/">How to Install QEMU&#x2F;KVM on Ubuntu to Create Virtual Machines</a><br><a href="https://www.tecmint.com/manage-kvm-virtual-machines-using-cockpit-web-console/">Managing KVM Virtual Machines with Cockpit Web Console in Linux</a><br><a href="https://github.com/bryansteiner/gpu-passthrough-tutorial">gpu-passthrough-tutorial</a></p>
+]]></content>
+      <tags>
+        <tag>kvm</tag>
+        <tag>cockpit</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Nginx配置HTTPS访问</title>
     <url>/configure-nginx-with-https/</url>
     <content><![CDATA[<p>简单介绍如何生成https服务所需要的证书、私钥以及部署，文档分别描述了开发时使用的self-signed证书以及线上使用的let’s encrypt免费证书的生成方法</p>
@@ -58,43 +95,6 @@
         <tag>ssl</tag>
         <tag>https</tag>
         <tag>let&#39;s enctypt</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>安装kvm虚拟机</title>
-    <url>/deploy-kvm-and-cockpit/</url>
-    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一般情况下，日常开发我只使用vagrant跟virtualbox，但后面想搭建一个k8s环境学习，需要一个免费、高性能、便于管理的虚拟机管理软件</p>
-<p>综合考虑了下现在市面上的虚拟机管理软件</p>
-<ol>
-<li>virtualbox 的磁盘性能太差，nat网络所有虚拟机都是同一个IP：10.0.2.15，其他方面也不考虑了</li>
-<li>parallel desktop 太贵太黑心</li>
-<li>vmware 价格也不便宜还很吃电脑资源</li>
-<li>hyper-v 管理界面太难用，同时无法固定虚拟机IP</li>
-</ol>
-<p>最终我选择组装一台台式机，安装了ubuntu系统，并在上面安装使用kvm虚拟机</p>
-<p>cpu是amd 7700，8核心16线程；32GB内存；暂时不需要用到显卡；PC在路由器做了MAC跟IP的绑定，方便使用ssh</p>
-<p>由于virt-manager太难用，最后选择cockpit作为kvm虚拟机管理软件</p>
-<h2 id="kvm安装"><a href="#kvm安装" class="headerlink" title="kvm安装"></a>kvm安装</h2><h3 id="前置工作"><a href="#前置工作" class="headerlink" title="前置工作"></a>前置工作</h3><p>确认cpu开启虚拟化功能</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一般是cpu的核心数量</span></span><br><span class="line">egrep -c <span class="string">&#x27;(vmx|svm)&#x27;</span> /proc/cpuinfo</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装kvm"><a href="#安装kvm" class="headerlink" title="安装kvm"></a>安装kvm</h3><p>安装kvm以及依赖软件</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install qemu-system-x86 libvirt-daemon-system virtinst \</span><br><span class="line">  virt-manager virt-viewer ovmf swtpm qemu-utils guestfs-tools \</span><br><span class="line">  libosinfo-bin tuned</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> libvirtd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line"><span class="built_in">sudo</span> virt-host-validate qemu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果有使用window的需要，可以下载virtio</span></span><br><span class="line">wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装后工作"><a href="#安装后工作" class="headerlink" title="安装后工作"></a>安装后工作</h3><p>将用户添加到kvm跟libvirt组</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> usermod -aG kvm <span class="variable">$USER</span></span><br><span class="line"><span class="built_in">sudo</span> usermod -aG libvirt <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="cockpit安装"><a href="#cockpit安装" class="headerlink" title="cockpit安装"></a>cockpit安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install cockpit cockpit-machines</span><br></pre></td></tr></table></figure>
-
-<p>防火墙配置</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 9090/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
-
-<p>浏览器打开访问web管理页面 <a href="https://192.168.0.105:9090/">https://192.168.0.105:9090</a></p>
-<p><img src="/images/kvm_with_cockpit.png" alt="kvm with cockpit preview"></p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.tecmint.com/install-qemu-kvm-ubuntu-create-virtual-machines/">How to Install QEMU&#x2F;KVM on Ubuntu to Create Virtual Machines</a><br><a href="https://www.tecmint.com/manage-kvm-virtual-machines-using-cockpit-web-console/">Managing KVM Virtual Machines with Cockpit Web Console in Linux</a><br><a href="https://github.com/bryansteiner/gpu-passthrough-tutorial">gpu-passthrough-tutorial</a></p>
-]]></content>
-      <tags>
-        <tag>kvm</tag>
-        <tag>cockpit</tag>
       </tags>
   </entry>
   <entry>
@@ -263,46 +263,6 @@
       </tags>
   </entry>
   <entry>
-    <title>如何下载网站视频</title>
-    <url>/how-to-download-online-video/</url>
-    <content><![CDATA[<p>现在的在线视频网站为了打击盗版、保护资源&#x2F;网络流量，不再直接使用mp4等视频格式，而是转而使用m3u8文件（播放索引列表）+ts文件（视频分段技术），其中有的视频还用了加密，下面简单展示下如何下载ts文件并合并为mp4</p>
-<h2 id="m3u8索引"><a href="#m3u8索引" class="headerlink" title="m3u8索引"></a>m3u8索引</h2><p>从浏览器的dev tool找到m3u8文件的连接并下载，该m3u8文件内有所有的ts文件列表，你可以将他们复制出来，通过编辑器补全制作成完整的url，通过下载器批量下载</p>
-<h2 id="未加密"><a href="#未加密" class="headerlink" title="未加密"></a>未加密</h2><p>如果视频没有加密（m3u8文件中#EXT-X-KEY字段为空），那么在下载所有ts文件后，可以直接用linux命令合并</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># ts段一般都有固定格式，如example_1.ts</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;ts_link_in_m3u8_file_&#x27;</span>&#123;number_first..number_end&#125;.ts | <span class="built_in">tr</span> <span class="string">&quot;&quot;</span> <span class="string">&quot;\n&quot;</span> &gt; tslist</span><br><span class="line"><span class="comment"># 将所有相关的ts文件合并</span></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> line; <span class="keyword">do</span> <span class="built_in">cat</span> <span class="variable">$line</span> &gt;&gt; the_final_video.mp4; <span class="keyword">done</span> &lt; tslist</span><br></pre></td></tr></table></figure>
-
-<p>到这里就不需要再往下看了</p>
-<h2 id="加密"><a href="#加密" class="headerlink" title="加密"></a>加密</h2><p>如果视频加密（m3u8文件中#EXT-X-KEY字段不为空），如下所示</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;https://hentai.com/xxxxxx&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">https://hentai.com/xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
-
-<p>处理步骤：</p>
-<ol>
-<li>下载必须的文件</li>
-<li>修改m3u8文件</li>
-<li>使用ffmpeg合并</li>
-</ol>
-<h3 id="下载必须的文件"><a href="#下载必须的文件" class="headerlink" title="下载必须的文件"></a>下载必须的文件</h3><ol>
-<li>通过浏览器dev tool找到m3u8文件url</li>
-<li>复制m3u8文件内所有ts文件地址到下载器下载，这里可能还需要通过编辑器补全url</li>
-<li>复制m3u8文件内记录的key的地址（从EXT-X-KEY字段获取链接）到下载器下载，可进一步重命名，如改为crypt.key，该文件文件大小一般是16字节</li>
-</ol>
-<h3 id="修改m3u8文件"><a href="#修改m3u8文件" class="headerlink" title="修改m3u8文件"></a>修改m3u8文件</h3><ol>
-<li>修改key的地址，将url改为本地文件路径</li>
-<li>如果ts文件url是http链接，那么也改为本地文件路径</li>
-</ol>
-<p>示例如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;crypt.key&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
-
-<h3 id="使用ffmpeg合并"><a href="#使用ffmpeg合并" class="headerlink" title="使用ffmpeg合并"></a>使用ffmpeg合并</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ffmpeg -allowed_extensions ALL -protocol_whitelist <span class="string">&quot;file,http,crypto,tcp&quot;</span> -i example.m3u8 -c copy the_final_video.mp4</span><br></pre></td></tr></table></figure>
-
-<p>done</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.cnblogs.com/warcraft/p/13388280.html">记一次加密的ts视频下载</a></p>
-]]></content>
-      <tags>
-        <tag>ffmpeg</tag>
-        <tag>hls</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>怎样从公网访问k8s服务</title>
     <url>/how-to-access-k8s-service-from-public-network/</url>
     <content><![CDATA[<p>默认情况下，k8s创建的服务是无法对公网提供访问的，如果要从公网访问k8s服务，一般有三种方式，NodePort、LoadBalancer、Ingress，下面简单介绍NodePort、LoadBalancer，着重讲解Ingress</p>
@@ -443,6 +403,72 @@
       </tags>
   </entry>
   <entry>
+    <title>生成火焰图分析php代码</title>
+    <url>/how-to-generate-php-flamegraphs/</url>
+    <content><![CDATA[<p>flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间。下面简单介绍如何使用xdebug以及flamegraph生成火焰图</p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>配置xdebug参数</p>
+<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.trace_output_name</span> = xdebug.trace.%t.%s</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.trace_output_dir</span> = /tmp</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger_value</span> = <span class="string">&quot;&lt;secret key&gt;&quot;</span></span><br><span class="line"><span class="attr">xdebug.trace_format</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>下载flamegraph，<code>git clone https://github.com/brendangregg/FlameGraph.git</code>，放置在任意位置</p>
+<h2 id="flamegraph"><a href="#flamegraph" class="headerlink" title="flamegraph"></a>flamegraph</h2><p>获取堆栈数据</p>
+<p>请求页面&#x2F;接口url，在url后面增加<code>?XDEBUG_TRACE=&lt;secret key&gt;</code>，获取php堆栈数据 <code>curl http://youdomain.com?XDEBUG_TRACE=&lt;secret key&gt;</code>，如果是命令行命令，则在php命令后使用参数<code>php -d xdebug.auto_trace=1</code></p>
+<p>转换堆栈数据</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./stackcollapse-xdebug.php /tmp/xdebug.trace.1579703170._data_www_yii2_web_index_php.xt &gt; out.folded</span><br></pre></td></tr></table></figure>
+
+<p>生成火焰图</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; out.svg</span><br></pre></td></tr></table></figure>
+
+<p>示例</p>
+<p><img src="/images/yii2-flamegraph-example.svg" alt="yii2 flamegraph example"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://daniellockyer.com/php-flame-graphs/">How to generate PHP Flamegraphs</a><br><a href="https://github.com/brendangregg/FlameGraph">Flame Graphs visualize profiled code</a></p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>flamegraph</tag>
+        <tag>profiling</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何下载网站视频</title>
+    <url>/how-to-download-online-video/</url>
+    <content><![CDATA[<p>现在的在线视频网站为了打击盗版、保护资源&#x2F;网络流量，不再直接使用mp4等视频格式，而是转而使用m3u8文件（播放索引列表）+ts文件（视频分段技术），其中有的视频还用了加密，下面简单展示下如何下载ts文件并合并为mp4</p>
+<h2 id="m3u8索引"><a href="#m3u8索引" class="headerlink" title="m3u8索引"></a>m3u8索引</h2><p>从浏览器的dev tool找到m3u8文件的连接并下载，该m3u8文件内有所有的ts文件列表，你可以将他们复制出来，通过编辑器补全制作成完整的url，通过下载器批量下载</p>
+<h2 id="未加密"><a href="#未加密" class="headerlink" title="未加密"></a>未加密</h2><p>如果视频没有加密（m3u8文件中#EXT-X-KEY字段为空），那么在下载所有ts文件后，可以直接用linux命令合并</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># ts段一般都有固定格式，如example_1.ts</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;ts_link_in_m3u8_file_&#x27;</span>&#123;number_first..number_end&#125;.ts | <span class="built_in">tr</span> <span class="string">&quot;&quot;</span> <span class="string">&quot;\n&quot;</span> &gt; tslist</span><br><span class="line"><span class="comment"># 将所有相关的ts文件合并</span></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> line; <span class="keyword">do</span> <span class="built_in">cat</span> <span class="variable">$line</span> &gt;&gt; the_final_video.mp4; <span class="keyword">done</span> &lt; tslist</span><br></pre></td></tr></table></figure>
+
+<p>到这里就不需要再往下看了</p>
+<h2 id="加密"><a href="#加密" class="headerlink" title="加密"></a>加密</h2><p>如果视频加密（m3u8文件中#EXT-X-KEY字段不为空），如下所示</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;https://hentai.com/xxxxxx&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">https://hentai.com/xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
+
+<p>处理步骤：</p>
+<ol>
+<li>下载必须的文件</li>
+<li>修改m3u8文件</li>
+<li>使用ffmpeg合并</li>
+</ol>
+<h3 id="下载必须的文件"><a href="#下载必须的文件" class="headerlink" title="下载必须的文件"></a>下载必须的文件</h3><ol>
+<li>通过浏览器dev tool找到m3u8文件url</li>
+<li>复制m3u8文件内所有ts文件地址到下载器下载，这里可能还需要通过编辑器补全url</li>
+<li>复制m3u8文件内记录的key的地址（从EXT-X-KEY字段获取链接）到下载器下载，可进一步重命名，如改为crypt.key，该文件文件大小一般是16字节</li>
+</ol>
+<h3 id="修改m3u8文件"><a href="#修改m3u8文件" class="headerlink" title="修改m3u8文件"></a>修改m3u8文件</h3><ol>
+<li>修改key的地址，将url改为本地文件路径</li>
+<li>如果ts文件url是http链接，那么也改为本地文件路径</li>
+</ol>
+<p>示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;crypt.key&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用ffmpeg合并"><a href="#使用ffmpeg合并" class="headerlink" title="使用ffmpeg合并"></a>使用ffmpeg合并</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ffmpeg -allowed_extensions ALL -protocol_whitelist <span class="string">&quot;file,http,crypto,tcp&quot;</span> -i example.m3u8 -c copy the_final_video.mp4</span><br></pre></td></tr></table></figure>
+
+<p>done</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://www.cnblogs.com/warcraft/p/13388280.html">记一次加密的ts视频下载</a></p>
+]]></content>
+      <tags>
+        <tag>ffmpeg</tag>
+        <tag>hls</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何在ubuntu服务器上管理Wi-Fi</title>
     <url>/how-to-manage-wifi-on-ubuntu-server/</url>
     <content><![CDATA[<p>当没有桌面时，ubuntu服务器该如何连接宽带、共享Wi-Fi热点，就像一台路由器一样运作，或者如何连接Wi-Fi，以下简单介绍这几个操作的过程</p>
@@ -469,32 +495,6 @@
       <tags>
         <tag>ubuntu</tag>
         <tag>hotspot</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>生成火焰图分析php代码</title>
-    <url>/how-to-generate-php-flamegraphs/</url>
-    <content><![CDATA[<p>flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间。下面简单介绍如何使用xdebug以及flamegraph生成火焰图</p>
-<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>配置xdebug参数</p>
-<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">xdebug.trace_output_name</span> = xdebug.trace.%t.%s</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.trace_output_dir</span> = /tmp</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger_value</span> = <span class="string">&quot;&lt;secret key&gt;&quot;</span></span><br><span class="line"><span class="attr">xdebug.trace_format</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
-
-<p>下载flamegraph，<code>git clone https://github.com/brendangregg/FlameGraph.git</code>，放置在任意位置</p>
-<h2 id="flamegraph"><a href="#flamegraph" class="headerlink" title="flamegraph"></a>flamegraph</h2><p>获取堆栈数据</p>
-<p>请求页面&#x2F;接口url，在url后面增加<code>?XDEBUG_TRACE=&lt;secret key&gt;</code>，获取php堆栈数据 <code>curl http://youdomain.com?XDEBUG_TRACE=&lt;secret key&gt;</code>，如果是命令行命令，则在php命令后使用参数<code>php -d xdebug.auto_trace=1</code></p>
-<p>转换堆栈数据</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./stackcollapse-xdebug.php /tmp/xdebug.trace.1579703170._data_www_yii2_web_index_php.xt &gt; out.folded</span><br></pre></td></tr></table></figure>
-
-<p>生成火焰图</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; out.svg</span><br></pre></td></tr></table></figure>
-
-<p>示例</p>
-<p><img src="/images/yii2-flamegraph-example.svg" alt="yii2 flamegraph example"></p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://daniellockyer.com/php-flame-graphs/">How to generate PHP Flamegraphs</a><br><a href="https://github.com/brendangregg/FlameGraph">Flame Graphs visualize profiled code</a></p>
-]]></content>
-      <tags>
-        <tag>php</tag>
-        <tag>flamegraph</tag>
-        <tag>profiling</tag>
       </tags>
   </entry>
   <entry>
@@ -613,39 +613,6 @@
       </tags>
   </entry>
   <entry>
-    <title>解决ubuntu系统monospace字体显示异常的问题</title>
-    <url>/linux-monofonts-render-incorrectly/</url>
-    <content><![CDATA[<p>很长的一段时间，被xubuntu下的一个monospace字体显示问题困扰着，在网上找了很多方法也没有解决问题，在一次误打误撞的情况下解决了，简单把自己问题的过程记录下来，希望给一些小伙伴们帮助</p>
-<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>xubuntu下monospace在浏览器以及vscode下显示异常，具体如下图所示</p>
-<p>浏览器chrome&#x2F;firefox下的monospace</p>
-<p><img src="/images/monofont_display_incorrect_in_browser.png" alt="monofont display incorrect in browser"></p>
-<p>vscode下的monospace</p>
-<p><img src="/images/monofont_display_incorrect_in_vscode.png" alt="monofont display incorrect in vscode"></p>
-<p>网上搜索结果大部分指示，是由于libfreetype6 2.8.1-2ubuntu2的一个bug导致，需要升级到最新的libfreetype2.9或者降级到libfreetype2.8.0，按照搜索的文档进行libfreetype的升级&#x2F;降级后，显示效果依旧，问题没有得到解决</p>
-<h2 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h2><p>在我放弃治疗后过了一段时间，突然想起，一直以来都忽略了验证linux的字体信息。首先，获取显示异常的字体font-family，如下图</p>
-<p><img src="/images/browser_get_font_family.png" alt="browser get font family"></p>
-<p>使用fc-match验证字体</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ fc-match monospace</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match consolas</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match Menlo</span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;PingFang SC&quot;</span></span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;Microsoft YaHei&quot;</span></span><br><span class="line">NotoSansCJK-Regular.ttc: <span class="string">&quot;Noto Sans CJK SC&quot;</span> <span class="string">&quot;Regular&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>可以看到Menlo、”PingFang SC”、”Microsoft YaHei”的实际字体跟monospace并不一致，抱着死马当活马医的心态，编辑字体配置文件<code>~/.config/fontconfig/fonts.conf</code>，内容如下，</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&#x27;1.0&#x27;?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&#x27;fonts.dtd&#x27;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">alias</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">prefer</span>&gt;</span><span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span><span class="tag">&lt;/<span class="name">prefer</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>退出，重新登录，发现这个困扰了很久的问题终于解决，如下图</p>
-<p><img src="/images/monofont_the_correct_view.png" alt="monofont the correct view"></p>
-<p>vscode可以通过更改font-family恢复正常的显示效果</p>
-<p><strong>注意</strong></p>
-<p>ubuntu&#x2F;xubuntu、中文&#x2F;英文的系统默认的字体会有些许差异，以上的操作可能不一定生效，可以新增<code>~/.config/fontconfig/conf.d/00-menlo.conf</code></p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;fonts.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">alias</span> <span class="attr">binding</span>=<span class="string">&quot;same&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">accept</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">accept</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/adobe/brackets/issues/14290">[Ubuntu 18.04 LTS] Font not rendering properly</a><br><a href="https://stackoverflow.com/questions/50114376/ubuntu-18-04-lts-font-not-rendering-properly">Ubuntu 18.04 LTS Font not rendering properly</a><br><a href="https://superuser.com/questions/930572/why-doesnt-fc-match-respect-my-match-and-edit-rule-for-courier-when-it-does-for">Why doesn’t fc-match respect my match and edit rule for Courier when it does for Consolas?</a></p>
-]]></content>
-      <tags>
-        <tag>ubuntu</tag>
-        <tag>vscode</tag>
-        <tag>monospace fonts</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>k8s pv配置教程</title>
     <url>/k8s-pv-setup-tutorial/</url>
     <content><![CDATA[<p>在Kubernetes官网的学习教程：<a href="https://kubernetes.io/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/">wordpress</a>中，我尝试了手动创建pv并绑定pvc，但是每次申请pvc都要手动添加pv并绑定是一件很麻烦且很容易出错的事情，官方也早就意识到这个问题，提出了动态存储分配，只需要通过storageclass即可实现</p>
@@ -707,6 +674,39 @@
 ]]></content>
       <tags>
         <tag>kubernetes</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>解决ubuntu系统monospace字体显示异常的问题</title>
+    <url>/linux-monofonts-render-incorrectly/</url>
+    <content><![CDATA[<p>很长的一段时间，被xubuntu下的一个monospace字体显示问题困扰着，在网上找了很多方法也没有解决问题，在一次误打误撞的情况下解决了，简单把自己问题的过程记录下来，希望给一些小伙伴们帮助</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>xubuntu下monospace在浏览器以及vscode下显示异常，具体如下图所示</p>
+<p>浏览器chrome&#x2F;firefox下的monospace</p>
+<p><img src="/images/monofont_display_incorrect_in_browser.png" alt="monofont display incorrect in browser"></p>
+<p>vscode下的monospace</p>
+<p><img src="/images/monofont_display_incorrect_in_vscode.png" alt="monofont display incorrect in vscode"></p>
+<p>网上搜索结果大部分指示，是由于libfreetype6 2.8.1-2ubuntu2的一个bug导致，需要升级到最新的libfreetype2.9或者降级到libfreetype2.8.0，按照搜索的文档进行libfreetype的升级&#x2F;降级后，显示效果依旧，问题没有得到解决</p>
+<h2 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h2><p>在我放弃治疗后过了一段时间，突然想起，一直以来都忽略了验证linux的字体信息。首先，获取显示异常的字体font-family，如下图</p>
+<p><img src="/images/browser_get_font_family.png" alt="browser get font family"></p>
+<p>使用fc-match验证字体</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ fc-match monospace</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match consolas</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match Menlo</span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;PingFang SC&quot;</span></span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;Microsoft YaHei&quot;</span></span><br><span class="line">NotoSansCJK-Regular.ttc: <span class="string">&quot;Noto Sans CJK SC&quot;</span> <span class="string">&quot;Regular&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到Menlo、”PingFang SC”、”Microsoft YaHei”的实际字体跟monospace并不一致，抱着死马当活马医的心态，编辑字体配置文件<code>~/.config/fontconfig/fonts.conf</code>，内容如下，</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&#x27;1.0&#x27;?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&#x27;fonts.dtd&#x27;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">alias</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">prefer</span>&gt;</span><span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span><span class="tag">&lt;/<span class="name">prefer</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>退出，重新登录，发现这个困扰了很久的问题终于解决，如下图</p>
+<p><img src="/images/monofont_the_correct_view.png" alt="monofont the correct view"></p>
+<p>vscode可以通过更改font-family恢复正常的显示效果</p>
+<p><strong>注意</strong></p>
+<p>ubuntu&#x2F;xubuntu、中文&#x2F;英文的系统默认的字体会有些许差异，以上的操作可能不一定生效，可以新增<code>~/.config/fontconfig/conf.d/00-menlo.conf</code></p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;fonts.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">alias</span> <span class="attr">binding</span>=<span class="string">&quot;same&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">accept</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">accept</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/adobe/brackets/issues/14290">[Ubuntu 18.04 LTS] Font not rendering properly</a><br><a href="https://stackoverflow.com/questions/50114376/ubuntu-18-04-lts-font-not-rendering-properly">Ubuntu 18.04 LTS Font not rendering properly</a><br><a href="https://superuser.com/questions/930572/why-doesnt-fc-match-respect-my-match-and-edit-rule-for-courier-when-it-does-for">Why doesn’t fc-match respect my match and edit rule for Courier when it does for Consolas?</a></p>
+]]></content>
+      <tags>
+        <tag>ubuntu</tag>
+        <tag>vscode</tag>
+        <tag>monospace fonts</tag>
       </tags>
   </entry>
   <entry>
@@ -892,6 +892,48 @@
       <tags>
         <tag>php</tag>
         <tag>php extension</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>swift模板移除头部注释</title>
+    <url>/swift-file-template-remove-header-comment/</url>
+    <content><![CDATA[<p>记录下如何移除swift文件的头部注释</p>
+<p><strong>注意，zsh要在空格处添加反斜杠 \，否则无法生成正确的文件路径</strong></p>
+<h2 id="清空模板注释内容（可选）"><a href="#清空模板注释内容（可选）" class="headerlink" title="清空模板注释内容（可选）"></a>清空模板注释内容（可选）</h2><p><strong>以下操作可以先备份文件</strong></p>
+<p>修改<code>IDETemplateMacros.plist</code>文件，移除注释内容</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vi ~/Library/Developer/Xcode/UserData/IDETemplateMacros.plist</span><br></pre></td></tr></table></figure>
+
+<p>找到<code>FILEHEADER</code>，将string的内容清空</p>
+<h2 id="Swift-File"><a href="#Swift-File" class="headerlink" title="Swift File"></a>Swift File</h2><p>进入Xcode目录</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/Library/Developer/Xcode/</span><br></pre></td></tr></table></figure>
+
+<p>添加模板<code>No Comment Swift File.xctemplate</code>，该模板会展示在Xcode的文件目录列表</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p Templates/File Templates/MultiPlatform/Source/No Comment Swift File.xctemplate</span><br></pre></td></tr></table></figure>
+
+<p>进入模板目录</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> Templates/File Templates/MultiPlatform/Source/No Comment Swift File.xctemplate</span><br></pre></td></tr></table></figure>
+
+<p>复制原swift file模板数据</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cp</span> /Applications/Xcode.app/Contents/Developer/Library/Xcode/Templates/File Templates/MultiPlatform/Source/Swift File.xctemplate/* ./</span><br></pre></td></tr></table></figure>
+
+<p>修改<code>___FILEBASENAME___.swift</code>，将第一行头部注释部分移除</p>
+<h2 id="SwiftUI-View"><a href="#SwiftUI-View" class="headerlink" title="SwiftUI View"></a>SwiftUI View</h2><p>同上，进入Xcode目录</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/Library/Developer/Xcode</span><br></pre></td></tr></table></figure>
+
+<p>添加模板<code>No Comment SwiftUI View.xctemplate</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p Templates/File Templates/MultiPlatform/User Interface/No Comment SwiftUI View.xctemplate</span><br></pre></td></tr></table></figure>
+
+<p>进入模板目录</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> Templates/File Templates/MultiPlatform/User Interface/No Comment SwiftUI View.xctemplate</span><br></pre></td></tr></table></figure>
+
+<p>复制原swiftui view模板数据</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cp</span> /Applications/Xcode.app/Contents/Developer/Library/Xcode/Templates/File Templates/MultiPlatform/User Interface/SwiftUI View.xctemplate/* ./</span><br></pre></td></tr></table></figure>
+
+<p>修改<code>___FILEBASENAME___.swift</code>，将第一行头部注释部分移除</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>重启Xcode（不是关闭打开xcode窗口，而是重启），cmd+N查看模板列表，完成！</p>
+]]></content>
+      <tags>
+        <tag>swift</tag>
       </tags>
   </entry>
   <entry>
@@ -1096,48 +1138,6 @@
       </tags>
   </entry>
   <entry>
-    <title>swift模板移除头部注释</title>
-    <url>/swift-file-template-remove-header-comment/</url>
-    <content><![CDATA[<p>记录下如何移除swift文件的头部注释</p>
-<p><strong>注意，zsh要在空格处添加反斜杠 \，否则无法生成正确的文件路径</strong></p>
-<h2 id="清空模板注释内容（可选）"><a href="#清空模板注释内容（可选）" class="headerlink" title="清空模板注释内容（可选）"></a>清空模板注释内容（可选）</h2><p><strong>以下操作可以先备份文件</strong></p>
-<p>修改<code>IDETemplateMacros.plist</code>文件，移除注释内容</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vi ~/Library/Developer/Xcode/UserData/IDETemplateMacros.plist</span><br></pre></td></tr></table></figure>
-
-<p>找到<code>FILEHEADER</code>，将string的内容清空</p>
-<h2 id="Swift-File"><a href="#Swift-File" class="headerlink" title="Swift File"></a>Swift File</h2><p>进入Xcode目录</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/Library/Developer/Xcode/</span><br></pre></td></tr></table></figure>
-
-<p>添加模板<code>No Comment Swift File.xctemplate</code>，该模板会展示在Xcode的文件目录列表</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p Templates/File Templates/MultiPlatform/Source/No Comment Swift File.xctemplate</span><br></pre></td></tr></table></figure>
-
-<p>进入模板目录</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> Templates/File Templates/MultiPlatform/Source/No Comment Swift File.xctemplate</span><br></pre></td></tr></table></figure>
-
-<p>复制原swift file模板数据</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cp</span> /Applications/Xcode.app/Contents/Developer/Library/Xcode/Templates/File Templates/MultiPlatform/Source/Swift File.xctemplate/* ./</span><br></pre></td></tr></table></figure>
-
-<p>修改<code>___FILEBASENAME___.swift</code>，将第一行头部注释部分移除</p>
-<h2 id="SwiftUI-View"><a href="#SwiftUI-View" class="headerlink" title="SwiftUI View"></a>SwiftUI View</h2><p>同上，进入Xcode目录</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/Library/Developer/Xcode</span><br></pre></td></tr></table></figure>
-
-<p>添加模板<code>No Comment SwiftUI View.xctemplate</code></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p Templates/File Templates/MultiPlatform/User Interface/No Comment SwiftUI View.xctemplate</span><br></pre></td></tr></table></figure>
-
-<p>进入模板目录</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> Templates/File Templates/MultiPlatform/User Interface/No Comment SwiftUI View.xctemplate</span><br></pre></td></tr></table></figure>
-
-<p>复制原swiftui view模板数据</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cp</span> /Applications/Xcode.app/Contents/Developer/Library/Xcode/Templates/File Templates/MultiPlatform/User Interface/SwiftUI View.xctemplate/* ./</span><br></pre></td></tr></table></figure>
-
-<p>修改<code>___FILEBASENAME___.swift</code>，将第一行头部注释部分移除</p>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>重启Xcode（不是关闭打开xcode窗口，而是重启），cmd+N查看模板列表，完成！</p>
-]]></content>
-      <tags>
-        <tag>swift</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>MySQL与PostgreSQL的使用区别</title>
     <url>/the-difference-between-mysql-and-postgresql-for-web-developer/</url>
     <content><![CDATA[<p>以<code>MySQL 9</code>以及<code>PostgreSQL 17</code>为例，从Web开发者的角度出发，列举两个数据库在使用方面的差异</p>
@@ -1202,6 +1202,31 @@
       </tags>
   </entry>
   <entry>
+    <title>使用colima作为docker desktop的替代</title>
+    <url>/use-colima-as-an-alternative-to-docker-mac/</url>
+    <content><![CDATA[<p>简单介绍下macOS当前docker运行环境的最新选择：colima，一个开源产品，使用体验与vagrant类似，感觉非常不错</p>
+<h2 id="colima"><a href="#colima" class="headerlink" title="colima"></a>colima</h2><p>根据<a href="https://github.com/abiosoft/colima">colima</a>官方仓库指导安装colima</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">brew install colima</span><br></pre></td></tr></table></figure>
+
+<p>colima默认的runtime是docker，因为k8s已经剥离了docker，只保留containerd，所以为了跟k8s保持一致，另外也不想再多安装一个软件，就选择了只用containerd</p>
+<p>但如果你使用了docker compose，那么最好还是根据教程安装docker以及docker-compose</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 拉取镜像并创建vm</span></span><br><span class="line">colima start --cpu 1 --memory 2 --disk 50 --runtime containerd</span><br><span class="line"><span class="comment"># 这里还可以开启kubernetes支持</span></span><br><span class="line"><span class="comment"># colima start --cpu 4 --memory 8 --disk 100 --runtime containerd --kubernetes</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看vm列表</span></span><br><span class="line">colima list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接vm</span></span><br><span class="line">colima ssh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装nerdctl用于支持containerd</span></span><br><span class="line">colima nerdctl install</span><br></pre></td></tr></table></figure>
+
+<h2 id="nerdctl"><a href="#nerdctl" class="headerlink" title="nerdctl"></a>nerdctl</h2><p>nerdctl是containerd的非核心命令行管理工具，与docker命令完全兼容，<code>containerd + nerdctl = docker</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看docker镜像列表，相当于docker image ls</span></span><br><span class="line">nerdctl image <span class="built_in">ls</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 拉取镜像</span></span><br><span class="line">nerdctl pull mysql:9.2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建container</span></span><br><span class="line">nerdctl run --name mysql9 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=a123456 -d mysql:9.2 --character-set-server=utf8mb4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看container列表</span></span><br><span class="line">nerdctl ps -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接container</span></span><br><span class="line">nerdctl <span class="built_in">exec</span> -it mysql9 bash</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/abiosoft/colima">colima</a><br><a href="https://github.com/containerd/nerdctl">nerdctl</a><br><a href="https://smallsharpsoftwaretools.com/tutorials/use-colima-to-run-docker-containers-on-macos/">Use Colima to Run Docker Containers on macOS</a></p>
+]]></content>
+      <tags>
+        <tag>docker</tag>
+        <tag>kubernetes</tag>
+        <tag>macOS</tag>
+        <tag>colima</tag>
+        <tag>containerd</tag>
+        <tag>nerdctl</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>记一次xdebug异常</title>
     <url>/vagrant-xdebug-not-working/</url>
     <content><![CDATA[<p>工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴</p>
@@ -1229,31 +1254,6 @@
         <tag>php</tag>
         <tag>vagrant</tag>
         <tag>xdebug</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用colima作为docker desktop的替代</title>
-    <url>/use-colima-as-an-alternative-to-docker-mac/</url>
-    <content><![CDATA[<p>简单介绍下macOS当前docker运行环境的最新选择：colima，一个开源产品，使用体验与vagrant类似，感觉非常不错</p>
-<h2 id="colima"><a href="#colima" class="headerlink" title="colima"></a>colima</h2><p>根据<a href="https://github.com/abiosoft/colima">colima</a>官方仓库指导安装colima</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">brew install colima</span><br></pre></td></tr></table></figure>
-
-<p>colima默认的runtime是docker，因为k8s已经剥离了docker，只保留containerd，所以为了跟k8s保持一致，另外也不想再多安装一个软件，就选择了只用containerd</p>
-<p>但如果你使用了docker compose，那么最好还是根据教程安装docker以及docker-compose</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 拉取镜像并创建vm</span></span><br><span class="line">colima start --cpu 1 --memory 2 --disk 50 --runtime containerd</span><br><span class="line"><span class="comment"># 这里还可以开启kubernetes支持</span></span><br><span class="line"><span class="comment"># colima start --cpu 4 --memory 8 --disk 100 --runtime containerd --kubernetes</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看vm列表</span></span><br><span class="line">colima list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接vm</span></span><br><span class="line">colima ssh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装nerdctl用于支持containerd</span></span><br><span class="line">colima nerdctl install</span><br></pre></td></tr></table></figure>
-
-<h2 id="nerdctl"><a href="#nerdctl" class="headerlink" title="nerdctl"></a>nerdctl</h2><p>nerdctl是containerd的非核心命令行管理工具，与docker命令完全兼容，<code>containerd + nerdctl = docker</code></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看docker镜像列表，相当于docker image ls</span></span><br><span class="line">nerdctl image <span class="built_in">ls</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 拉取镜像</span></span><br><span class="line">nerdctl pull mysql:9.2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建container</span></span><br><span class="line">nerdctl run --name mysql9 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=a123456 -d mysql:9.2 --character-set-server=utf8mb4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看container列表</span></span><br><span class="line">nerdctl ps -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接container</span></span><br><span class="line">nerdctl <span class="built_in">exec</span> -it mysql9 bash</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://github.com/abiosoft/colima">colima</a><br><a href="https://github.com/containerd/nerdctl">nerdctl</a><br><a href="https://smallsharpsoftwaretools.com/tutorials/use-colima-to-run-docker-containers-on-macos/">Use Colima to Run Docker Containers on macOS</a></p>
-]]></content>
-      <tags>
-        <tag>docker</tag>
-        <tag>kubernetes</tag>
-        <tag>macOS</tag>
-        <tag>colima</tag>
-        <tag>containerd</tag>
-        <tag>nerdctl</tag>
       </tags>
   </entry>
   <entry>
