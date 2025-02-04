@@ -264,20 +264,6 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/docker/</loc>
-    <lastmod>2025-02-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/registry/</loc>
-    <lastmod>2025-02-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://y2k38.github.io/tags/kvm/</loc>
     <lastmod>2025-02-04</lastmod>
     <changefreq>weekly</changefreq>
@@ -313,6 +299,20 @@
   </url>
   
   <url>
+    <loc>https://y2k38.github.io/tags/docker/</loc>
+    <lastmod>2025-02-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/registry/</loc>
+    <lastmod>2025-02-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://y2k38.github.io/tags/ffmpeg/</loc>
     <lastmod>2025-02-04</lastmod>
     <changefreq>weekly</changefreq>
@@ -321,6 +321,34 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/hls/</loc>
+    <lastmod>2025-02-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/kubernetes/</loc>
+    <lastmod>2025-02-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/wireguard/</loc>
+    <lastmod>2025-02-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/ubuntu/</loc>
+    <lastmod>2025-02-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/hotspot/</loc>
     <lastmod>2025-02-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -342,34 +370,6 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/profiling/</loc>
-    <lastmod>2025-02-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/kubernetes/</loc>
-    <lastmod>2025-02-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/ubuntu/</loc>
-    <lastmod>2025-02-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/hotspot/</loc>
-    <lastmod>2025-02-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/wireguard/</loc>
     <lastmod>2025-02-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
