@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://y2k38.github.io/golang-series-channel/</loc>
+    <loc>https://y2k38.github.io/golang-series-timer-and-ticker/</loc>
     
     <lastmod>2025-03-01</lastmod>
     
@@ -11,7 +11,7 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/golang-series-timer-and-ticker/</loc>
+    <loc>https://y2k38.github.io/golang-series-channel/</loc>
     
     <lastmod>2025-03-01</lastmod>
     
@@ -101,7 +101,7 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/golang-series-slice/</loc>
+    <loc>https://y2k38.github.io/golang-series-sync-cond/</loc>
     
     <lastmod>2025-02-20</lastmod>
     
@@ -110,7 +110,7 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/golang-series-sync-cond/</loc>
+    <loc>https://y2k38.github.io/golang-series-slice/</loc>
     
     <lastmod>2025-02-20</lastmod>
     
@@ -128,7 +128,7 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/golang-series-sync-rwmutex/</loc>
+    <loc>https://y2k38.github.io/golang-series-sync-singleflight/</loc>
     
     <lastmod>2025-02-20</lastmod>
     
@@ -137,7 +137,7 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/golang-series-sync-singleflight/</loc>
+    <loc>https://y2k38.github.io/golang-series-sync-rwmutex/</loc>
     
     <lastmod>2025-02-20</lastmod>
     
@@ -503,6 +503,20 @@
   </url>
   
   <url>
+    <loc>https://y2k38.github.io/tags/ubuntu/</loc>
+    <lastmod>2025-03-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/hotspot/</loc>
+    <lastmod>2025-03-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://y2k38.github.io/tags/php/</loc>
     <lastmod>2025-03-01</lastmod>
     <changefreq>weekly</changefreq>
@@ -518,20 +532,6 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/profiling/</loc>
-    <lastmod>2025-03-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/ubuntu/</loc>
-    <lastmod>2025-03-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/hotspot/</loc>
     <lastmod>2025-03-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -559,14 +559,7 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/vscode/</loc>
-    <lastmod>2025-03-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/monospace-fonts/</loc>
+    <loc>https://y2k38.github.io/tags/php-extension/</loc>
     <lastmod>2025-03-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -587,7 +580,14 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/php-extension/</loc>
+    <loc>https://y2k38.github.io/tags/vscode/</loc>
+    <lastmod>2025-03-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/monospace-fonts/</loc>
     <lastmod>2025-03-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -595,13 +595,6 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/postgresql/</loc>
-    <lastmod>2025-03-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/swift/</loc>
     <lastmod>2025-03-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -629,6 +622,20 @@
   </url>
   
   <url>
+    <loc>https://y2k38.github.io/tags/swift/</loc>
+    <lastmod>2025-03-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/kubeadm/</loc>
+    <lastmod>2025-03-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://y2k38.github.io/tags/vagrant/</loc>
     <lastmod>2025-03-01</lastmod>
     <changefreq>weekly</changefreq>
@@ -637,13 +644,6 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/xdebug/</loc>
-    <lastmod>2025-03-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/kubeadm/</loc>
     <lastmod>2025-03-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
