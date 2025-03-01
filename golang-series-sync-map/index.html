@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="map不支持并发读写，但我们可以转变下思路，将value改为一个指向结构体entry的指针，结构体内部的字段我们是可以随意修改的，如下，将并发读写map改为并发读map，读写转移到entry 12345type entry struct &#123;    p any&#125;var m map[string]*entry  上面的方法看起来解决了并发读写的问题，但还不够，当有新的key写入时，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang系列之-sync.Map">
+<meta property="og:url" content="https://y2k38.github.io/golang-series-sync-map/index.html">
+<meta property="og:site_name" content="noname">
+<meta property="og:description" content="map不支持并发读写，但我们可以转变下思路，将value改为一个指向结构体entry的指针，结构体内部的字段我们是可以随意修改的，如下，将并发读写map改为并发读map，读写转移到entry 12345type entry struct &#123;    p any&#125;var m map[string]*entry  上面的方法看起来解决了并发读写的问题，但还不够，当有新的key写入时，">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-02-20T01:45:01.000Z">
+<meta property="article:modified_time" content="2025-02-20T03:37:03.210Z">
+<meta property="article:author" content="y2k38">
+<meta property="article:tag" content="golang">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://y2k38.github.io/golang-series-sync-map/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/golang-series-sync-map/","path":"golang-series-sync-map/","title":"golang系列之-sync.Map"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>golang系列之-sync.Map | noname</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">noname</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B"><span class="nav-number">1.</span> <span class="nav-text">快速上手</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">数据结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">核心方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Load"><span class="nav-number">3.1.</span> <span class="nav-text">Load</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Store"><span class="nav-number">3.2.</span> <span class="nav-text">Store</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LoadOrStore"><span class="nav-number">3.3.</span> <span class="nav-text">LoadOrStore</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Delete"><span class="nav-number">3.4.</span> <span class="nav-text">Delete</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LoadAndDelete"><span class="nav-number">3.5.</span> <span class="nav-text">LoadAndDelete</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CompareAndDelete"><span class="nav-number">3.6.</span> <span class="nav-text">CompareAndDelete</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Swap"><span class="nav-number">3.7.</span> <span class="nav-text">Swap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CompareAndSwap"><span class="nav-number">3.8.</span> <span class="nav-text">CompareAndSwap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Range"><span class="nav-number">3.9.</span> <span class="nav-text">Range</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Clear"><span class="nav-number">3.10.</span> <span class="nav-text">Clear</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="nav-number">4.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">y2k38</p>
+  <div class="site-description" itemprop="description">个人笔记</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-sync-map/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="golang系列之-sync.Map | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          golang系列之-sync.Map
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-02-20 09:45:01 / 修改时间：11:37:03" itemprop="dateCreated datePublished" datetime="2025-02-20T09:45:01+08:00">2025-02-20</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>9 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>map不支持并发读写，但我们可以转变下思路，将value改为一个指向结构体entry的指针，结构体内部的字段我们是可以随意修改的，如下，将并发读写map改为并发读map，读写转移到entry</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> entry <span class="keyword">struct</span> &#123;</span><br><span class="line">    p any</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> m <span class="keyword">map</span>[<span class="type">string</span>]*entry</span><br></pre></td></tr></table></figure>
+
+<p>上面的方法看起来解决了并发读写的问题，但还不够，当有新的key写入时，还是变回了原来的map并发读写。sync.Map提供了一种思路，使用两个map，read负责已有key的并发读写，dirty负责新key的读写，只有当read找不到key，才去找dirty。</p>
+<p>现在还剩最后一个问题，read和dirty如何保证数据一致&#x2F;同步，我们可以改造entry，使其指向value的指针，如此一来，read和dirty的entry可以指向同一个value，如下，这就是sync.Map的大致思路</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> entry <span class="keyword">struct</span> &#123;</span><br><span class="line">    p *any</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// read  -&gt; key0|*entry0         entry0.p -&gt; &amp;value</span></span><br><span class="line"><span class="comment">//       -&gt; key1|*entry1</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// dirty -&gt; key0|*entry0</span></span><br><span class="line"><span class="comment">//       -&gt; key1|*entry1</span></span><br><span class="line"><span class="comment">//       -&gt; key2|*entry2</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong>尽管如此，sync.Map并不完美，以上设计导致我们无法直接计算出哈希表的元素数量，需要遍历进行统计，而且还不一定准确</p>
+<p>当前go版本：1.23，1.24版本改为HashTrieMap实现</p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;sync&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> syncMap sync.Map</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 写</span></span><br><span class="line">    syncMap.Store(<span class="string">&quot;blog&quot;</span>, <span class="string">&quot;VictoriaMetrics&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 读</span></span><br><span class="line">    value, ok := syncMap.Load(<span class="string">&quot;blog&quot;</span>)</span><br><span class="line">    fmt.Println(value, ok)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 删除</span></span><br><span class="line">    syncMap.Delete(<span class="string">&quot;blog&quot;</span>)</span><br><span class="line">    value, ok = syncMap.Load(<span class="string">&quot;blog&quot;</span>)</span><br><span class="line">    fmt.Println(value, ok)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述代码运行结果如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">go run ./main.go</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出如下</span></span><br><span class="line"><span class="comment"># VictoriaMetrics true</span></span><br><span class="line"><span class="comment"># &lt;nil&gt; false</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>todo：文章图片待补充</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/sync/map.go</span></span><br><span class="line"><span class="keyword">type</span> Map <span class="keyword">struct</span> &#123;</span><br><span class="line">    mu Mutex                        <span class="comment">// dirty锁</span></span><br><span class="line">    read atomic.Pointer[readOnly]   <span class="comment">// 负责已有key的读写</span></span><br><span class="line">    dirty <span class="keyword">map</span>[any]*entry            <span class="comment">// 负责新key的读写，替换read后设置为nil</span></span><br><span class="line">    misses <span class="type">int</span>                      <span class="comment">// 计数器，如果read找不到key时加一，当misses==len(dirty)，用dirty替换掉read</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// map+amended</span></span><br><span class="line"><span class="keyword">type</span> readOnly <span class="keyword">struct</span> &#123;</span><br><span class="line">    m       <span class="keyword">map</span>[any]*entry          <span class="comment">// </span></span><br><span class="line">    amended <span class="type">bool</span>                    <span class="comment">// 修正，当dirty有新的key写入时为true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 指针-运行时生成，表示数据已完全删除</span></span><br><span class="line"><span class="keyword">var</span> expunged = <span class="built_in">new</span>(any)</span><br><span class="line"></span><br><span class="line"><span class="comment">// value的封装，被read和dirty共享</span></span><br><span class="line"><span class="keyword">type</span> entry <span class="keyword">struct</span> &#123;</span><br><span class="line">    p atomic.Pointer[any]           <span class="comment">// 指针-任意类型</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这里值得注意的是entry的p指针，有三个状态</p>
+<table>
+<thead>
+<tr>
+<th align="left">p</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">&amp;value</td>
+<td align="left">正常状态</td>
+</tr>
+<tr>
+<td align="left">nil</td>
+<td align="left">已删除，可以当作是墓碑来理解</td>
+</tr>
+<tr>
+<td align="left">expunged</td>
+<td align="left">dirty替代read时，从nil改为expunged，在下一轮替换中，移除该key</td>
+</tr>
+</tbody></table>
+<p>三种状态转移路线：</p>
+<ol>
+<li>&amp;value   -&gt; nil -&gt; expunged</li>
+<li>expunged -&gt; nil -&gt; &amp;value</li>
+</ol>
+<h2 id="核心方法"><a href="#核心方法" class="headerlink" title="核心方法"></a>核心方法</h2><h3 id="Load"><a href="#Load" class="headerlink" title="Load"></a>Load</h3><p>根据key获取value，具体逻辑如下</p>
+<ol>
+<li>根据key在read中寻找entry，如果找到，返回</li>
+<li>加锁，再找一遍read，如果找到，返回（double-check）</li>
+<li>amended为true表示dirty有新的key，在dirty找</li>
+<li>更新misses计数器，如果misses&#x3D;&#x3D;len(dirty)，用dirty替换掉read</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> Load(key any) (value any, ok <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="comment">// 在read找</span></span><br><span class="line">    read := m.loadReadOnly()</span><br><span class="line">    e, ok := read.m[key]</span><br><span class="line">    <span class="comment">// 没找到但dirty有新key写入</span></span><br><span class="line">    <span class="keyword">if</span> !ok &amp;&amp; read.amended &#123;</span><br><span class="line">        m.mu.Lock()</span><br><span class="line">        <span class="comment">// double-check</span></span><br><span class="line">        read = m.loadReadOnly()</span><br><span class="line">        e, ok = read.m[key]</span><br><span class="line">        <span class="keyword">if</span> !ok &amp;&amp; read.amended &#123;</span><br><span class="line">            <span class="comment">// 在dirty找</span></span><br><span class="line">            e, ok = m.dirty[key]</span><br><span class="line">            <span class="comment">// misses++</span></span><br><span class="line">            m.missLocked()</span><br><span class="line">        &#125;</span><br><span class="line">        m.mu.Unlock()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> !ok &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> e.load()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取m.read</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> loadReadOnly() readOnly &#123;</span><br><span class="line">    <span class="keyword">if</span> p := m.read.Load(); p != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> *p</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> readOnly&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取数据</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *entry)</span></span> load() (value any, ok <span class="type">bool</span>) &#123;</span><br><span class="line">    p := e.p.Load()</span><br><span class="line">    <span class="comment">// 已删除</span></span><br><span class="line">    <span class="keyword">if</span> p == <span class="literal">nil</span> || p == expunged &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> *p, <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// misses计数器更新</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> missLocked() &#123;</span><br><span class="line">    m.misses++</span><br><span class="line">    <span class="keyword">if</span> m.misses &lt; <span class="built_in">len</span>(m.dirty) &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// misses == len(m.dirty)</span></span><br><span class="line">    <span class="comment">// 用dirty替换read</span></span><br><span class="line">    m.read.Store(&amp;readOnly&#123;m: m.dirty&#125;)</span><br><span class="line">    m.dirty = <span class="literal">nil</span></span><br><span class="line">    m.misses = <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Store"><a href="#Store" class="headerlink" title="Store"></a>Store</h3><p>存储key&#x2F;value。本质就是Swap方法，但丢弃其返回值，具体看Swap</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> Store(key, value any) &#123;</span><br><span class="line">    _, _ = m.Swap(key, value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="LoadOrStore"><a href="#LoadOrStore" class="headerlink" title="LoadOrStore"></a>LoadOrStore</h3><p>根据key获取value，如果没有该key&#x2F;value，则改为写入。该方法逻辑与Swap方法十分相似</p>
+<p>具体逻辑如下</p>
+<ol>
+<li>根据key在read中寻找entry，如果找到，返回</li>
+<li>加锁，再找一遍read，如果找到，返回（double-check）</li>
+<li>如果在dirty找到，获取&#x2F;更新key，同时更新misses计数器，返回</li>
+<li>都没找到说明是新key，写入dirty，返回</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> LoadOrStore(key, value any) (actual any, loaded <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="comment">// 在read找</span></span><br><span class="line">    read := m.loadReadOnly()</span><br><span class="line">    <span class="comment">// 找到了</span></span><br><span class="line">    <span class="keyword">if</span> e, ok := read.m[key]; ok &#123;</span><br><span class="line">        <span class="comment">// e有数值则获取，没有则更新并获取</span></span><br><span class="line">        actual, loaded, ok := e.tryLoadOrStore(value)</span><br><span class="line">        <span class="keyword">if</span> ok &#123;</span><br><span class="line">            <span class="keyword">return</span> actual, loaded</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在read中没找到（dirty可能有）</span></span><br><span class="line"></span><br><span class="line">    m.mu.Lock()</span><br><span class="line">    <span class="comment">// double-check</span></span><br><span class="line">    read = m.loadReadOnly()</span><br><span class="line">    <span class="comment">// 在read找到</span></span><br><span class="line">    <span class="keyword">if</span> e, ok := read.m[key]; ok &#123;</span><br><span class="line">        <span class="comment">// e指针从expunged改为nil</span></span><br><span class="line">        <span class="keyword">if</span> e.unexpungeLocked() &#123;</span><br><span class="line">            <span class="comment">// 凡是expunged变为nil状态的，read要同步到dirty</span></span><br><span class="line">            m.dirty[key] = e</span><br><span class="line">        &#125;</span><br><span class="line">        actual, loaded, _ = e.tryLoadOrStore(value)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> e, ok := m.dirty[key]; ok &#123;</span><br><span class="line">        <span class="comment">// 在dirty找到</span></span><br><span class="line">        actual, loaded, _ = e.tryLoadOrStore(value)</span><br><span class="line">        <span class="comment">// misses++</span></span><br><span class="line">        m.missLocked()</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// dirty也没有 =&gt; 全新写入</span></span><br><span class="line">        <span class="comment">// 有新的key写入，需要更新amended</span></span><br><span class="line">        <span class="keyword">if</span> !read.amended &#123;</span><br><span class="line">            <span class="comment">// 克隆read到dirty（只保留未删除的纪录）</span></span><br><span class="line">            m.dirtyLocked()</span><br><span class="line">            <span class="comment">// 有新key写入，需要将amended改为true</span></span><br><span class="line">            m.read.Store(&amp;readOnly&#123;m: read.m, amended: <span class="literal">true</span>&#125;)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 凡是新key，都放在dirty</span></span><br><span class="line">        m.dirty[key] = newEntry(value)</span><br><span class="line">        actual, loaded = value, <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">    m.mu.Unlock()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> actual, loaded</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 有数值则获取，没有则更新并获取返回</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *entry)</span></span> tryLoadOrStore(i any) (actual any, loaded, ok <span class="type">bool</span>) &#123;</span><br><span class="line">    p := e.p.Load()</span><br><span class="line">    <span class="comment">// 完全删除</span></span><br><span class="line">    <span class="keyword">if</span> p == expunged &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span>, <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 不为nil</span></span><br><span class="line">    <span class="keyword">if</span> p != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> *p, <span class="literal">true</span>, <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 为nil</span></span><br><span class="line">    ic := i</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        <span class="comment">// 替换成功</span></span><br><span class="line">        <span class="keyword">if</span> e.p.CompareAndSwap(<span class="literal">nil</span>, &amp;ic) &#123;</span><br><span class="line">            <span class="keyword">return</span> i, <span class="literal">false</span>, <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 重复上面的操作</span></span><br><span class="line">        p = e.p.Load()</span><br><span class="line">        <span class="keyword">if</span> p == expunged &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span>, <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> p != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> *p, <span class="literal">true</span>, <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// e指针从expunged改为nil</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *entry)</span></span> unexpungeLocked() (wasExpunged <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> e.p.CompareAndSwap(expunged, <span class="literal">nil</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> dirtyLocked() &#123;</span><br><span class="line">    <span class="comment">// dirty已经存在了，忽略</span></span><br><span class="line">    <span class="keyword">if</span> m.dirty != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    read := m.loadReadOnly()</span><br><span class="line">    <span class="comment">// 创建dirty，与read同等大小</span></span><br><span class="line">    m.dirty = <span class="built_in">make</span>(<span class="keyword">map</span>[any]*entry, <span class="built_in">len</span>(read.m))</span><br><span class="line">    <span class="keyword">for</span> k, e := <span class="keyword">range</span> read.m &#123;</span><br><span class="line">        <span class="comment">// 把nil的entry改为expunged</span></span><br><span class="line">        <span class="keyword">if</span> !e.tryExpungeLocked() &#123;</span><br><span class="line">            <span class="comment">// 其他非删除数据复制到dirty</span></span><br><span class="line">            m.dirty[k] = e</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// e.p指针从nil改为expunged</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *entry)</span></span> tryExpungeLocked() (isExpunged <span class="type">bool</span>) &#123;</span><br><span class="line">    p := e.p.Load()</span><br><span class="line">    <span class="keyword">for</span> p == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="comment">// nil -&gt; expunged</span></span><br><span class="line">        <span class="keyword">if</span> e.p.CompareAndSwap(<span class="literal">nil</span>, expunged) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        p = e.p.Load()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> p == expunged</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Delete"><a href="#Delete" class="headerlink" title="Delete"></a>Delete</h3><p>删除指定key，具体看LoadAndDelete</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Delete deletes the value for a key.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> Delete(key any) &#123;</span><br><span class="line">    m.LoadAndDelete(key)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="LoadAndDelete"><a href="#LoadAndDelete" class="headerlink" title="LoadAndDelete"></a>LoadAndDelete</h3><p>逻辑与Load相似，具体如下</p>
+<ol>
+<li>根据key在read中寻找entry，如果找到，将entry置为nil</li>
+<li>加锁，再找一遍read，如果找到，将entry置为nil（double-check）</li>
+<li>amended为true表示dirty有新的key，在dirty找</li>
+<li>更新misses计数器，如果misses&#x3D;&#x3D;len(dirty)，将dirty迁移到read</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> LoadAndDelete(key any) (value any, loaded <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="comment">// 在read找</span></span><br><span class="line">    read := m.loadReadOnly()</span><br><span class="line">    e, ok := read.m[key]</span><br><span class="line">    <span class="comment">// 没找到但dirty有新key写入</span></span><br><span class="line">    <span class="keyword">if</span> !ok &amp;&amp; read.amended &#123;</span><br><span class="line">        m.mu.Lock()</span><br><span class="line">        <span class="comment">// double-check</span></span><br><span class="line">        read = m.loadReadOnly()</span><br><span class="line">        e, ok = read.m[key]</span><br><span class="line">        <span class="keyword">if</span> !ok &amp;&amp; read.amended &#123;</span><br><span class="line">            <span class="comment">// 在dirty找</span></span><br><span class="line">            e, ok = m.dirty[key]</span><br><span class="line">            <span class="comment">// read没有但dirty有，直接删除</span></span><br><span class="line">            <span class="built_in">delete</span>(m.dirty, key)</span><br><span class="line">            <span class="comment">// misses++</span></span><br><span class="line">            m.missLocked()</span><br><span class="line">        &#125;</span><br><span class="line">        m.mu.Unlock()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> ok &#123;</span><br><span class="line">        <span class="comment">// e.p改为nil</span></span><br><span class="line">        <span class="keyword">return</span> e.<span class="built_in">delete</span>()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// e.p改为nil</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *entry)</span></span> <span class="built_in">delete</span>() (value any, ok <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        p := e.p.Load()</span><br><span class="line">        <span class="comment">// 已删除</span></span><br><span class="line">        <span class="keyword">if</span> p == <span class="literal">nil</span> || p == expunged &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 置为nil</span></span><br><span class="line">        <span class="keyword">if</span> e.p.CompareAndSwap(p, <span class="literal">nil</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> *p, <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="CompareAndDelete"><a href="#CompareAndDelete" class="headerlink" title="CompareAndDelete"></a>CompareAndDelete</h3><p>具体逻辑如下</p>
+<ol>
+<li>根据key在read中寻找entry，如果找到，纪录e</li>
+<li>加锁，再找一遍read，如果找到，纪录e（double-check）</li>
+<li>amended为true表示dirty有新的key，在dirty找</li>
+<li>更新misses计数器，如果misses&#x3D;&#x3D;len(dirty)，用dirty替换掉read</li>
+<li>已删除或比对失败返回false，否则将e.p置为nil，返回true</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> CompareAndDelete(key, old any) (deleted <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="comment">// 在read找</span></span><br><span class="line">    read := m.loadReadOnly()</span><br><span class="line">    e, ok := read.m[key]</span><br><span class="line">    <span class="comment">// 没找到但dirty有新key写入</span></span><br><span class="line">    <span class="keyword">if</span> !ok &amp;&amp; read.amended &#123;</span><br><span class="line">        m.mu.Lock()</span><br><span class="line">        <span class="comment">// double-check</span></span><br><span class="line">        read = m.loadReadOnly()</span><br><span class="line">        e, ok = read.m[key]</span><br><span class="line">        <span class="keyword">if</span> !ok &amp;&amp; read.amended &#123;</span><br><span class="line">            <span class="comment">// 在dirty找</span></span><br><span class="line">            e, ok = m.dirty[key]</span><br><span class="line">            <span class="comment">// misses++</span></span><br><span class="line">            m.missLocked()</span><br><span class="line">        &#125;</span><br><span class="line">        m.mu.Unlock()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> ok &#123;</span><br><span class="line">        p := e.p.Load()</span><br><span class="line">        <span class="comment">// 已删除或比对失败</span></span><br><span class="line">        <span class="keyword">if</span> p == <span class="literal">nil</span> || p == expunged || *p != old &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 置为nil</span></span><br><span class="line">        <span class="keyword">if</span> e.p.CompareAndSwap(p, <span class="literal">nil</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Swap"><a href="#Swap" class="headerlink" title="Swap"></a>Swap</h3><p>使用value替换key当前存储的数据。具体逻辑如下</p>
+<ol>
+<li>根据key在read中寻找entry，如果找到，替换并返回</li>
+<li>加锁，再找一遍read，如果找到，替换并返回（double-check）</li>
+<li>如果在dirty找到，替换并返回</li>
+<li>都没找到说明是新key，写入dirty，返回</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> Swap(key, value any) (previous any, loaded <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="comment">// 在read找</span></span><br><span class="line">    read := m.loadReadOnly()</span><br><span class="line">    <span class="comment">// 找到了</span></span><br><span class="line">    <span class="keyword">if</span> e, ok := read.m[key]; ok &#123;</span><br><span class="line">        <span class="comment">// 修改指针指向新的value</span></span><br><span class="line">        <span class="keyword">if</span> v, ok := e.trySwap(&amp;value); ok &#123;</span><br><span class="line">            <span class="comment">// 已删除</span></span><br><span class="line">            <span class="keyword">if</span> v == <span class="literal">nil</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 有值，返回</span></span><br><span class="line">            <span class="keyword">return</span> *v, <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在read中没找到（dirty可能有）</span></span><br><span class="line"></span><br><span class="line">    m.mu.Lock()</span><br><span class="line">    <span class="comment">// double-check</span></span><br><span class="line">    read = m.loadReadOnly()</span><br><span class="line">    <span class="comment">// 在read找到</span></span><br><span class="line">    <span class="keyword">if</span> e, ok := read.m[key]; ok &#123;</span><br><span class="line">        <span class="comment">// e指针从expunged改为nil</span></span><br><span class="line">        <span class="keyword">if</span> e.unexpungeLocked() &#123;</span><br><span class="line">            <span class="comment">// 凡是expunged变为nil状态的，read要同步到dirty</span></span><br><span class="line">            m.dirty[key] = e</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 修改指针指向新的value</span></span><br><span class="line">        <span class="keyword">if</span> v := e.swapLocked(&amp;value); v != <span class="literal">nil</span> &#123;</span><br><span class="line">            loaded = <span class="literal">true</span></span><br><span class="line">            previous = *v</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> e, ok := m.dirty[key]; ok &#123;</span><br><span class="line">        <span class="comment">// 在dirty找到</span></span><br><span class="line">        <span class="comment">// 修改指针指向新的value</span></span><br><span class="line">        <span class="keyword">if</span> v := e.swapLocked(&amp;value); v != <span class="literal">nil</span> &#123;</span><br><span class="line">            loaded = <span class="literal">true</span></span><br><span class="line">            previous = *v</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// dirty也没有 =&gt; 全新写入</span></span><br><span class="line">        <span class="comment">// 有新的key写入，需要更新amended</span></span><br><span class="line">        <span class="keyword">if</span> !read.amended &#123;</span><br><span class="line">            <span class="comment">// 克隆read到dirty（只保留未删除的纪录）</span></span><br><span class="line">            m.dirtyLocked()</span><br><span class="line">            <span class="comment">// 有新key写入，需要将amended改为true</span></span><br><span class="line">            m.read.Store(&amp;readOnly&#123;m: read.m, amended: <span class="literal">true</span>&#125;)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 凡是新key，都放在dirty</span></span><br><span class="line">        m.dirty[key] = newEntry(value)</span><br><span class="line">    &#125;</span><br><span class="line">    m.mu.Unlock()</span><br><span class="line">    <span class="keyword">return</span> previous, loaded</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *entry)</span></span> trySwap(i *any) (*any, <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        p := e.p.Load()</span><br><span class="line">        <span class="comment">// 已删除</span></span><br><span class="line">        <span class="keyword">if</span> p == expunged &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 替换成功</span></span><br><span class="line">        <span class="keyword">if</span> e.p.CompareAndSwap(p, i) &#123;</span><br><span class="line">            <span class="keyword">return</span> p, <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *entry)</span></span> swapLocked(i *any) *any &#123;</span><br><span class="line">    <span class="keyword">return</span> e.p.Swap(i)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="CompareAndSwap"><a href="#CompareAndSwap" class="headerlink" title="CompareAndSwap"></a>CompareAndSwap</h3><p>具体逻辑如下</p>
+<ol>
+<li>根据key在read中寻找entry，如果找到，替换并返回</li>
+<li>如果dirty没有新key，到此为止，返回</li>
+<li>加锁，再找一遍read，如果找到，替换并返回（double-check）</li>
+<li>如果在dirty找到，替换并返回</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> CompareAndSwap(key, old, <span class="built_in">new</span> any) (swapped <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="comment">// 在read找</span></span><br><span class="line">    read := m.loadReadOnly()</span><br><span class="line">    <span class="comment">// 找到了</span></span><br><span class="line">    <span class="keyword">if</span> e, ok := read.m[key]; ok &#123;</span><br><span class="line">        <span class="comment">// 尝试修改指针指向新的value</span></span><br><span class="line">        <span class="keyword">return</span> e.tryCompareAndSwap(old, <span class="built_in">new</span>)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> !read.amended &#123;</span><br><span class="line">        <span class="comment">// 没找到，dirty也没有新key</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在read中没找到但dirty可能有</span></span><br><span class="line"></span><br><span class="line">    m.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> m.mu.Unlock()</span><br><span class="line">    <span class="comment">// double-check</span></span><br><span class="line">    read = m.loadReadOnly()</span><br><span class="line">    swapped = <span class="literal">false</span></span><br><span class="line">    <span class="keyword">if</span> e, ok := read.m[key]; ok &#123;</span><br><span class="line">        <span class="comment">// 同上</span></span><br><span class="line">        swapped = e.tryCompareAndSwap(old, <span class="built_in">new</span>)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> e, ok := m.dirty[key]; ok &#123;</span><br><span class="line">        <span class="comment">// 在dirty找到</span></span><br><span class="line">        <span class="comment">// 尝试修改指针指向新的value</span></span><br><span class="line">        swapped = e.tryCompareAndSwap(old, <span class="built_in">new</span>)</span><br><span class="line">        <span class="comment">// misses++</span></span><br><span class="line">        m.missLocked()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> swapped</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *entry)</span></span> tryCompareAndSwap(old, <span class="built_in">new</span> any) <span class="type">bool</span> &#123;</span><br><span class="line">    p := e.p.Load()</span><br><span class="line">    <span class="comment">// 已删除或比对失败</span></span><br><span class="line">    <span class="keyword">if</span> p == <span class="literal">nil</span> || p == expunged || *p != old &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 原子替换</span></span><br><span class="line">    nc := <span class="built_in">new</span> <span class="comment">// 优化，具体看原注释</span></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> e.p.CompareAndSwap(p, &amp;nc) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        p = e.p.Load()</span><br><span class="line">        <span class="keyword">if</span> p == <span class="literal">nil</span> || p == expunged || *p != old &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Range"><a href="#Range" class="headerlink" title="Range"></a>Range</h3><p>具体逻辑如下</p>
+<ol>
+<li>复制read，如果dirty有新key写入，则复制dirty并用dirty替换read</li>
+<li>遍历哈希表</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> Range(f <span class="function"><span class="keyword">func</span><span class="params">(key, value any)</span></span> <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="comment">// 复制read</span></span><br><span class="line">    read := m.loadReadOnly()</span><br><span class="line">    <span class="comment">// dirty有新key写入</span></span><br><span class="line">    <span class="keyword">if</span> read.amended &#123;</span><br><span class="line">        m.mu.Lock()</span><br><span class="line">        read = m.loadReadOnly()</span><br><span class="line">        <span class="comment">// double-check</span></span><br><span class="line">        <span class="keyword">if</span> read.amended &#123;</span><br><span class="line">            <span class="comment">// 复制dirty</span></span><br><span class="line">            read = readOnly&#123;m: m.dirty&#125;</span><br><span class="line">            copyRead := read</span><br><span class="line">            <span class="comment">// 用dirty替换掉read</span></span><br><span class="line">            m.read.Store(&amp;copyRead)</span><br><span class="line">            m.dirty = <span class="literal">nil</span></span><br><span class="line">            m.misses = <span class="number">0</span></span><br><span class="line">        &#125;</span><br><span class="line">        m.mu.Unlock()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 遍历哈希表</span></span><br><span class="line">    <span class="keyword">for</span> k, e := <span class="keyword">range</span> read.m &#123;</span><br><span class="line">        <span class="comment">// 读取数据</span></span><br><span class="line">        v, ok := e.load()</span><br><span class="line">        <span class="keyword">if</span> !ok &#123;</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> !f(k, v) &#123;</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Clear"><a href="#Clear" class="headerlink" title="Clear"></a>Clear</h3><p>具体逻辑如下</p>
+<ol>
+<li>read为空且dirty也为空，返回</li>
+<li>read不为空或者dirty有新数据<ul>
+<li>复制read并将read置空</li>
+<li>将dirty清空</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span></span> Clear() &#123;</span><br><span class="line">    <span class="comment">// 复制read</span></span><br><span class="line">    read := m.loadReadOnly()</span><br><span class="line">    <span class="comment">// read为空且dirty也为空</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(read.m) == <span class="number">0</span> &amp;&amp; !read.amended &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// read不为空或者dirty有新数据</span></span><br><span class="line"></span><br><span class="line">    m.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> m.mu.Unlock()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 复制read</span></span><br><span class="line">    read = m.loadReadOnly()</span><br><span class="line">    <span class="comment">// read置空</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(read.m) &gt; <span class="number">0</span> || read.amended &#123;</span><br><span class="line">        m.read.Store(&amp;readOnly&#123;&#125;)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// dirty清空</span></span><br><span class="line">    clear(m.dirty)</span><br><span class="line">    <span class="comment">// Don&#x27;t immediately promote the newly-cleared dirty map on the next operation.</span></span><br><span class="line">    m.misses = <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://victoriametrics.com/blog/go-sync-map/index.html">Go sync.Map: The Right Tool for the Right Job</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/golang/" rel="tag"># golang</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/golang-series-sync-singleflight/" rel="prev" title="golang系列之-singleflight">
+                  <i class="fa fa-angle-left"></i> golang系列之-singleflight
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/golang-series-hashtriemap/" rel="next" title="golang系列之-sync.Map(HashTrieMap)">
+                  golang系列之-sync.Map(HashTrieMap) <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  
+  <div class="comments giscus-container">
+  </div>
+  
+  
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">y2k38</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">81k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:54</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+<script class="next-config" data-name="giscus" type="application/json">{"enable":true,"repo":"Y2k38/y2k38.github.io","repo_id":"R_kgDOMZGvZA","category":"Announcements","category_id":"DIC_kwDOMZGvZM4CirXX","mapping":"pathname","strict":0,"reactions_enabled":1,"emit_metadata":0,"theme":"preferred_color_scheme","lang":"zh-CN","crossorigin":"anonymous","input_position":"bottom","loading":"lazy"}</script>
+
+<script>
+document.addEventListener('page:loaded', () => {
+  if (!CONFIG.page.comments) return;
+
+  NexT.utils.loadComments('.giscus-container')
+    .then(() => NexT.utils.getScript('https://giscus.app/client.js', {
+      attributes: {
+        async                   : true,
+        crossOrigin             : 'anonymous',
+        'data-repo'             : CONFIG.giscus.repo,
+        'data-repo-id'          : CONFIG.giscus.repo_id,
+        'data-category'         : CONFIG.giscus.category,
+        'data-category-id'      : CONFIG.giscus.category_id,
+        'data-mapping'          : CONFIG.giscus.mapping,
+        'data-strict'           : CONFIG.giscus.strict,
+        'data-reactions-enabled': CONFIG.giscus.reactions_enabled,
+        'data-emit-metadata'    : CONFIG.giscus.emit_metadata,
+        'data-theme'            : CONFIG.giscus.theme,
+        'data-lang'             : CONFIG.giscus.lang,
+        'data-input-position'   : CONFIG.giscus.input_position,
+        'data-loading'          : CONFIG.giscus.loading
+      },
+      parentNode: document.querySelector('.giscus-container')
+    }));
+});
+</script>
+
+</body>
+</html>

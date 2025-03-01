@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="sync&#x2F;atomic标准库包中提供的原子操作。原子操作是无锁的，直接通过CPU指令实现。 当你想要在多个goroutine中无锁访问一个变量时，就可以考虑使用atomic包提供的数据类型实现 当前go版本：1.24 快速上手以下是一个使用atomic.Uint64数据类型实现的计数器，它确保了多个goroutine按顺序正确更新数据 12345678910111213141516171">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang系列之-sync&#x2F;atomic">
+<meta property="og:url" content="https://y2k38.github.io/golang-series-sync-atomic/index.html">
+<meta property="og:site_name" content="noname">
+<meta property="og:description" content="sync&#x2F;atomic标准库包中提供的原子操作。原子操作是无锁的，直接通过CPU指令实现。 当你想要在多个goroutine中无锁访问一个变量时，就可以考虑使用atomic包提供的数据类型实现 当前go版本：1.24 快速上手以下是一个使用atomic.Uint64数据类型实现的计数器，它确保了多个goroutine按顺序正确更新数据 12345678910111213141516171">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-02-16T08:29:07.000Z">
+<meta property="article:modified_time" content="2025-02-20T00:31:21.686Z">
+<meta property="article:author" content="y2k38">
+<meta property="article:tag" content="golang">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://y2k38.github.io/golang-series-sync-atomic/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/golang-series-sync-atomic/","path":"golang-series-sync-atomic/","title":"golang系列之-sync/atomic"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>golang系列之-sync/atomic | noname</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">noname</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B"><span class="nav-number">1.</span> <span class="nav-text">快速上手</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">通用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">2.2.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">通用方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Load"><span class="nav-number">3.1.</span> <span class="nav-text">Load</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Store"><span class="nav-number">3.2.</span> <span class="nav-text">Store</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Swap"><span class="nav-number">3.3.</span> <span class="nav-text">Swap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CompareAndSwap"><span class="nav-number">3.4.</span> <span class="nav-text">CompareAndSwap</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E5%AE%9A%E7%B1%BB%E5%9E%8B%E6%96%B9%E6%B3%95"><span class="nav-number">4.</span> <span class="nav-text">特定类型方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Add"><span class="nav-number">4.1.</span> <span class="nav-text">Add</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#And"><span class="nav-number">4.2.</span> <span class="nav-text">And</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Or"><span class="nav-number">4.3.</span> <span class="nav-text">Or</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="nav-number">5.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">y2k38</p>
+  <div class="site-description" itemprop="description">个人笔记</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-sync-atomic/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="golang系列之-sync/atomic | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          golang系列之-sync/atomic
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-02-16 16:29:07" itemprop="dateCreated datePublished" datetime="2025-02-16T16:29:07+08:00">2025-02-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-02-20 08:31:21" itemprop="dateModified" datetime="2025-02-20T08:31:21+08:00">2025-02-20</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>sync&#x2F;atomic标准库包中提供的原子操作。原子操作是无锁的，直接通过CPU指令实现。</p>
+<p>当你想要在多个goroutine中无锁访问一个变量时，就可以考虑使用atomic包提供的数据类型实现</p>
+<p>当前go版本：1.24</p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>以下是一个使用atomic.Uint64数据类型实现的计数器，它确保了多个goroutine按顺序正确更新数据</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;sync&quot;</span></span><br><span class="line">    <span class="string">&quot;sync/atomic&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> ops atomic.Uint64</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">50</span>; i++ &#123;</span><br><span class="line">        wg.Add(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="keyword">for</span> c := <span class="number">0</span>; c &lt; <span class="number">1000</span>; c++ &#123;</span><br><span class="line"></span><br><span class="line">                ops.Add(<span class="number">1</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            wg.Done()</span><br><span class="line">        &#125;()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    wg.Wait()</span><br><span class="line"></span><br><span class="line">    fmt.Println(<span class="string">&quot;ops:&quot;</span>, ops.Load())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>todo：文章图片待补充</p>
+<h3 id="通用"><a href="#通用" class="headerlink" title="通用"></a>通用</h3><p>sync&#x2F;atomic包中，通用的数据结构有</p>
+<ul>
+<li><code>Value</code></li>
+</ul>
+<p>使用Value可以存储任意类型的数据</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Value <span class="keyword">struct</span> &#123;</span><br><span class="line">    v any</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// efaceWords is interface&#123;&#125; internal representation.</span></span><br><span class="line"><span class="keyword">type</span> efaceWords <span class="keyword">struct</span> &#123;</span><br><span class="line">    typ  unsafe.Pointer</span><br><span class="line">    data unsafe.Pointer</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>其他具体的数据结构有</p>
+<ul>
+<li><code>Bool</code></li>
+<li><code>Int32</code></li>
+<li><code>Int64</code></li>
+<li><code>Uint32</code></li>
+<li><code>Uint64</code></li>
+<li><code>Uintptr</code></li>
+<li><code>Pointer</code></li>
+</ul>
+<p>举个例子，Pointer类型的数据结构如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// A Pointer is an atomic pointer of type *T. The zero value is a nil *T.</span></span><br><span class="line"><span class="keyword">type</span> Pointer[T any] <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="comment">// Mention *T in a field to disallow conversion between Pointer types.</span></span><br><span class="line">    <span class="comment">// See go.dev/issue/56603 for more details.</span></span><br><span class="line">    <span class="comment">// Use *T, not T, to avoid spurious recursive type definition errors.</span></span><br><span class="line">    _ [<span class="number">0</span>]*T</span><br><span class="line"></span><br><span class="line">    _ noCopy</span><br><span class="line">    v unsafe.Pointer</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="通用方法"><a href="#通用方法" class="headerlink" title="通用方法"></a>通用方法</h2><p>基本上，atomic提供的数据类型有几个通用的方法：Load、Store、Swap、CompareAndSwap</p>
+<p>下面展示一个基本的使用方式</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// init  -&gt; v=nil</span></span><br><span class="line">v := atomic.Value&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// store -&gt; v=1</span></span><br><span class="line">v.Store(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// load</span></span><br><span class="line"><span class="comment">// print 1</span></span><br><span class="line">fmt.Println(v.Load())</span><br><span class="line"></span><br><span class="line"><span class="comment">// swap  -&gt; v=2</span></span><br><span class="line"><span class="comment">// print 1</span></span><br><span class="line">fmt.Println(v.Swap(<span class="number">2</span>))</span><br><span class="line"><span class="comment">// print 2</span></span><br><span class="line">fmt.Println(v.Load())</span><br><span class="line"></span><br><span class="line"><span class="comment">// CAS   -&gt; v=3</span></span><br><span class="line"><span class="comment">// print true</span></span><br><span class="line">fmt.Println(v.CompareAndSwap(<span class="number">2</span>, <span class="number">3</span>))</span><br><span class="line"><span class="comment">// print 3</span></span><br><span class="line">fmt.Println(v.Load())</span><br></pre></td></tr></table></figure>
+
+<h3 id="Load"><a href="#Load" class="headerlink" title="Load"></a>Load</h3><p>获取atomic类型存储的数值</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Load returns the value set by the most recent Store.</span></span><br><span class="line"><span class="comment">// It returns nil if there has been no call to Store for this Value.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(v *Value)</span></span> Load() (val any) &#123;</span><br><span class="line">    vp := (*efaceWords)(unsafe.Pointer(v))</span><br><span class="line">    typ := LoadPointer(&amp;vp.typ)</span><br><span class="line">    <span class="keyword">if</span> typ == <span class="literal">nil</span> || typ == unsafe.Pointer(&amp;firstStoreInProgress) &#123;</span><br><span class="line">        <span class="comment">// First store not yet completed.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    data := LoadPointer(&amp;vp.data)</span><br><span class="line">    vlp := (*efaceWords)(unsafe.Pointer(&amp;val))</span><br><span class="line">    vlp.typ = typ</span><br><span class="line">    vlp.data = data</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Store"><a href="#Store" class="headerlink" title="Store"></a>Store</h3><p>更新&#x2F;覆盖atomic类型的数值</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Store sets the value of the [Value] v to val.</span></span><br><span class="line"><span class="comment">// All calls to Store for a given Value must use values of the same concrete type.</span></span><br><span class="line"><span class="comment">// Store of an inconsistent type panics, as does Store(nil).</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(v *Value)</span></span> Store(val any) &#123;</span><br><span class="line">    <span class="keyword">if</span> val == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="built_in">panic</span>(<span class="string">&quot;sync/atomic: store of nil value into Value&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    vp := (*efaceWords)(unsafe.Pointer(v))</span><br><span class="line">    vlp := (*efaceWords)(unsafe.Pointer(&amp;val))</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        typ := LoadPointer(&amp;vp.typ)</span><br><span class="line">        <span class="keyword">if</span> typ == <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="comment">// Attempt to start first store.</span></span><br><span class="line">            <span class="comment">// Disable preemption so that other goroutines can use</span></span><br><span class="line">            <span class="comment">// active spin wait to wait for completion.</span></span><br><span class="line">            runtime_procPin()</span><br><span class="line">            <span class="keyword">if</span> !CompareAndSwapPointer(&amp;vp.typ, <span class="literal">nil</span>, unsafe.Pointer(&amp;firstStoreInProgress)) &#123;</span><br><span class="line">                runtime_procUnpin()</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Complete first store.</span></span><br><span class="line">            StorePointer(&amp;vp.data, vlp.data)</span><br><span class="line">            StorePointer(&amp;vp.typ, vlp.typ)</span><br><span class="line">            runtime_procUnpin()</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> typ == unsafe.Pointer(&amp;firstStoreInProgress) &#123;</span><br><span class="line">            <span class="comment">// First store in progress. Wait.</span></span><br><span class="line">            <span class="comment">// Since we disable preemption around the first store,</span></span><br><span class="line">            <span class="comment">// we can wait with active spinning.</span></span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// First store completed. Check type and overwrite data.</span></span><br><span class="line">        <span class="keyword">if</span> typ != vlp.typ &#123;</span><br><span class="line">            <span class="built_in">panic</span>(<span class="string">&quot;sync/atomic: store of inconsistently typed value into Value&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        StorePointer(&amp;vp.data, vlp.data)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Swap"><a href="#Swap" class="headerlink" title="Swap"></a>Swap</h3><p>类似Store，更新atomic类型的数值-&gt;newVal，并返回先前数值-&gt;oldVal</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Swap stores new into Value and returns the previous value. It returns nil if</span></span><br><span class="line"><span class="comment">// the Value is empty.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// All calls to Swap for a given Value must use values of the same concrete</span></span><br><span class="line"><span class="comment">// type. Swap of an inconsistent type panics, as does Swap(nil).</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(v *Value)</span></span> Swap(<span class="built_in">new</span> any) (old any) &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">new</span> == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="built_in">panic</span>(<span class="string">&quot;sync/atomic: swap of nil value into Value&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    vp := (*efaceWords)(unsafe.Pointer(v))</span><br><span class="line">    np := (*efaceWords)(unsafe.Pointer(&amp;<span class="built_in">new</span>))</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        typ := LoadPointer(&amp;vp.typ)</span><br><span class="line">        <span class="keyword">if</span> typ == <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="comment">// Attempt to start first store.</span></span><br><span class="line">            <span class="comment">// Disable preemption so that other goroutines can use</span></span><br><span class="line">            <span class="comment">// active spin wait to wait for completion; and so that</span></span><br><span class="line">            <span class="comment">// GC does not see the fake type accidentally.</span></span><br><span class="line">            runtime_procPin()</span><br><span class="line">            <span class="keyword">if</span> !CompareAndSwapPointer(&amp;vp.typ, <span class="literal">nil</span>, unsafe.Pointer(&amp;firstStoreInProgress)) &#123;</span><br><span class="line">                runtime_procUnpin()</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Complete first store.</span></span><br><span class="line">            StorePointer(&amp;vp.data, np.data)</span><br><span class="line">            StorePointer(&amp;vp.typ, np.typ)</span><br><span class="line">            runtime_procUnpin()</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> typ == unsafe.Pointer(&amp;firstStoreInProgress) &#123;</span><br><span class="line">            <span class="comment">// First store in progress. Wait.</span></span><br><span class="line">            <span class="comment">// Since we disable preemption around the first store,</span></span><br><span class="line">            <span class="comment">// we can wait with active spinning.</span></span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// First store completed. Check type and overwrite data.</span></span><br><span class="line">        <span class="keyword">if</span> typ != np.typ &#123;</span><br><span class="line">            <span class="built_in">panic</span>(<span class="string">&quot;sync/atomic: swap of inconsistently typed value into Value&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        op := (*efaceWords)(unsafe.Pointer(&amp;old))</span><br><span class="line">        op.typ, op.data = np.typ, SwapPointer(&amp;vp.data, np.data)</span><br><span class="line">        <span class="keyword">return</span> old</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="CompareAndSwap"><a href="#CompareAndSwap" class="headerlink" title="CompareAndSwap"></a>CompareAndSwap</h3><p>对比atomic类型当前数值，相同则更新并返回true，否则不处理并返回false</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// CompareAndSwap executes the compare-and-swap operation for the [Value].</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// All calls to CompareAndSwap for a given Value must use values of the same</span></span><br><span class="line"><span class="comment">// concrete type. CompareAndSwap of an inconsistent type panics, as does</span></span><br><span class="line"><span class="comment">// CompareAndSwap(old, nil).</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(v *Value)</span></span> CompareAndSwap(old, <span class="built_in">new</span> any) (swapped <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">new</span> == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="built_in">panic</span>(<span class="string">&quot;sync/atomic: compare and swap of nil value into Value&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    vp := (*efaceWords)(unsafe.Pointer(v))</span><br><span class="line">    np := (*efaceWords)(unsafe.Pointer(&amp;<span class="built_in">new</span>))</span><br><span class="line">    op := (*efaceWords)(unsafe.Pointer(&amp;old))</span><br><span class="line">    <span class="keyword">if</span> op.typ != <span class="literal">nil</span> &amp;&amp; np.typ != op.typ &#123;</span><br><span class="line">        <span class="built_in">panic</span>(<span class="string">&quot;sync/atomic: compare and swap of inconsistently typed values&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        typ := LoadPointer(&amp;vp.typ)</span><br><span class="line">        <span class="keyword">if</span> typ == <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> old != <span class="literal">nil</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Attempt to start first store.</span></span><br><span class="line">            <span class="comment">// Disable preemption so that other goroutines can use</span></span><br><span class="line">            <span class="comment">// active spin wait to wait for completion; and so that</span></span><br><span class="line">            <span class="comment">// GC does not see the fake type accidentally.</span></span><br><span class="line">            runtime_procPin()</span><br><span class="line">            <span class="keyword">if</span> !CompareAndSwapPointer(&amp;vp.typ, <span class="literal">nil</span>, unsafe.Pointer(&amp;firstStoreInProgress)) &#123;</span><br><span class="line">                runtime_procUnpin()</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Complete first store.</span></span><br><span class="line">            StorePointer(&amp;vp.data, np.data)</span><br><span class="line">            StorePointer(&amp;vp.typ, np.typ)</span><br><span class="line">            runtime_procUnpin()</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> typ == unsafe.Pointer(&amp;firstStoreInProgress) &#123;</span><br><span class="line">            <span class="comment">// First store in progress. Wait.</span></span><br><span class="line">            <span class="comment">// Since we disable preemption around the first store,</span></span><br><span class="line">            <span class="comment">// we can wait with active spinning.</span></span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// First store completed. Check type and overwrite data.</span></span><br><span class="line">        <span class="keyword">if</span> typ != np.typ &#123;</span><br><span class="line">            <span class="built_in">panic</span>(<span class="string">&quot;sync/atomic: compare and swap of inconsistently typed value into Value&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Compare old and current via runtime equality check.</span></span><br><span class="line">        <span class="comment">// This allows value types to be compared, something</span></span><br><span class="line">        <span class="comment">// not offered by the package functions.</span></span><br><span class="line">        <span class="comment">// CompareAndSwapPointer below only ensures vp.data</span></span><br><span class="line">        <span class="comment">// has not changed since LoadPointer.</span></span><br><span class="line">        data := LoadPointer(&amp;vp.data)</span><br><span class="line">        <span class="keyword">var</span> i any</span><br><span class="line">        (*efaceWords)(unsafe.Pointer(&amp;i)).typ = typ</span><br><span class="line">        (*efaceWords)(unsafe.Pointer(&amp;i)).data = data</span><br><span class="line">        <span class="keyword">if</span> i != old &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> CompareAndSwapPointer(&amp;vp.data, data, np.data)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="特定类型方法"><a href="#特定类型方法" class="headerlink" title="特定类型方法"></a>特定类型方法</h2><p>相对于其他，整型数有几个额外方法：Add、And、Or，相关类型是</p>
+<ul>
+<li><code>Int32</code></li>
+<li><code>Int64</code></li>
+<li><code>Uint32</code></li>
+<li><code>Uint64</code></li>
+<li><code>Uintptr</code></li>
+</ul>
+<p>示例代码如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">counter := <span class="type">int32</span>(<span class="number">99</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// counter += 1</span></span><br><span class="line">counter = atomic.AddInt32(&amp;counter, <span class="number">1</span>)</span><br><span class="line"><span class="comment">// print 100</span></span><br><span class="line">fmt.Println(counter)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 0110 0100 &amp; 0000 0111 -&gt; 0000 0100 =&gt; 4</span></span><br><span class="line"><span class="comment">// print 100</span></span><br><span class="line">fmt.Println(atomic.AndInt32(&amp;counter, <span class="number">7</span>))</span><br><span class="line"><span class="comment">// print 4</span></span><br><span class="line">fmt.Println(counter)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 0000 0100 | 0000 0010 -&gt; 0000 0110 =&gt; 6</span></span><br><span class="line"><span class="comment">// print 4</span></span><br><span class="line">fmt.Println(atomic.OrInt32(&amp;counter, <span class="number">2</span>))</span><br><span class="line"><span class="comment">// print 6</span></span><br><span class="line">fmt.Println(counter)</span><br></pre></td></tr></table></figure>
+
+<h3 id="Add"><a href="#Add" class="headerlink" title="Add"></a><code>Add</code></h3><p>原子加法操作，两个数相加，返回结果</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/internal/runtime/atomic/atomic_amd64.s</span></span><br><span class="line"><span class="comment">// src/sync/atomic/type.go</span></span><br><span class="line"><span class="comment">// Add atomically adds delta to x and returns the new value.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(x *Int64)</span></span> Add(delta <span class="type">int64</span>) (<span class="built_in">new</span> <span class="type">int64</span>) &#123; <span class="keyword">return</span> AddInt64(&amp;x.v, delta) &#125;</span><br></pre></td></tr></table></figure>
+
+<p>AddInt64汇编代码如下，本人对汇编代码不了解，下面的注释是由ChatGPT提供的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">// uint64 Xadd64(uint64 volatile *val, int64 delta)</span><br><span class="line">// Atomically:</span><br><span class="line">//    *val += delta;</span><br><span class="line">//    return *val;</span><br><span class="line">TEXT ·Xadd64(SB), NOSPLIT, $0-24</span><br><span class="line">    MOVQ    ptr+0(FP), BX       // ptr（val 的地址）被加载到寄存器 BX 中</span><br><span class="line">    MOVQ    delta+8(FP), AX     // delta 被加载到寄存器 AX 中</span><br><span class="line">    MOVQ    AX, CX              // 复制 AX 的值到 CX，以便后面能把 delta 加到返回值中</span><br><span class="line">    LOCK                        // 确保接下来的操作是原子性的</span><br><span class="line">    XADDQ    AX, 0(BX)           // 指令会将 AX 加到 BX 指向的值，并返回加法操作前的旧值（旧值会存入 AX）</span><br><span class="line">    ADDQ    CX, AX              // 将之前存储的delta加回AX上，得到最终结果</span><br><span class="line">    MOVQ    AX, ret+16(FP)      // 把最终的结果存入返回值地址</span><br><span class="line">    RET                         // 返回</span><br><span class="line"></span><br><span class="line">TEXT ·Xaddint64(SB), NOSPLIT, $0-24</span><br><span class="line">    JMP    ·Xadd64(SB)</span><br></pre></td></tr></table></figure>
+
+<p>更多的注释如下</p>
+<table>
+<thead>
+<tr>
+<th align="left">字段</th>
+<th align="left">注释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>TEXT</code></td>
+<td align="left">标志这段代码是一个函数</td>
+</tr>
+<tr>
+<td align="left"><code>·Xadd64(SB)</code></td>
+<td align="left">函数名称</td>
+</tr>
+<tr>
+<td align="left"><code>SB</code></td>
+<td align="left">是指向当前函数栈帧的偏移量，传递给 racecallatomic 作为栈帧的指针。</td>
+</tr>
+<tr>
+<td align="left"><code>NOSPLIT</code></td>
+<td align="left">表示该函数不会执行栈分割，也就是说，它不会访问 Go 层的栈分配</td>
+</tr>
+<tr>
+<td align="left"><code>$0-24</code></td>
+<td align="left">指示函数参数的大小范围，在这种情况下，0-24 意味着该函数有 24 字节的局部空间（用于存储传入的参数等）</td>
+</tr>
+</tbody></table>
+<h3 id="And"><a href="#And" class="headerlink" title="And"></a><code>And</code></h3><p>原子位与（&amp;）操作，新结果写入变量，返回旧的数据</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// And atomically performs a bitwise AND operation on x using the bitmask</span></span><br><span class="line"><span class="comment">// provided as mask and returns the old value.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(x *Int64)</span></span> And(mask <span class="type">int64</span>) (old <span class="type">int64</span>) &#123; <span class="keyword">return</span> AndInt64(&amp;x.v, mask) &#125;</span><br></pre></td></tr></table></figure>
+
+<p>AndInt64汇编代码如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TEXT    sync∕atomic·AndInt64(SB), NOSPLIT|NOFRAME, $0-24    // </span><br><span class="line">    GO_ARGS</span><br><span class="line">    MOVQ    $__tsan_go_atomic64_fetch_and(SB), AX</span><br><span class="line">    CALL    racecallatomic&lt;&gt;(SB)</span><br><span class="line">    RET</span><br></pre></td></tr></table></figure>
+
+<p>相关注释如下，只展示与AddInt64汇编代码不同的部份</p>
+<table>
+<thead>
+<tr>
+<th align="left">字段</th>
+<th align="left">注释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>GO_ARGS</code></td>
+<td align="left">这是一个宏，表示处理传入的 Go 参数，具体的参数内容会根据函数调用的上下文进行调整。这是 Go 编译器用来处理函数调用时的一些约定。它会将传入的参数从 Go 栈中提取到寄存器中</td>
+</tr>
+<tr>
+<td align="left"><code>__tsan_go_atomic64_fetch_and</code></td>
+<td align="left">是一个标识符，Go 在进行原子操作时，通常会使用一个特殊的函数来标识和追踪潜在的数据竞争。这种操作确保了线程安全，并且在并发环境中避免了出现未同步的数据访问</td>
+</tr>
+<tr>
+<td align="left"><code>racecallatomic</code></td>
+<td align="left">Go 的一个内建函数，用来执行原子操作并同时为 ThreadSanitizer（TSan）提供监控支持。它会根据 AX 寄存器中存储的函数地址（即 __tsan_go_atomic64_fetch_and）执行对应的操作</td>
+</tr>
+<tr>
+<td align="left"><code>&lt;&gt;</code></td>
+<td align="left">表示泛型类型参数，在 Go 汇编中表示函数的参数类型。racecallatomic 函数会根据这些类型参数来处理实际的原子操作。</td>
+</tr>
+</tbody></table>
+<h3 id="Or"><a href="#Or" class="headerlink" title="Or"></a><code>Or</code></h3><p>原子位或（|）操作，新结果写入变量，返回旧的数据</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Or atomically performs a bitwise OR operation on x using the bitmask</span></span><br><span class="line"><span class="comment">// provided as mask and returns the old value.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(x *Int64)</span></span> Or(mask <span class="type">int64</span>) (old <span class="type">int64</span>) &#123; <span class="keyword">return</span> OrInt64(&amp;x.v, mask) &#125;</span><br></pre></td></tr></table></figure>
+
+<p>OrInt64的汇编代码如下，不再展示注释</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TEXT    sync∕atomic·OrInt64(SB), NOSPLIT|NOFRAME, $0-24</span><br><span class="line">    GO_ARGS</span><br><span class="line">    MOVQ    $__tsan_go_atomic64_fetch_or(SB), AX</span><br><span class="line">    CALL    racecallatomic&lt;&gt;(SB)</span><br><span class="line">    RET</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://pkg.go.dev/sync/atomic">atomic</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/golang/" rel="tag"># golang</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/golang-series-sync-pool/" rel="prev" title="golang系列之-sync.Pool">
+                  <i class="fa fa-angle-left"></i> golang系列之-sync.Pool
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/golang-series-sync-waitgroup/" rel="next" title="golang系列之-sync.Waitgroup">
+                  golang系列之-sync.Waitgroup <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  
+  <div class="comments giscus-container">
+  </div>
+  
+  
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">y2k38</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">81k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:54</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+<script class="next-config" data-name="giscus" type="application/json">{"enable":true,"repo":"Y2k38/y2k38.github.io","repo_id":"R_kgDOMZGvZA","category":"Announcements","category_id":"DIC_kwDOMZGvZM4CirXX","mapping":"pathname","strict":0,"reactions_enabled":1,"emit_metadata":0,"theme":"preferred_color_scheme","lang":"zh-CN","crossorigin":"anonymous","input_position":"bottom","loading":"lazy"}</script>
+
+<script>
+document.addEventListener('page:loaded', () => {
+  if (!CONFIG.page.comments) return;
+
+  NexT.utils.loadComments('.giscus-container')
+    .then(() => NexT.utils.getScript('https://giscus.app/client.js', {
+      attributes: {
+        async                   : true,
+        crossOrigin             : 'anonymous',
+        'data-repo'             : CONFIG.giscus.repo,
+        'data-repo-id'          : CONFIG.giscus.repo_id,
+        'data-category'         : CONFIG.giscus.category,
+        'data-category-id'      : CONFIG.giscus.category_id,
+        'data-mapping'          : CONFIG.giscus.mapping,
+        'data-strict'           : CONFIG.giscus.strict,
+        'data-reactions-enabled': CONFIG.giscus.reactions_enabled,
+        'data-emit-metadata'    : CONFIG.giscus.emit_metadata,
+        'data-theme'            : CONFIG.giscus.theme,
+        'data-lang'             : CONFIG.giscus.lang,
+        'data-input-position'   : CONFIG.giscus.input_position,
+        'data-loading'          : CONFIG.giscus.loading
+      },
+      parentNode: document.querySelector('.giscus-container')
+    }));
+});
+</script>
+
+</body>
+</html>

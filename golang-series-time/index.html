@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="time涉及的内容较多，如生成&#x2F;存储时间、比较时间、获取时间信息、时区、夏令时等，本文仅介绍一些自己感兴趣的地方 日历计算基于格里高利历（公历），1年有365天（闰年有366天）。同时支持墙上时钟（wall clock）和单调时钟（monotonic clock），其中墙上时钟用于时间同步、报时（time-telling），单调时钟用于时间测量（time-measuring）。并不是所有">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang系列之-time">
+<meta property="og:url" content="https://y2k38.github.io/golang-series-time/index.html">
+<meta property="og:site_name" content="noname">
+<meta property="og:description" content="time涉及的内容较多，如生成&#x2F;存储时间、比较时间、获取时间信息、时区、夏令时等，本文仅介绍一些自己感兴趣的地方 日历计算基于格里高利历（公历），1年有365天（闰年有366天）。同时支持墙上时钟（wall clock）和单调时钟（monotonic clock），其中墙上时钟用于时间同步、报时（time-telling），单调时钟用于时间测量（time-measuring）。并不是所有">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-02-23T07:59:36.000Z">
+<meta property="article:modified_time" content="2025-02-23T09:37:59.607Z">
+<meta property="article:author" content="y2k38">
+<meta property="article:tag" content="golang">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://y2k38.github.io/golang-series-time/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/golang-series-time/","path":"golang-series-time/","title":"golang系列之-time"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>golang系列之-time | noname</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">noname</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B"><span class="nav-number">1.</span> <span class="nav-text">快速上手</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E5%AD%98%E5%82%A8"><span class="nav-number">2.1.</span> <span class="nav-text">时间存储</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E6%97%B6%E9%97%B4%E5%AF%B9%E8%B1%A1Time"><span class="nav-number">3.</span> <span class="nav-text">获取时间对象Time</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BD%93%E5%89%8D%E6%97%B6%E5%88%BBNow"><span class="nav-number">3.1.</span> <span class="nav-text">当前时刻Now</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Unix%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E6%8D%A2"><span class="nav-number">3.2.</span> <span class="nav-text">Unix时间戳转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Date%E8%8E%B7%E5%8F%96%E6%8C%87%E5%AE%9A%E6%97%B6%E5%88%BB"><span class="nav-number">3.3.</span> <span class="nav-text">Date获取指定时刻</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A2%9E%E5%8A%A0%E6%97%B6%E9%95%BF%E8%8E%B7%E5%8F%96%E6%8C%87%E5%AE%9A%E6%97%B6%E5%88%BB"><span class="nav-number">3.4.</span> <span class="nav-text">增加时长获取指定时刻</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Add"><span class="nav-number">3.4.1.</span> <span class="nav-text">Add</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AddDate"><span class="nav-number">3.4.2.</span> <span class="nav-text">AddDate</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%BD%AC%E6%8D%A2%E6%88%90Time"><span class="nav-number">3.5.</span> <span class="nav-text">字符串转换成Time</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Parse"><span class="nav-number">3.5.1.</span> <span class="nav-text">Parse</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ParseInLocation"><span class="nav-number">3.5.2.</span> <span class="nav-text">ParseInLocation</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E4%B8%A4%E4%B8%AA%E6%97%B6%E5%88%BB%E7%9A%84%E5%B7%AE%E5%80%BC"><span class="nav-number">4.</span> <span class="nav-text">计算两个时刻的差值</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Sub"><span class="nav-number">4.1.</span> <span class="nav-text">Sub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Since"><span class="nav-number">4.2.</span> <span class="nav-text">Since</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Until"><span class="nav-number">4.3.</span> <span class="nav-text">Until</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AF%94%E8%BE%83%E4%B8%A4%E4%B8%AA%E6%97%B6%E5%88%BB%E7%9A%84%E5%85%88%E5%90%8E%E9%A1%BA%E5%BA%8F"><span class="nav-number">5.</span> <span class="nav-text">比较两个时刻的先后顺序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Before"><span class="nav-number">5.1.</span> <span class="nav-text">Before</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#After"><span class="nav-number">5.2.</span> <span class="nav-text">After</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Equal"><span class="nav-number">5.3.</span> <span class="nav-text">Equal</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IsZero"><span class="nav-number">5.4.</span> <span class="nav-text">IsZero</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Compare"><span class="nav-number">5.5.</span> <span class="nav-text">Compare</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%B6%E5%8C%BA"><span class="nav-number">6.</span> <span class="nav-text">时区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AC%E6%8D%A2%E6%97%B6%E5%8C%BA"><span class="nav-number">6.1.</span> <span class="nav-text">转换时区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Local"><span class="nav-number">6.1.1.</span> <span class="nav-text">Local</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UTC"><span class="nav-number">6.1.2.</span> <span class="nav-text">UTC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E6%97%B6%E5%8C%BA"><span class="nav-number">6.1.3.</span> <span class="nav-text">指定时区</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E6%8A%A5%E6%97%B6%E4%BF%A1%E6%81%AF"><span class="nav-number">7.</span> <span class="nav-text">获取报时信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96Unix%E6%97%B6%E9%97%B4%E6%88%B3"><span class="nav-number">7.1.</span> <span class="nav-text">获取Unix时间戳</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E5%8F%96%E6%97%A5%E6%9C%9F%E7%AD%89%E4%BF%A1%E6%81%AF"><span class="nav-number">7.2.</span> <span class="nav-text">提取日期等信息</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">y2k38</p>
+  <div class="site-description" itemprop="description">个人笔记</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-time/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="golang系列之-time | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          golang系列之-time
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-02-23 15:59:36 / 修改时间：17:37:59" itemprop="dateCreated datePublished" datetime="2025-02-23T15:59:36+08:00">2025-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>time涉及的内容较多，如生成&#x2F;存储时间、比较时间、获取时间信息、时区、夏令时等，本文仅介绍一些自己感兴趣的地方</p>
+<p>日历计算基于格里高利历（公历），1年有365天（闰年有366天）。同时支持墙上时钟（wall clock）和单调时钟（monotonic clock），其中墙上时钟用于时间同步、报时（time-telling），单调时钟用于时间测量（time-measuring）。并不是所有函数都支持单调时钟，如字符串编码&#x2F;解码函数就会舍弃单调时钟数据</p>
+<p>注意：</p>
+<ol>
+<li>时间精确度：纳秒</li>
+<li>大部分都是线程安全，除了<ul>
+<li>GobDecode</li>
+<li>UnmarshalBinary</li>
+<li>UnmarshalJSON</li>
+<li>UnmarshalText</li>
+</ul>
+</li>
+<li>有些系统会在进程休眠时停止单调时钟，会导致一些函数计算异常，如<ul>
+<li>Sub</li>
+<li>Since</li>
+<li>Until</li>
+<li>Before</li>
+<li>After</li>
+<li>Add</li>
+<li>Equal</li>
+<li>Compare</li>
+</ul>
+</li>
+<li>字符串编码时，保存的是Location的offset，会导致dst-夏令时丢失，相关函数<ul>
+<li>GobEncode</li>
+<li>MarshalBinary</li>
+<li>AppendBinary</li>
+<li>MarshalJSON</li>
+<li>MarshalText</li>
+<li>AppendText</li>
+</ul>
+</li>
+<li>字符串编码&#x2F;解码时，会丢弃单调时钟信息</li>
+</ol>
+<p>当前go版本：1.24</p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    p := fmt.Println</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当前时刻</span></span><br><span class="line">    now := time.Now()</span><br><span class="line">    p(now)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 指定时刻</span></span><br><span class="line">    then := time.Date(</span><br><span class="line">        <span class="number">2009</span>, <span class="number">11</span>, <span class="number">17</span>, <span class="number">20</span>, <span class="number">34</span>, <span class="number">58</span>, <span class="number">651387237</span>, time.UTC)</span><br><span class="line">    p(then)</span><br><span class="line"></span><br><span class="line">    p(then.Year())          <span class="comment">// 年</span></span><br><span class="line">    p(then.Month())         <span class="comment">// 月</span></span><br><span class="line">    p(then.Day())           <span class="comment">// 日</span></span><br><span class="line">    p(then.Hour())          <span class="comment">// 时</span></span><br><span class="line">    p(then.Minute())        <span class="comment">// 分</span></span><br><span class="line">    p(then.Second())        <span class="comment">// 秒</span></span><br><span class="line">    p(then.Nanosecond())    <span class="comment">// 纳秒</span></span><br><span class="line">    p(then.Location())      <span class="comment">// 时区</span></span><br><span class="line"></span><br><span class="line">    p(then.Weekday())       <span class="comment">// 星期</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断两个时刻先后顺序</span></span><br><span class="line">    p(then.Before(now))</span><br><span class="line">    p(then.After(now))</span><br><span class="line">    p(then.Equal(now))</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 时长/时刻差值</span></span><br><span class="line">    diff := now.Sub(then)</span><br><span class="line">    p(diff)</span><br><span class="line"></span><br><span class="line">    p(diff.Hours())         <span class="comment">// 转换成总小时数</span></span><br><span class="line">    p(diff.Minutes())       <span class="comment">// 转换成总分钟数</span></span><br><span class="line">    p(diff.Seconds())       <span class="comment">// 转换成总秒数</span></span><br><span class="line">    p(diff.Nanoseconds())   <span class="comment">// 转换成总纳秒数</span></span><br><span class="line"></span><br><span class="line">    p(then.Add(diff))</span><br><span class="line">    p(then.Add(-diff))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果如下所示</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">go run main.go</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2025-02-22 10:30:14.247195 +0800 CST m=+0.000103986  # 当前时刻</span></span><br><span class="line"><span class="comment"># 2009-11-17 20:34:58.651387237 +0000 UTC              # 指定时刻</span></span><br><span class="line"><span class="comment"># 2009                                                 # 年</span></span><br><span class="line"><span class="comment"># November                                             # 月</span></span><br><span class="line"><span class="comment"># 17                                                   # 日</span></span><br><span class="line"><span class="comment"># 20                                                   # 时</span></span><br><span class="line"><span class="comment"># 34                                                   # 分</span></span><br><span class="line"><span class="comment"># 58                                                   # 秒</span></span><br><span class="line"><span class="comment"># 651387237                                            # 纳秒</span></span><br><span class="line"><span class="comment"># UTC                                                  # 时区</span></span><br><span class="line"><span class="comment"># Tuesday                                              # 星期</span></span><br><span class="line"><span class="comment"># true</span></span><br><span class="line"><span class="comment"># false</span></span><br><span class="line"><span class="comment"># false</span></span><br><span class="line"><span class="comment"># 133805h55m15.595807763s                              # 时长/时刻差值</span></span><br><span class="line"><span class="comment"># 133805.9209988355                                    # 总小时数</span></span><br><span class="line"><span class="comment"># 8.028355259930129e+06                                # 总分钟数</span></span><br><span class="line"><span class="comment"># 4.817013155958078e+08                                # 总秒数</span></span><br><span class="line"><span class="comment"># 481701315595807763                                   # 总纳秒数</span></span><br><span class="line"><span class="comment"># 2025-02-22 02:30:14.247195 +0000 UTC</span></span><br><span class="line"><span class="comment"># 1994-08-13 14:39:43.055579474 +0000 UTC</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>时间由Time数据结构表示，具体如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/time/time.go</span></span><br><span class="line"><span class="keyword">type</span> Time <span class="keyword">struct</span> &#123;</span><br><span class="line">    wall <span class="type">uint64</span>      <span class="comment">// 1位表示flag，33位表示秒数，30位表示纳秒数</span></span><br><span class="line">    ext  <span class="type">int64</span>       <span class="comment">// wall与ext组合表示：秒数（墙上时钟）+纳秒数（墙上时钟）+纳秒数（单调时钟）【可选】</span></span><br><span class="line">    loc *Location    <span class="comment">// 时区，为nil时表示UTC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="时间存储"><a href="#时间存储" class="headerlink" title="时间存储"></a>时间存储</h3><p>Time结构使用wall和ext两个字段来存储时间，具体表示如下</p>
+<ol>
+<li>当wall第一位即flag为0时，表示没有单调时钟数据，wall和ext存储内容如下</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// wall -&gt; | 1bit | 33bit                     | 30bit                     |</span></span><br><span class="line"><span class="comment">//         | 0    | 0                         | def(ns) -&gt; [0, 999999999] |</span></span><br><span class="line"><span class="comment">// </span></span><br><span class="line"><span class="comment">// ext  -&gt; | 64bit                                                        |</span></span><br><span class="line"><span class="comment">//         | abc(s) =&gt; int64                                              |</span></span><br></pre></td></tr></table></figure>
+
+<p>其中，abc伪数据表示秒数，从1年1月1日开始算起；def伪数据表示纳秒数，范围[0, 999999999]</p>
+<ol start="2">
+<li>当wall第一位为1时，表示有单调时钟数据，wall和ext存储内容如下</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// wall -&gt; | 1bit | 33bit                     | 30bit                     |</span></span><br><span class="line"><span class="comment">//         | 1    | abc(s) =&gt; unsigned        | def(ns) -&gt; [0, 999999999] |</span></span><br><span class="line"><span class="comment">// </span></span><br><span class="line"><span class="comment">// ext  -&gt; | 64bit                                                        |</span></span><br><span class="line"><span class="comment">//         | xyz(ns) =&gt; int64                                             |</span></span><br></pre></td></tr></table></figure>
+
+<p>其中，abc伪数据表示秒数，def伪数据表示纳秒数，范围[0, 999999999]，xyz为单调时钟的纳秒数，从进程启动开始计时</p>
+<p>此时，墙上时钟能表示的时间范围是[1885, 2157]</p>
+<h2 id="获取时间对象Time"><a href="#获取时间对象Time" class="headerlink" title="获取时间对象Time"></a>获取时间对象Time</h2><h3 id="当前时刻Now"><a href="#当前时刻Now" class="headerlink" title="当前时刻Now"></a>当前时刻Now</h3><p>Now返回系统时间，返回的Time一般包含单调时钟数据</p>
+<p>具体逻辑</p>
+<ol>
+<li>从系统获取时间数据（通过VDSO或clock_gettime获取）</li>
+<li>如果返回的时间没有单调时钟数据，按墙上时钟格式存储</li>
+<li>如果秒数出现溢出的情况，按墙上时钟格式存储</li>
+<li>存储墙上时钟和单调时钟</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 返回本地当前时间</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Now</span><span class="params">()</span></span> Time &#123;</span><br><span class="line">    <span class="comment">// 从系统获取时间数据</span></span><br><span class="line">    sec, nsec, mono := runtimeNow()</span><br><span class="line">    <span class="comment">// 没有单调时间</span></span><br><span class="line">    <span class="keyword">if</span> mono == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="comment">// unix时间戳存储时都要加上unixToInternal</span></span><br><span class="line">        <span class="keyword">return</span> Time&#123;<span class="type">uint64</span>(nsec), sec + unixToInternal, Local&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 减去进程启动时获取的nanotime</span></span><br><span class="line">    mono -= startNano</span><br><span class="line">    <span class="comment">// 检测是否会溢出，2157年3月16日耗尽所有bit</span></span><br><span class="line">    sec += unixToInternal - minWall</span><br><span class="line">    <span class="comment">// 溢出？丢弃单调时钟，只存墙上时钟</span></span><br><span class="line">    <span class="keyword">if</span> <span class="type">uint64</span>(sec)&gt;&gt;<span class="number">33</span> != <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Time&#123;<span class="type">uint64</span>(nsec), sec + minWall, Local&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 墙上时钟+单调时钟</span></span><br><span class="line">    <span class="keyword">return</span> Time&#123;hasMonotonic | <span class="type">uint64</span>(sec)&lt;&lt;nsecShift | <span class="type">uint64</span>(nsec), mono, Local&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 进程启动时初始化该变量</span></span><br><span class="line"><span class="keyword">var</span> startNano <span class="type">int64</span> = runtimeNano() - <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// src/runtime/time.go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">time_runtimeNow</span><span class="params">()</span></span> (sec <span class="type">int64</span>, nsec <span class="type">int32</span>, mono <span class="type">int64</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> sg := getg().syncGroup; sg != <span class="literal">nil</span> &#123;</span><br><span class="line">        sec = sg.now / (<span class="number">1000</span> * <span class="number">1000</span> * <span class="number">1000</span>)</span><br><span class="line">        nsec = <span class="type">int32</span>(sg.now % (<span class="number">1000</span> * <span class="number">1000</span> * <span class="number">1000</span>))</span><br><span class="line">        <span class="keyword">return</span> sec, nsec, sg.now</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> time_now()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// src/runtime/timestub.go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">time_now</span><span class="params">()</span></span> (sec <span class="type">int64</span>, nsec <span class="type">int32</span>, mono <span class="type">int64</span>) &#123;</span><br><span class="line">    sec, nsec = walltime() <span class="comment">// 通过VDSO或clock_gettime获取</span></span><br><span class="line">    <span class="keyword">return</span> sec, nsec, nanotime()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// src/runtime/time.go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">time_runtimeNano</span><span class="params">()</span></span> <span class="type">int64</span> &#123;</span><br><span class="line">    gp := getg()</span><br><span class="line">    <span class="keyword">if</span> gp.syncGroup != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> gp.syncGroup.now</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> nanotime()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// src/runtime/time_nofake.go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">nanotime</span><span class="params">()</span></span> <span class="type">int64</span> &#123;</span><br><span class="line">    <span class="comment">// linux+amd64看相关汇编代码 src/runtime/sys_linux_amd64.s</span></span><br><span class="line">	<span class="keyword">return</span> nanotime1() <span class="comment">// 通过VDSO或clock_gettime获取</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Unix时间戳转换"><a href="#Unix时间戳转换" class="headerlink" title="Unix时间戳转换"></a>Unix时间戳转换</h3><p>根据秒数、纳秒数返回一个从1970年1月1日开始计时的unix时间戳的Time，该Time不包含单调时钟数据。按参数精度分为Unix&#x2F;UnixMilli&#x2F;UnixMicro</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 精度：秒</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Unix</span><span class="params">(sec <span class="type">int64</span>, nsec <span class="type">int64</span>)</span></span> Time &#123;</span><br><span class="line">    <span class="comment">// 负数或超过1e9</span></span><br><span class="line">    <span class="keyword">if</span> nsec &lt; <span class="number">0</span> || nsec &gt;= <span class="number">1e9</span> &#123;</span><br><span class="line">        n := nsec / <span class="number">1e9</span></span><br><span class="line">        sec += n           <span class="comment">// 溢出部份换算成秒，加到sec</span></span><br><span class="line">        nsec -= n * <span class="number">1e9</span>    <span class="comment">// 移除溢出部份</span></span><br><span class="line">        <span class="keyword">if</span> nsec &lt; <span class="number">0</span> &#123;      <span class="comment">// 负数</span></span><br><span class="line">            nsec += <span class="number">1e9</span>    <span class="comment">// 从sec拿1s加上，使其为正</span></span><br><span class="line">            sec--          <span class="comment">// sec减去1s</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> unixTime(sec, <span class="type">int32</span>(nsec))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">unixTime</span><span class="params">(sec <span class="type">int64</span>, nsec <span class="type">int32</span>)</span></span> Time &#123;</span><br><span class="line">    <span class="comment">// 存储时加上一个预设值unixToInternal，读取的时候减掉</span></span><br><span class="line">    <span class="keyword">return</span> Time&#123;<span class="type">uint64</span>(nsec), sec + unixToInternal, Local&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 精度：毫秒</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">UnixMilli</span><span class="params">(msec <span class="type">int64</span>)</span></span> Time &#123;</span><br><span class="line">    <span class="keyword">return</span> Unix(msec/<span class="number">1e3</span>, (msec%<span class="number">1e3</span>)*<span class="number">1e6</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 精度：微秒</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">UnixMicro</span><span class="params">(usec <span class="type">int64</span>)</span></span> Time &#123;</span><br><span class="line">    <span class="keyword">return</span> Unix(usec/<span class="number">1e6</span>, (usec%<span class="number">1e6</span>)*<span class="number">1e3</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Date获取指定时刻"><a href="#Date获取指定时刻" class="headerlink" title="Date获取指定时刻"></a>Date获取指定时刻</h3><p>根据提供的时间信息如：年&#x2F;月&#x2F;日&#x2F;时&#x2F;分&#x2F;秒以及时区获得指定时刻，具体逻辑如下</p>
+<ol>
+<li>规范化后计算出一个unix时间戳</li>
+<li>根据时区的偏移量调整unix时间戳</li>
+<li>生成Time示例</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Date</span><span class="params">(year <span class="type">int</span>, month Month, day, hour, min, sec, nsec <span class="type">int</span>, loc *Location)</span></span> Time &#123;</span><br><span class="line">    <span class="comment">// 时区不能为空</span></span><br><span class="line">    <span class="keyword">if</span> loc == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="built_in">panic</span>(<span class="string">&quot;time: missing Location in call to Date&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 规范月份，溢出值加到年上</span></span><br><span class="line">    m := <span class="type">int</span>(month) - <span class="number">1</span></span><br><span class="line">    year, m = norm(year, m, <span class="number">12</span>)</span><br><span class="line">    month = Month(m) + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 规范nsec, sec, min, hour, 溢出值加到天上</span></span><br><span class="line">    sec, nsec = norm(sec, nsec, <span class="number">1e9</span>)</span><br><span class="line">    min, sec = norm(min, sec, <span class="number">60</span>)</span><br><span class="line">    hour, min = norm(hour, min, <span class="number">60</span>)</span><br><span class="line">    day, hour = norm(day, hour, <span class="number">24</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 转换为绝对时间，然后转换为unix时间戳</span></span><br><span class="line">    unix := <span class="type">int64</span>(dateToAbsDays(<span class="type">int64</span>(year), month, day))*secondsPerDay +</span><br><span class="line">        <span class="type">int64</span>(hour*secondsPerHour+min*secondsPerMinute+sec) +</span><br><span class="line">        absoluteToUnix</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 时区偏移量</span></span><br><span class="line">    _, offset, start, end, _ := loc.lookup(unix)</span><br><span class="line">    <span class="keyword">if</span> offset != <span class="number">0</span> &#123;</span><br><span class="line">        utc := unix - <span class="type">int64</span>(offset)</span><br><span class="line">        <span class="keyword">if</span> utc &lt; start || utc &gt;= end &#123;</span><br><span class="line">            _, offset, _, _, _ = loc.lookup(utc)</span><br><span class="line">        &#125;</span><br><span class="line">        unix -= <span class="type">int64</span>(offset)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// unix时间戳</span></span><br><span class="line">    t := unixTime(unix, <span class="type">int32</span>(nsec))</span><br><span class="line">    t.setLoc(loc)</span><br><span class="line">    <span class="keyword">return</span> t</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// hi * base + lo == nhi * base + nlo</span></span><br><span class="line"><span class="comment">// 0 &lt;= nlo &lt; base</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">norm</span><span class="params">(hi, lo, base <span class="type">int</span>)</span></span> (nhi, nlo <span class="type">int</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> lo &lt; <span class="number">0</span> &#123;</span><br><span class="line">        n := (-lo<span class="number">-1</span>)/base + <span class="number">1</span></span><br><span class="line">        hi -= n</span><br><span class="line">        lo += n * base</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> lo &gt;= base &#123;</span><br><span class="line">        n := lo / base</span><br><span class="line">        hi += n</span><br><span class="line">        lo -= n * base</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> hi, lo</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 转换为天数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">dateToAbsDays</span><span class="params">(year <span class="type">int64</span>, month Month, day <span class="type">int</span>)</span></span> absDays &#123;</span><br><span class="line">    amonth := <span class="type">uint32</span>(month)</span><br><span class="line">    janFeb := <span class="type">uint32</span>(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">if</span> amonth &lt; <span class="number">3</span> &#123;</span><br><span class="line">        janFeb = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 如果是1月和2月，再加12个月</span></span><br><span class="line">    amonth += <span class="number">12</span> * janFeb</span><br><span class="line">    <span class="comment">// year-janFeb+292277022400</span></span><br><span class="line">    y := <span class="type">uint64</span>(year) - <span class="type">uint64</span>(janFeb) + absoluteYears</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果3 &lt;= amonth &lt;= 14</span></span><br><span class="line">    <span class="comment">// ayday := (153*amonth - 457) / 5</span></span><br><span class="line">    <span class="comment">// 等同于</span></span><br><span class="line">    <span class="comment">// ayday := (979*amonth - 2919) &gt;&gt; 5</span></span><br><span class="line">    ayday := (<span class="number">979</span>*amonth - <span class="number">2919</span>) &gt;&gt; <span class="number">5</span></span><br><span class="line"></span><br><span class="line">    century := y / <span class="number">100</span></span><br><span class="line">    cyear := <span class="type">uint32</span>(y % <span class="number">100</span>)</span><br><span class="line">    cday := <span class="number">1461</span> * cyear / <span class="number">4</span></span><br><span class="line">    centurydays := <span class="number">146097</span> * century / <span class="number">4</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// absDays =&gt; uint64的别名</span></span><br><span class="line">    <span class="keyword">return</span> absDays(centurydays + <span class="type">uint64</span>(<span class="type">int64</span>(cday+ayday)+<span class="type">int64</span>(day)<span class="number">-1</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="增加时长获取指定时刻"><a href="#增加时长获取指定时刻" class="headerlink" title="增加时长获取指定时刻"></a>增加时长获取指定时刻</h3><h4 id="Add"><a href="#Add" class="headerlink" title="Add"></a>Add</h4><p>时刻t增加时长d，获得指定时刻，该方法会同时更新墙上时钟和单调时钟</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> Add(d Duration) Time &#123;</span><br><span class="line">    dsec := <span class="type">int64</span>(d / <span class="number">1e9</span>)            <span class="comment">// 秒数</span></span><br><span class="line">    nsec := t.nsec() + <span class="type">int32</span>(d%<span class="number">1e9</span>)   <span class="comment">// 纳秒数</span></span><br><span class="line">    <span class="keyword">if</span> nsec &gt;= <span class="number">1e9</span> &#123;</span><br><span class="line">        dsec++</span><br><span class="line">        nsec -= <span class="number">1e9</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> nsec &lt; <span class="number">0</span> &#123;</span><br><span class="line">        dsec--</span><br><span class="line">        nsec += <span class="number">1e9</span></span><br><span class="line">    &#125;</span><br><span class="line">    t.wall = t.wall&amp;^nsecMask | <span class="type">uint64</span>(nsec) <span class="comment">// 更新纳秒数</span></span><br><span class="line">    t.addSec(dsec)</span><br><span class="line">    <span class="comment">// 单调时钟</span></span><br><span class="line">    <span class="keyword">if</span> t.wall&amp;hasMonotonic != <span class="number">0</span> &#123;</span><br><span class="line">        te := t.ext + <span class="type">int64</span>(d)</span><br><span class="line">        <span class="keyword">if</span> d &lt; <span class="number">0</span> &amp;&amp; te &gt; t.ext || d &gt; <span class="number">0</span> &amp;&amp; te &lt; t.ext &#123;</span><br><span class="line">            <span class="comment">// 单调时钟溢出，降级成墙上时钟</span></span><br><span class="line">            t.stripMono()</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            t.ext = te</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> t</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Time)</span></span> addSec(d <span class="type">int64</span>) &#123;</span><br><span class="line">    <span class="comment">// 单调时钟</span></span><br><span class="line">    <span class="keyword">if</span> t.wall&amp;hasMonotonic != <span class="number">0</span> &#123;</span><br><span class="line">        sec := <span class="type">int64</span>(t.wall &lt;&lt; <span class="number">1</span> &gt;&gt; (nsecShift + <span class="number">1</span>))</span><br><span class="line">        dsec := sec + d</span><br><span class="line">        <span class="keyword">if</span> <span class="number">0</span> &lt;= dsec &amp;&amp; dsec &lt;= <span class="number">1</span>&lt;&lt;<span class="number">33</span><span class="number">-1</span> &#123;</span><br><span class="line">            t.wall = t.wall&amp;nsecMask | <span class="type">uint64</span>(dsec)&lt;&lt;nsecShift | hasMonotonic</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 秒数溢出，把单调时钟数据移除，降级为墙上时钟</span></span><br><span class="line">        t.stripMono()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 墙上时钟</span></span><br><span class="line">    sum := t.ext + d</span><br><span class="line">    <span class="keyword">if</span> (sum &gt; t.ext) == (d &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        t.ext = sum</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> d &gt; <span class="number">0</span> &#123;</span><br><span class="line">        t.ext = <span class="number">1</span>&lt;&lt;<span class="number">63</span> - <span class="number">1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        t.ext = -(<span class="number">1</span>&lt;&lt;<span class="number">63</span> - <span class="number">1</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 移除mono时钟数据</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Time)</span></span> stripMono() &#123;</span><br><span class="line">    <span class="keyword">if</span> t.wall&amp;hasMonotonic != <span class="number">0</span> &#123;</span><br><span class="line">        t.ext = t.sec()     <span class="comment">// 复制秒数到ext</span></span><br><span class="line">        t.wall &amp;= nsecMask    <span class="comment">// 移除flag</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="AddDate"><a href="#AddDate" class="headerlink" title="AddDate"></a>AddDate</h4><p>Time根据提供的年数&#x2F;月数&#x2F;日数获得目标指定时刻，底层实际调用的是Date方法，只更新wall clock</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> AddDate(years <span class="type">int</span>, months <span class="type">int</span>, days <span class="type">int</span>) Time &#123;</span><br><span class="line">    year, month, day := t.Date()</span><br><span class="line">    hour, min, sec := t.Clock()</span><br><span class="line">    <span class="keyword">return</span> Date(year+years, month+Month(months), day+days, hour, min, sec, <span class="type">int</span>(t.nsec()), t.Location())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="字符串转换成Time"><a href="#字符串转换成Time" class="headerlink" title="字符串转换成Time"></a>字符串转换成Time</h3><p>常用的layout有：</p>
+<table>
+<thead>
+<tr>
+<th align="left">constant</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">DateTime</td>
+<td align="left">“2006-01-02 15:04:05”</td>
+</tr>
+<tr>
+<td align="left">DateOnly</td>
+<td align="left">“2006-01-02”</td>
+</tr>
+<tr>
+<td align="left">TimeOnly</td>
+<td align="left">“15:04:05”</td>
+</tr>
+</tbody></table>
+<h4 id="Parse"><a href="#Parse" class="headerlink" title="Parse"></a>Parse</h4><p>解析字符串获得Time对象以及异常信息</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Parse</span><span class="params">(layout, value <span class="type">string</span>)</span></span> (Time, <span class="type">error</span>) &#123;</span><br><span class="line">    <span class="comment">// RFC3339 =&gt; 2006-01-02T15:04:05Z07:00</span></span><br><span class="line">    <span class="keyword">if</span> layout == RFC3339 || layout == RFC3339Nano &#123;</span><br><span class="line">        <span class="keyword">if</span> t, ok := parseRFC3339(value, Local); ok &#123;</span><br><span class="line">            <span class="keyword">return</span> t, <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// parse函数太长了，有兴趣可以看源码</span></span><br><span class="line">    <span class="keyword">return</span> parse(layout, value, UTC, Local)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="ParseInLocation"><a href="#ParseInLocation" class="headerlink" title="ParseInLocation"></a>ParseInLocation</h4><p>指定时区，解析字符串获得Time对象以及异常信息</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ParseInLocation</span><span class="params">(layout, value <span class="type">string</span>, loc *Location)</span></span> (Time, <span class="type">error</span>) &#123;</span><br><span class="line">    <span class="comment">// RFC3339 =&gt; 2006-01-02T15:04:05Z07:00</span></span><br><span class="line">    <span class="keyword">if</span> layout == RFC3339 || layout == RFC3339Nano &#123;</span><br><span class="line">        <span class="keyword">if</span> t, ok := parseRFC3339(value, loc); ok &#123;</span><br><span class="line">            <span class="keyword">return</span> t, <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// parse函数太长了，有兴趣可以看源码</span></span><br><span class="line">    <span class="keyword">return</span> parse(layout, value, loc, loc)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="计算两个时刻的差值"><a href="#计算两个时刻的差值" class="headerlink" title="计算两个时刻的差值"></a>计算两个时刻的差值</h2><h3 id="Sub"><a href="#Sub" class="headerlink" title="Sub"></a>Sub</h3><p>计算t时刻-u时刻的差值</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> Sub(u Time) Duration &#123;</span><br><span class="line">    <span class="comment">// 两个时刻都有单调时钟</span></span><br><span class="line">    <span class="keyword">if</span> t.wall&amp;u.wall&amp;hasMonotonic != <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> subMono(t.ext, u.ext)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 秒数+纳秒数</span></span><br><span class="line">    d := Duration(t.sec()-u.sec())*Second + Duration(t.nsec()-u.nsec())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> u.Add(d).Equal(t):</span><br><span class="line">        <span class="keyword">return</span> d <span class="comment">// d is correct</span></span><br><span class="line">    <span class="keyword">case</span> t.Before(u):</span><br><span class="line">        <span class="keyword">return</span> minDuration <span class="comment">// t - u is negative out of range</span></span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">return</span> maxDuration <span class="comment">// t - u is positive out of range</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">subMono</span><span class="params">(t, u <span class="type">int64</span>)</span></span> Duration &#123;</span><br><span class="line">    d := Duration(t - u)</span><br><span class="line">    <span class="keyword">if</span> d &lt; <span class="number">0</span> &amp;&amp; t &gt; u &#123;</span><br><span class="line">        <span class="keyword">return</span> maxDuration <span class="comment">// t - u is positive out of range</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> d &gt; <span class="number">0</span> &amp;&amp; t &lt; u &#123;</span><br><span class="line">        <span class="keyword">return</span> minDuration <span class="comment">// t - u is negative out of range</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> d</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Since"><a href="#Since" class="headerlink" title="Since"></a>Since</h3><p>计算从指定时刻（过去）到现在时刻的差值</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Since</span><span class="params">(t Time)</span></span> Duration &#123;</span><br><span class="line">    <span class="comment">// 目标时刻有单调时钟数据</span></span><br><span class="line">    <span class="keyword">if</span> t.wall&amp;hasMonotonic != <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> subMono(runtimeNano()-startNano, t.ext)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> Now().Sub(t)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Until"><a href="#Until" class="headerlink" title="Until"></a>Until</h3><p>计算从现在时刻到指定时刻（将来）的差值</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Until</span><span class="params">(t Time)</span></span> Duration &#123;</span><br><span class="line">    <span class="comment">// 目标时刻有单调时钟数据</span></span><br><span class="line">    <span class="keyword">if</span> t.wall&amp;hasMonotonic != <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> subMono(t.ext, runtimeNano()-startNano)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> t.Sub(Now())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="比较两个时刻的先后顺序"><a href="#比较两个时刻的先后顺序" class="headerlink" title="比较两个时刻的先后顺序"></a>比较两个时刻的先后顺序</h2><p>如果两个Time都包含wall clock和mono clock，则只比较mono clock，否则比较wall clock</p>
+<h3 id="Before"><a href="#Before" class="headerlink" title="Before"></a>Before</h3><p>判断t时刻是否先于u时刻</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> Before(u Time) <span class="type">bool</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> t.wall&amp;u.wall&amp;hasMonotonic != <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> t.ext &lt; u.ext</span><br><span class="line">    &#125;</span><br><span class="line">    ts := t.sec()</span><br><span class="line">    us := u.sec()</span><br><span class="line">    <span class="keyword">return</span> ts &lt; us || ts == us &amp;&amp; t.nsec() &lt; u.nsec()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="After"><a href="#After" class="headerlink" title="After"></a>After</h3><p>判断t时刻是否晚于u时刻</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> After(u Time) <span class="type">bool</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> t.wall&amp;u.wall&amp;hasMonotonic != <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> t.ext &gt; u.ext</span><br><span class="line">    &#125;</span><br><span class="line">    ts := t.sec()</span><br><span class="line">    us := u.sec()</span><br><span class="line">    <span class="keyword">return</span> ts &gt; us || ts == us &amp;&amp; t.nsec() &gt; u.nsec()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Equal"><a href="#Equal" class="headerlink" title="Equal"></a>Equal</h3><p>判断t时刻与u时刻是否相等</p>
+<p>注意：时刻比较不要使用<code>==</code>，因为<code>==</code>会比较整个Time结构</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> Equal(u Time) <span class="type">bool</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> t.wall&amp;u.wall&amp;hasMonotonic != <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> t.ext == u.ext</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> t.sec() == u.sec() &amp;&amp; t.nsec() == u.nsec()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="IsZero"><a href="#IsZero" class="headerlink" title="IsZero"></a>IsZero</h3><p>判断t时刻是否是零值。</p>
+<p>注意：零值是UTC时间1年1月1日0时0分0秒</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> IsZero() <span class="type">bool</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> t.sec() == <span class="number">0</span> &amp;&amp; t.nsec() == <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Compare"><a href="#Compare" class="headerlink" title="Compare"></a>Compare</h3><p>比较两个时刻</p>
+<ol>
+<li>如果t时刻先于u时刻，返回-1</li>
+<li>如果t时刻晚与u时刻，返回+1</li>
+<li>如果t时刻与u时刻相等，返回0</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> Compare(u Time) <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> tc, uc <span class="type">int64</span></span><br><span class="line">    <span class="keyword">if</span> t.wall&amp;u.wall&amp;hasMonotonic != <span class="number">0</span> &#123;</span><br><span class="line">        tc, uc = t.ext, u.ext</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        tc, uc = t.sec(), u.sec()</span><br><span class="line">        <span class="keyword">if</span> tc == uc &#123;</span><br><span class="line">            tc, uc = <span class="type">int64</span>(t.nsec()), <span class="type">int64</span>(u.nsec())</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">switch</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> tc &lt; uc:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span></span><br><span class="line">    <span class="keyword">case</span> tc &gt; uc:</span><br><span class="line">        <span class="keyword">return</span> +<span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="时区"><a href="#时区" class="headerlink" title="时区"></a>时区</h2><h3 id="转换时区"><a href="#转换时区" class="headerlink" title="转换时区"></a>转换时区</h3><p>时区不会改变Time存储的数值，影响的是数据输出&#x2F;表示</p>
+<h4 id="Local"><a href="#Local" class="headerlink" title="Local"></a>Local</h4><p>切换为本机时区</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> Local() Time &#123;</span><br><span class="line">    t.setLoc(Local)</span><br><span class="line">    <span class="keyword">return</span> t</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Time)</span></span> setLoc(loc *Location) &#123;</span><br><span class="line">    <span class="comment">// nil表示UTC</span></span><br><span class="line">    <span class="keyword">if</span> loc == &amp;utcLoc &#123;</span><br><span class="line">        loc = <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    t.stripMono()</span><br><span class="line">    t.loc = loc</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="UTC"><a href="#UTC" class="headerlink" title="UTC"></a>UTC</h4><p>切换为UTC时区</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> utcLoc = Location&#123;name: <span class="string">&quot;UTC&quot;</span>&#125; <span class="comment">// 启动时初始化</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> UTC() Time &#123;</span><br><span class="line">    t.setLoc(&amp;utcLoc)</span><br><span class="line">    <span class="keyword">return</span> t</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="指定时区"><a href="#指定时区" class="headerlink" title="指定时区"></a>指定时区</h4><p>切换为指定时区</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> In(loc *Location) Time &#123;</span><br><span class="line">    <span class="keyword">if</span> loc == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="built_in">panic</span>(<span class="string">&quot;time: missing Location in call to Time.In&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    t.setLoc(loc)</span><br><span class="line">    <span class="keyword">return</span> t</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="获取报时信息"><a href="#获取报时信息" class="headerlink" title="获取报时信息"></a>获取报时信息</h2><h3 id="获取Unix时间戳"><a href="#获取Unix时间戳" class="headerlink" title="获取Unix时间戳"></a>获取Unix时间戳</h3><p>获取从1970年1月1日开始到现在的秒数</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 精度：秒</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> Unix() <span class="type">int64</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> t.unixSec()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 精度：毫秒</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> UnixMilli() <span class="type">int64</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> t.unixSec()*<span class="number">1e3</span> + <span class="type">int64</span>(t.nsec())/<span class="number">1e6</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 精度：微秒</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> UnixMicro() <span class="type">int64</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> t.unixSec()*<span class="number">1e6</span> + <span class="type">int64</span>(t.nsec())/<span class="number">1e3</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 精度：纳秒</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t Time)</span></span> UnixNano() <span class="type">int64</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> (t.unixSec())*<span class="number">1e9</span> + <span class="type">int64</span>(t.nsec())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 包含秒数和纳秒数</span></span><br><span class="line"><span class="comment">// unix时间戳读取时都要加上internalToUnix（也就是减去unixToInternal）</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Time)</span></span> unixSec() <span class="type">int64</span> &#123; <span class="keyword">return</span> t.sec() + internalToUnix &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="提取日期等信息"><a href="#提取日期等信息" class="headerlink" title="提取日期等信息"></a>提取日期等信息</h3><p>业务逻辑经常需要判断两个时刻是否处在同一天&#x2F;同一周等，此外，也需要获取当前周&#x2F;当前月等的起止时刻，列举如下依赖方法</p>
+<table>
+<thead>
+<tr>
+<th align="left">method</th>
+<th align="left">desc</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Date</td>
+<td align="left">获取年月日</td>
+</tr>
+<tr>
+<td align="left">Clock</td>
+<td align="left">获取时分秒</td>
+</tr>
+<tr>
+<td align="left">ISOWeek</td>
+<td align="left">获取年和周数</td>
+</tr>
+<tr>
+<td align="left">Year</td>
+<td align="left">获取年</td>
+</tr>
+<tr>
+<td align="left">Month</td>
+<td align="left">获取月</td>
+</tr>
+<tr>
+<td align="left">Day</td>
+<td align="left">获取天</td>
+</tr>
+<tr>
+<td align="left">Hour</td>
+<td align="left">获取时</td>
+</tr>
+<tr>
+<td align="left">Minute</td>
+<td align="left">获取分</td>
+</tr>
+<tr>
+<td align="left">Second</td>
+<td align="left">获取秒</td>
+</tr>
+<tr>
+<td align="left">Round</td>
+<td align="left">获取秒</td>
+</tr>
+<tr>
+<td align="left">Truncate</td>
+<td align="left">按给定时长截断</td>
+</tr>
+<tr>
+<td align="left">Round</td>
+<td align="left">按给定时长向上取整</td>
+</tr>
+</tbody></table>
+<p>示例</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 两个时刻是否是同一天</span></span><br><span class="line">NewDate(t1.Date()) == NewDate(t2.Date())</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Date <span class="keyword">struct</span> &#123;</span><br><span class="line">    YearMonth</span><br><span class="line">    day <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewDate</span><span class="params">(year <span class="type">int</span>, month time.Month, day <span class="type">int</span>)</span></span> Date &#123;</span><br><span class="line">    <span class="keyword">return</span> Date&#123;</span><br><span class="line">        YearMonth: YearMonth&#123;</span><br><span class="line">            year:  year,</span><br><span class="line">            month: month,</span><br><span class="line">        &#125;,</span><br><span class="line">        day: day,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 获取当月开始和结束时刻</span></span><br><span class="line">startOfMonth := time.Date(t1.Year(), t1.Month(), <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, t1.Location())</span><br><span class="line">endOfMonth := startOfMonth.AddDate(<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>).Add(<span class="number">-1</span> * time.Second)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 获取当个星期的开始和结束时刻</span></span><br><span class="line"><span class="comment">// 从星期天开始计起</span></span><br><span class="line">tmp := t1.Truncate(<span class="number">7</span> * <span class="number">24</span> * time.Hour)</span><br><span class="line">startOfWeek := time.Date(tmp.Year(), tmp.Month(), tmp.Day(), <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, tmp.Location())</span><br><span class="line">endOfWeek := startOfWeek.AddDate(<span class="number">0</span>, <span class="number">0</span>, <span class="number">7</span>).Add(<span class="number">-1</span> * time.Second)</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/golang/" rel="tag"># golang</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/golang-series-channel/" rel="prev" title="golang系列之-channel">
+                  <i class="fa fa-angle-left"></i> golang系列之-channel
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/golang-series-netpoll/" rel="next" title="golang系列之-netpoll">
+                  golang系列之-netpoll <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  
+  <div class="comments giscus-container">
+  </div>
+  
+  
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">y2k38</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">81k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:54</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+<script class="next-config" data-name="giscus" type="application/json">{"enable":true,"repo":"Y2k38/y2k38.github.io","repo_id":"R_kgDOMZGvZA","category":"Announcements","category_id":"DIC_kwDOMZGvZM4CirXX","mapping":"pathname","strict":0,"reactions_enabled":1,"emit_metadata":0,"theme":"preferred_color_scheme","lang":"zh-CN","crossorigin":"anonymous","input_position":"bottom","loading":"lazy"}</script>
+
+<script>
+document.addEventListener('page:loaded', () => {
+  if (!CONFIG.page.comments) return;
+
+  NexT.utils.loadComments('.giscus-container')
+    .then(() => NexT.utils.getScript('https://giscus.app/client.js', {
+      attributes: {
+        async                   : true,
+        crossOrigin             : 'anonymous',
+        'data-repo'             : CONFIG.giscus.repo,
+        'data-repo-id'          : CONFIG.giscus.repo_id,
+        'data-category'         : CONFIG.giscus.category,
+        'data-category-id'      : CONFIG.giscus.category_id,
+        'data-mapping'          : CONFIG.giscus.mapping,
+        'data-strict'           : CONFIG.giscus.strict,
+        'data-reactions-enabled': CONFIG.giscus.reactions_enabled,
+        'data-emit-metadata'    : CONFIG.giscus.emit_metadata,
+        'data-theme'            : CONFIG.giscus.theme,
+        'data-lang'             : CONFIG.giscus.lang,
+        'data-input-position'   : CONFIG.giscus.input_position,
+        'data-loading'          : CONFIG.giscus.loading
+      },
+      parentNode: document.querySelector('.giscus-container')
+    }));
+});
+</script>
+
+</body>
+</html>
