@@ -128,7 +128,7 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/golang-series-sync-singleflight/</loc>
+    <loc>https://y2k38.github.io/golang-series-sync-rwmutex/</loc>
     
     <lastmod>2025-02-20</lastmod>
     
@@ -137,7 +137,7 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/golang-series-sync-rwmutex/</loc>
+    <loc>https://y2k38.github.io/golang-series-sync-singleflight/</loc>
     
     <lastmod>2025-02-20</lastmod>
     
@@ -426,20 +426,6 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/docker/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/registry/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://y2k38.github.io/tags/kvm/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -448,6 +434,20 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/cockpit/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/docker/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/registry/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -482,27 +482,6 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/kubernetes/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/ffmpeg/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/hls/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://y2k38.github.io/tags/php/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -518,6 +497,27 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/profiling/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/kubernetes/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/ffmpeg/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/hls/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -594,13 +594,6 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/swift/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://y2k38.github.io/tags/postgresql/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -608,7 +601,7 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/mysql/</loc>
+    <loc>https://y2k38.github.io/tags/swift/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -629,7 +622,7 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/kubeadm/</loc>
+    <loc>https://y2k38.github.io/tags/mysql/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -644,6 +637,13 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/xdebug/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/kubeadm/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
