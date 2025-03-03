@@ -27,7 +27,7 @@
 <meta property="og:description" content="简单的配置管理，可以把信息写入文件放在项目里，然后打包发布，但这样会有信息泄露的安全风险，经常会看到谁谁谁把项目上传到github，然后公司数据库&#x2F;敏感密钥泄漏等。所以，现在的公司一般会自建发布平台，通过发布平台管理配置，流程：配置修改-&gt;审核-&gt;发布。了解到这背景，我们就知道config跟secret在整个软件开发过程中扮演的角色，接下来就学习如何配置config&amp;#x2F">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-08-25T11:32:30.000Z">
-<meta property="article:modified_time" content="2024-08-25T11:34:57.457Z">
+<meta property="article:modified_time" content="2025-03-03T02:06:26.756Z">
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="kubernetes">
 <meta name="twitter:card" content="summary">
@@ -179,9 +179,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-08-25 19:32:30 / 修改时间：19:34:57" itemprop="dateCreated datePublished" datetime="2024-08-25T19:32:30+08:00">2024-08-25</time>
+      <time title="创建时间：2024-08-25 19:32:30" itemprop="dateCreated datePublished" datetime="2024-08-25T19:32:30+08:00">2024-08-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-03 10:06:26" itemprop="dateModified" datetime="2025-03-03T10:06:26+08:00">2025-03-03</time>
     </span>
 
   
@@ -217,6 +223,8 @@
 
 <p>执行命令写入k8s，查看并验证配置信息</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 写入k8s</span></span><br><span class="line">kubectl apply -f game-demo.yam</span><br><span class="line"><span class="comment"># </span></span><br><span class="line">kubectl get cm game-demo</span><br><span class="line"><span class="comment"># 查看config数据</span></span><br><span class="line">kubectl describe cm game-demo</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
 
 <p>有了配置信息，怎么搭配container使用？有4种使用方式可供参考</p>
 <ol>

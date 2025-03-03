@@ -27,7 +27,7 @@
 <meta property="og:description" content="time涉及的内容较多，如生成&#x2F;存储时间、比较时间、获取时间信息、时区、夏令时等，本文仅介绍一些自己感兴趣的地方 日历计算基于格里高利历（公历），1年有365天（闰年有366天）。同时支持墙上时钟（wall clock）和单调时钟（monotonic clock），其中墙上时钟用于时间同步、报时（time-telling），单调时钟用于时间测量（time-measuring）。并不是所有">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-02-23T07:59:36.000Z">
-<meta property="article:modified_time" content="2025-02-23T09:37:59.607Z">
+<meta property="article:modified_time" content="2025-03-03T02:05:05.626Z">
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="golang">
 <meta name="twitter:card" content="summary">
@@ -179,9 +179,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2025-02-23 15:59:36 / 修改时间：17:37:59" itemprop="dateCreated datePublished" datetime="2025-02-23T15:59:36+08:00">2025-02-23</time>
+      <time title="创建时间：2025-02-23 15:59:36" itemprop="dateCreated datePublished" datetime="2025-02-23T15:59:36+08:00">2025-02-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-03 10:05:05" itemprop="dateModified" datetime="2025-03-03T10:05:05+08:00">2025-03-03</time>
     </span>
 
   
@@ -247,6 +253,8 @@
 
 <p>运行结果如下所示</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">go run main.go</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2025-02-22 10:30:14.247195 +0800 CST m=+0.000103986  # 当前时刻</span></span><br><span class="line"><span class="comment"># 2009-11-17 20:34:58.651387237 +0000 UTC              # 指定时刻</span></span><br><span class="line"><span class="comment"># 2009                                                 # 年</span></span><br><span class="line"><span class="comment"># November                                             # 月</span></span><br><span class="line"><span class="comment"># 17                                                   # 日</span></span><br><span class="line"><span class="comment"># 20                                                   # 时</span></span><br><span class="line"><span class="comment"># 34                                                   # 分</span></span><br><span class="line"><span class="comment"># 58                                                   # 秒</span></span><br><span class="line"><span class="comment"># 651387237                                            # 纳秒</span></span><br><span class="line"><span class="comment"># UTC                                                  # 时区</span></span><br><span class="line"><span class="comment"># Tuesday                                              # 星期</span></span><br><span class="line"><span class="comment"># true</span></span><br><span class="line"><span class="comment"># false</span></span><br><span class="line"><span class="comment"># false</span></span><br><span class="line"><span class="comment"># 133805h55m15.595807763s                              # 时长/时刻差值</span></span><br><span class="line"><span class="comment"># 133805.9209988355                                    # 总小时数</span></span><br><span class="line"><span class="comment"># 8.028355259930129e+06                                # 总分钟数</span></span><br><span class="line"><span class="comment"># 4.817013155958078e+08                                # 总秒数</span></span><br><span class="line"><span class="comment"># 481701315595807763                                   # 总纳秒数</span></span><br><span class="line"><span class="comment"># 2025-02-22 02:30:14.247195 +0000 UTC</span></span><br><span class="line"><span class="comment"># 1994-08-13 14:39:43.055579474 +0000 UTC</span></span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
 
 <h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>时间由Time数据结构表示，具体如下</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/time/time.go</span></span><br><span class="line"><span class="keyword">type</span> Time <span class="keyword">struct</span> &#123;</span><br><span class="line">    wall <span class="type">uint64</span>      <span class="comment">// 1位表示flag，33位表示秒数，30位表示纳秒数</span></span><br><span class="line">    ext  <span class="type">int64</span>       <span class="comment">// wall与ext组合表示：秒数（墙上时钟）+纳秒数（墙上时钟）+纳秒数（单调时钟）【可选】</span></span><br><span class="line">    loc *Location    <span class="comment">// 时区，为nil时表示UTC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>

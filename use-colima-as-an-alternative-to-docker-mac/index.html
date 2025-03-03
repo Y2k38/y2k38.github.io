@@ -27,7 +27,7 @@
 <meta property="og:description" content="简单介绍下macOS当前docker运行环境的最新选择：colima，一个开源产品，使用体验与vagrant类似，感觉非常不错 colima根据colima官方仓库指导安装colima 1brew install colima  colima默认的runtime是docker，因为k8s已经剥离了docker，只保留containerd，所以为了跟k8s保持一致，另外也不想再多安装一个软件，就选择">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-02-03T08:30:30.000Z">
-<meta property="article:modified_time" content="2025-02-03T08:33:13.599Z">
+<meta property="article:modified_time" content="2025-03-03T02:07:36.202Z">
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="docker">
 <meta property="article:tag" content="kubernetes">
@@ -184,9 +184,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2025-02-03 16:30:30 / 修改时间：16:33:13" itemprop="dateCreated datePublished" datetime="2025-02-03T16:30:30+08:00">2025-02-03</time>
+      <time title="创建时间：2025-02-03 16:30:30" itemprop="dateCreated datePublished" datetime="2025-02-03T16:30:30+08:00">2025-02-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-03 10:07:36" itemprop="dateModified" datetime="2025-03-03T10:07:36+08:00">2025-03-03</time>
     </span>
 
   
@@ -196,7 +202,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>296</span>
+      <span>297</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -220,6 +226,8 @@
 <p>colima默认的runtime是docker，因为k8s已经剥离了docker，只保留containerd，所以为了跟k8s保持一致，另外也不想再多安装一个软件，就选择了只用containerd</p>
 <p>但如果你使用了docker compose，那么最好还是根据教程安装docker以及docker-compose</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 拉取镜像并创建vm</span></span><br><span class="line">colima start --cpu 1 --memory 2 --disk 50 --runtime containerd</span><br><span class="line"><span class="comment"># 这里还可以开启kubernetes支持</span></span><br><span class="line"><span class="comment"># colima start --cpu 4 --memory 8 --disk 100 --runtime containerd --kubernetes</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看vm列表</span></span><br><span class="line">colima list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接vm</span></span><br><span class="line">colima ssh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装nerdctl用于支持containerd</span></span><br><span class="line">colima nerdctl install</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
 
 <h2 id="nerdctl"><a href="#nerdctl" class="headerlink" title="nerdctl"></a>nerdctl</h2><p>nerdctl是containerd的非核心命令行管理工具，与docker命令完全兼容，<code>containerd + nerdctl = docker</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看docker镜像列表，相当于docker image ls</span></span><br><span class="line">nerdctl image <span class="built_in">ls</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 拉取镜像</span></span><br><span class="line">nerdctl pull mysql:9.2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建container</span></span><br><span class="line">nerdctl run --name mysql9 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=a123456 -d mysql:9.2 --character-set-server=utf8mb4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看container列表</span></span><br><span class="line">nerdctl ps -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接container</span></span><br><span class="line">nerdctl <span class="built_in">exec</span> -it mysql9 bash</span><br></pre></td></tr></table></figure>

@@ -2,7 +2,277 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://y2k38.github.io/use-kubeadm-to-deploy-k8s-cluster/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/use-colima-as-an-alternative-to-docker-mac/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/the-difference-between-mysql-and-postgresql-for-web-developer/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/swift-file-template-remove-header-comment/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/postgres-setup-example/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/php-extension-writing-part3/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/php-extension-writing-part2/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/php-extension-writing-part1/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/php-extension-writing-classes/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/k8s-pv-setup-tutorial/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/k8s-config-and-secret-setup-tutorial/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/install-containerd-and-nerdctl-on-ubuntu24/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/how-to-setup-wireguard-vpn-server/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/how-to-download-online-video/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/how-to-access-k8s-service-from-public-network/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://y2k38.github.io/golang-series-timer-and-ticker/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-time/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-sync-waitgroup/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-sync-singleflight/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-sync-rwmutex/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-sync-pool/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-sync-once/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-sync-mutex/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-sync-map/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-sync-cond/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-sync-atomic/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-slice/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-netpoll/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-map-swiss/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-map-noswiss/</loc>
+    
+    <lastmod>2025-03-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/golang-series-hashtriemap/</loc>
     
     <lastmod>2025-03-03</lastmod>
     
@@ -13,151 +283,25 @@
   <url>
     <loc>https://y2k38.github.io/golang-series-channel/</loc>
     
-    <lastmod>2025-03-01</lastmod>
+    <lastmod>2025-03-03</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/golang-series-netpoll/</loc>
+    <loc>https://y2k38.github.io/deploy-shadowsocks-service/</loc>
     
-    <lastmod>2025-02-27</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-time/</loc>
-    
-    <lastmod>2025-02-23</lastmod>
+    <lastmod>2025-03-03</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/golang-series-map-swiss/</loc>
+    <loc>https://y2k38.github.io/deploy-kvm-and-cockpit/</loc>
     
-    <lastmod>2025-02-23</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-map-noswiss/</loc>
-    
-    <lastmod>2025-02-23</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-hashtriemap/</loc>
-    
-    <lastmod>2025-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-sync-map/</loc>
-    
-    <lastmod>2025-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-sync-pool/</loc>
-    
-    <lastmod>2025-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-sync-atomic/</loc>
-    
-    <lastmod>2025-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-sync-mutex/</loc>
-    
-    <lastmod>2025-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-slice/</loc>
-    
-    <lastmod>2025-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-sync-cond/</loc>
-    
-    <lastmod>2025-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-sync-once/</loc>
-    
-    <lastmod>2025-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-sync-rwmutex/</loc>
-    
-    <lastmod>2025-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-sync-singleflight/</loc>
-    
-    <lastmod>2025-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/golang-series-sync-waitgroup/</loc>
-    
-    <lastmod>2025-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/install-containerd-and-nerdctl-on-ubuntu24/</loc>
-    
-    <lastmod>2025-02-08</lastmod>
+    <lastmod>2025-03-03</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -166,43 +310,16 @@
   <url>
     <loc>https://y2k38.github.io/deploy-docker-and-registry-service/</loc>
     
-    <lastmod>2025-02-07</lastmod>
+    <lastmod>2025-03-03</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/the-difference-between-mysql-and-postgresql-for-web-developer/</loc>
+    <loc>https://y2k38.github.io/configure-nginx-with-https/</loc>
     
-    <lastmod>2025-02-04</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/use-colima-as-an-alternative-to-docker-mac/</loc>
-    
-    <lastmod>2025-02-03</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/use-kubeadm-to-deploy-k8s-cluster/</loc>
-    
-    <lastmod>2025-01-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/swift-file-template-remove-header-comment/</loc>
-    
-    <lastmod>2024-12-02</lastmod>
+    <lastmod>2025-03-03</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -218,99 +335,9 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/how-to-access-k8s-service-from-public-network/</loc>
-    
-    <lastmod>2024-09-16</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/deploy-kvm-and-cockpit/</loc>
-    
-    <lastmod>2024-08-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/k8s-pv-setup-tutorial/</loc>
-    
-    <lastmod>2024-08-26</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/k8s-config-and-secret-setup-tutorial/</loc>
-    
-    <lastmod>2024-08-25</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://y2k38.github.io/how-to-manage-wifi-on-ubuntu-server/</loc>
     
     <lastmod>2024-08-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/how-to-download-online-video/</loc>
-    
-    <lastmod>2024-08-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/how-to-setup-wireguard-vpn-server/</loc>
-    
-    <lastmod>2024-08-17</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/php-extension-writing-classes/</loc>
-    
-    <lastmod>2024-08-17</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/php-extension-writing-part1/</loc>
-    
-    <lastmod>2024-08-17</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/configure-nginx-with-https/</loc>
-    
-    <lastmod>2024-08-17</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/php-extension-writing-part3/</loc>
-    
-    <lastmod>2024-08-17</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -335,15 +362,6 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/php-extension-writing-part2/</loc>
-    
-    <lastmod>2024-08-17</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://y2k38.github.io/linux-monofonts-render-incorrectly/</loc>
     
     <lastmod>2024-08-17</lastmod>
@@ -356,24 +374,6 @@
     <loc>https://y2k38.github.io/tags/index.html</loc>
     
     <lastmod>2024-08-17</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/postgres-setup-example/</loc>
-    
-    <lastmod>2024-08-16</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/deploy-shadowsocks-service/</loc>
-    
-    <lastmod>2024-08-12</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -426,20 +426,6 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/kvm/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/cockpit/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://y2k38.github.io/tags/docker/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -448,6 +434,20 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/registry/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/kvm/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/cockpit/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -482,27 +482,6 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/php/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/flamegraph/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/profiling/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://y2k38.github.io/tags/kubernetes/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -518,6 +497,27 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/hls/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/php/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/flamegraph/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/profiling/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -608,21 +608,14 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/macOS/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/colima/</loc>
-    <lastmod>2025-03-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://y2k38.github.io/tags/mysql/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/kubeadm/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -643,7 +636,14 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/kubeadm/</loc>
+    <loc>https://y2k38.github.io/tags/macOS/</loc>
+    <lastmod>2025-03-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/colima/</loc>
     <lastmod>2025-03-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>

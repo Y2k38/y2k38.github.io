@@ -174,9 +174,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-12-02 10:41:22 / 修改时间：10:43:57" itemprop="dateCreated datePublished" datetime="2024-12-02T10:41:22+08:00">2024-12-02</time>
+      <time title="创建时间：2024-12-02 10:41:22" itemprop="dateCreated datePublished" datetime="2024-12-02T10:41:22+08:00">2024-12-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-03 10:07:22" itemprop="dateModified" datetime="2025-03-03T10:07:22+08:00">2025-03-03</time>
     </span>
 
   
@@ -186,7 +192,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>316</span>
+      <span>317</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -224,21 +230,14 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> /Applications/Xcode.app/Contents/Developer/Library/Xcode/Templates/File Templates/MultiPlatform/Source/Swift File.xctemplate/* ./</span><br></pre></td></tr></table></figure>
 
 <p>修改<code>___FILEBASENAME___.swift</code>，将第一行头部注释部分移除</p>
-<h2 id="SwiftUI-View"><a href="#SwiftUI-View" class="headerlink" title="SwiftUI View"></a>SwiftUI View</h2><p>同上，进入Xcode目录</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/Library/Developer/Xcode</span><br></pre></td></tr></table></figure>
-
-<p>添加模板<code>No Comment SwiftUI View.xctemplate</code></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p Templates/File Templates/MultiPlatform/User Interface/No Comment SwiftUI View.xctemplate</span><br></pre></td></tr></table></figure>
-
-<p>进入模板目录</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> Templates/File Templates/MultiPlatform/User Interface/No Comment SwiftUI View.xctemplate</span><br></pre></td></tr></table></figure>
-
-<p>复制原swiftui view模板数据</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> /Applications/Xcode.app/Contents/Developer/Library/Xcode/Templates/File Templates/MultiPlatform/User Interface/SwiftUI View.xctemplate/* ./</span><br></pre></td></tr></table></figure>
-
-<p>修改<code>___FILEBASENAME___.swift</code>，将第一行头部注释部分移除</p>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>重启Xcode（不是关闭打开xcode窗口，而是重启），cmd+N查看模板列表，完成！</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/swift-file-template-remove-header-comment/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -300,7 +299,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-09-16 18:05:30" itemprop="dateModified" datetime="2024-09-16T18:05:30+08:00">2024-09-16</time>
+      <time title="修改时间：2025-03-03 10:05:29" itemprop="dateModified" datetime="2025-03-03T10:05:29+08:00">2025-03-03</time>
     </span>
 
   
@@ -353,114 +352,14 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete svc nginx-deployment</span><br></pre></td></tr></table></figure>
 
 <p><strong>注意</strong>：考虑到线上一般是直接通过域名访问，如果不想在域名后还要添加端口访问服务，如<code>www.noname.io:31402</code>，那么还需要使用nginx&#x2F;haproxy建立一个反向代理的网关进行管理</p>
-<h2 id="LoadBalancer"><a href="#LoadBalancer" class="headerlink" title="LoadBalancer"></a>LoadBalancer</h2><p><img src="/images/metallb.jpg" alt="metallb"></p>
-<p>如上图所示，客户端的请求抵达LoadBalancer指定的IP（这里的IP有点奇怪，应该是与节点IP同一个CIDR但被保留的IP才对，看下面metallb），然后机器将流量转发到对应的服务</p>
-<p>一般情况下，各个云服务厂商有提供专门支持k8s的LoadBalancer，本文依赖的k8s是自建的裸集群（bare-metal），默认不支持LoadBalancer，因此需要先安装metallb</p>
-<h3 id="metallb安装"><a href="#metallb安装" class="headerlink" title="metallb安装"></a>metallb安装</h3><ol>
-<li>下载配置文件，修改image地址，然后使用kubectl执行</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f ./metallb-native.yaml</span><br><span class="line"><span class="comment"># 如果你的网络正常</span></span><br><span class="line"><span class="comment"># kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml</span></span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>查看pod运行状态</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -n metallb-system -o wide</span><br></pre></td></tr></table></figure>
-
-<p>输出如下</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">NAME                        READY   STATUS    RESTARTS   AGE   IP                NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">controller-f6d7bd7b-7kg47   1/1     Running   0          51s   10.0.2.19         vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-8fgzx               1/1     Running   0          51s   192.168.122.235   vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-bfbtk               1/1     Running   0          51s   192.168.122.11    vm1    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">speaker-t4lv8               1/1     Running   0          51s   192.168.122.126   vm2    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>配置IP池</li>
-</ol>
-<p>配置IP池用于LoadBalancer分配，注意，要确保这部分IP不要被dhcp分配给其他任何机器</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vi ip-address-pool.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">metallb.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">IPAddressPool</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">metallb-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">addresses:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.122</span><span class="number">.20</span><span class="number">-192.168</span><span class="number">.122</span><span class="number">.25</span></span><br><span class="line">  <span class="attr">autoAssign:</span> <span class="literal">true</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">metallb.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">L2Advertisement</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">metallb-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ipAddressPools:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">default</span></span><br></pre></td></tr></table></figure>
-
-<p>执行命令<code>kubectl apply -f ip-address-pool.yaml</code></p>
-<p>到这里就创建好了</p>
-<h3 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h3><ol>
-<li>创建LoadBalancer类型的service</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment --<span class="built_in">type</span>=<span class="string">&quot;LoadBalancer&quot;</span> --port 80</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>查看service <code>kubectl get svc</code>，输出如下</li>
-</ol>
-<p>192.168.122.20这个地址不是节点IP，而是从IP池里挑选的未被使用的</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NAME               TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)        AGE</span><br><span class="line">kubernetes         ClusterIP      10.96.0.1        &lt;none&gt;           443/TCP        12d</span><br><span class="line">nginx-deployment   LoadBalancer   10.111.110.163   192.168.122.20   80:30804/TCP   8s</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>验证</li>
-</ol>
-<p>在物理机上访问服务<code>curl -D- http://192.168.122.20 -H &#39;Host: www.noname.io&#39;</code>，对比在虚拟机上执行<code>curl -D- http://10.111.110.163</code>，两者的输出是一致的</p>
-<ol start="4">
-<li>删除service</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete svc nginx-deployment</span><br></pre></td></tr></table></figure>
-
-<h2 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h2><p>Ingress在整个k8s架构中扮演着集群网关的角色，提供了如负载均衡、SSL终结和基于名称的虚拟托管功能，当然，你可以用在a&#x2F;b测试、版本升级这种用途，目前支持的协议是http，后续的继任者Gateway提供了更强大的功能，如支持更多协议、流量管理、更灵活的配置等，但这里暂不做过多介绍</p>
-<p>Ingress的运行方式有好几种，其中比较常见的是NodePort以及LoadBalancer。其工作原理是：客户端通过NodePort或者LoadBalancer的方式访问ingress，ingress再通过路由转发到指定的k8s内部服务</p>
-<p>本文使用的ingress是ingress-nginx，当然，你也可以选择envoy或higress等</p>
-<h3 id="ingress-nginx"><a href="#ingress-nginx" class="headerlink" title="ingress-nginx"></a>ingress-nginx</h3><p>将repo下载到本地，地址：<a target="_blank" rel="noopener" href="https://github.com/kubernetes/ingress-nginx%EF%BC%8Ck8s%E4%BE%9D%E8%B5%96%E7%9A%84%E9%83%A8%E7%BD%B2%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60deploy/static/provider/%60%E7%9B%AE%E5%BD%95%E4%B8%8B%EF%BC%8CNodePort%E6%96%B9%E5%BC%8F%E7%9A%84%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60baremetal%60%EF%BC%8C%E8%80%8CLoadBalancer%E6%96%B9%E5%BC%8F%E7%9A%84%E6%96%87%E4%BB%B6%E6%94%BE%E5%9C%A8%60cloud%60">https://github.com/kubernetes/ingress-nginx，k8s依赖的部署文件放在`deploy/static/provider/`目录下，NodePort方式的文件放在`baremetal`，而LoadBalancer方式的文件放在`cloud`</a></p>
-<ol>
-<li><p>拷贝文件夹<code>baremetal</code>或<code>cloud</code>，修改deploy.yaml中的image地址</p>
-</li>
-<li><p>执行命令<code>kubectl apply -k .</code></p>
-</li>
-<li><p>查看pod运行状况</p>
-</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -o wide -n ingress-nginx</span><br></pre></td></tr></table></figure>
-
-<p>输出如下，前两个是一次性的job，忽略</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">NAME                                        READY   STATUS      RESTARTS   AGE     IP           NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">ingress-nginx-admission-create-6mmd6        0/1     Completed   0          2m33s   10.0.2.178   vm3    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">ingress-nginx-admission-patch-clnr4         0/1     Completed   0          2m33s   10.0.1.235   vm2    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">ingress-nginx-controller-5989548bf5-tjv5t   1/1     Running     0          2m33s   10.0.2.12    vm3    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
-
-<ol start="4">
-<li>查看controller运行状况</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get svc ingress-nginx-controller -n ingress-nginx</span><br></pre></td></tr></table></figure>
-
-<p>如果你执行的是<code>cloud</code>配置，也就是<code>LoadBalancer</code>方式，输出如下</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME                       TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)                      AGE</span><br><span class="line">ingress-nginx-controller   LoadBalancer   10.109.74.112   192.168.122.20   80:31608/TCP,443:30939/TCP   77m</span><br></pre></td></tr></table></figure>
-
-<p>如果你执行的是<code>baremetal</code>配置，也就是<code>NodePort</code>方式，输出如下</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME                       TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE</span><br><span class="line">ingress-nginx-controller   NodePort   10.104.202.43   &lt;none&gt;        80:31880/TCP,443:30184/TCP   3m27s</span><br></pre></td></tr></table></figure>
-
-<ol start="5">
-<li>验证</li>
-</ol>
-<p>访问ingress地址</p>
-<p><code>LoadBalancer</code>方式如下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># LoadBalancer如下</span></span><br><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># NodePort如下</span></span><br><span class="line">curl -D- http://vm1:31880 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>输出如下</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 404 Not Found</span><br><span class="line">Date: Wed, 28 Aug 2024 04:09:19 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 146</span><br><span class="line">Connection: keep-alive</span><br><span class="line"></span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;&lt;title&gt;404 Not Found&lt;/title&gt;&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;center&gt;&lt;h1&gt;404 Not Found&lt;/h1&gt;&lt;/center&gt;</span><br><span class="line">&lt;hr&gt;&lt;center&gt;nginx&lt;/center&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>到这里，ingress安装完成</p>
-<h3 id="实践-1"><a href="#实践-1" class="headerlink" title="实践"></a>实践</h3><ol>
-<li>创建默认类型为ClusterIP的服务（该服务无法在集群外部访问，适合验证我们创建的ingress）</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment nginx-deployment</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>查看service <code>kubectl get svc</code>，输出如下</li>
-</ol>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NAME               TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE</span><br><span class="line">kubernetes         ClusterIP   10.96.0.1      &lt;none&gt;        443/TCP   12d</span><br><span class="line">nginx-deployment   ClusterIP   10.106.19.73   &lt;none&gt;        80/TCP    12m</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>配置ingress规则</li>
-</ol>
-<p>该规则指定<a target="_blank" rel="noopener" href="http://www.noname.io的所有流量都转发到nginx-deployment服务/">www.noname.io的所有流量都转发到nginx-deployment服务</a></p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># example-ingress.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"> <span class="attr">name:</span> <span class="string">example-ingress</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"> <span class="attr">rules:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">www.noname.io</span></span><br><span class="line">   <span class="attr">http:</span></span><br><span class="line">     <span class="attr">paths:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="attr">pathType:</span> <span class="string">Prefix</span></span><br><span class="line">       <span class="attr">path:</span> <span class="string">&quot;/&quot;</span></span><br><span class="line">       <span class="attr">backend:</span></span><br><span class="line">         <span class="attr">service:</span></span><br><span class="line">           <span class="attr">name:</span> <span class="string">nginx-deployment</span></span><br><span class="line">           <span class="attr">port:</span></span><br><span class="line">             <span class="attr">number:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
-
-<ol start="4">
-<li>验证</li>
-</ol>
-<p>访问ingress地址，仅展示LoadBalancer方式</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -D- http://192.168.122.20 -H <span class="string">&#x27;Host: www.noname.io&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>done</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://medium.com/@seanlinsanity/how-to-expose-applications-running-in-kubernetes-cluster-to-public-access-65c2fa959a3b">3 Ways to Expose Applications Running in Kubernetes Cluster to Public Access</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/ingress/">Ingress</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/tasks/access-application-cluster/ingress-minikube/">在 Minikube 环境中使用 NGINX Ingress 控制器配置 Ingress</a><br><a target="_blank" rel="noopener" href="https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/baremetal.md">Bare-metal considerations</a><br><a target="_blank" rel="noopener" href="https://medium.com/tektutor/using-nginx-ingress-controller-in-kubernetes-bare-metal-setup-890eb4e7772">Using Nginx Ingress Controller in Kubernetes bare-metal setup</a><br><a target="_blank" rel="noopener" href="https://medium.com/tektutor/using-metal-lb-on-a-bare-metal-onprem-kubernetes-setup-6d036af1d20c">Using Metal LB on a bare-metal(OnPrem) Kubernetes Setup</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/how-to-access-k8s-service-from-public-network/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -514,9 +413,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-08-26 19:02:49 / 修改时间：19:06:56" itemprop="dateCreated datePublished" datetime="2024-08-26T19:02:49+08:00">2024-08-26</time>
+      <time title="创建时间：2024-08-26 19:02:49" itemprop="dateCreated datePublished" datetime="2024-08-26T19:02:49+08:00">2024-08-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-03 10:06:36" itemprop="dateModified" datetime="2025-03-03T10:06:36+08:00">2025-03-03</time>
     </span>
 
   
@@ -526,7 +431,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>678</span>
+      <span>679</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -561,46 +466,14 @@
 <li>创建命名空间nfs-provisioner</li>
 </ol>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># namespace.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Namespace</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nfs-provisioner</span></span><br></pre></td></tr></table></figure>
-
-<ol start="4">
-<li>创建nfs deployment的patch，主要修改image地址、nfs信息，用于后续的合并</li>
-</ol>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># patch_nfs_details.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">          <span class="attr">image:</span> <span class="string">registry.noname.io:5000/sig-storage/nfs-subdir-external-provisioner:v4.0.2</span></span><br><span class="line">          <span class="attr">env:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">NFS_SERVER</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">&lt;YOUR_NFS_SERVER_IP&gt;</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">NFS_PATH</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">&lt;YOUR_NFS_SERVER_SHARE&gt;</span></span><br><span class="line">      <span class="attr">volumes:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nfs-client-root</span></span><br><span class="line">          <span class="attr">nfs:</span></span><br><span class="line">            <span class="attr">server:</span> <span class="string">&lt;YOUR_NFS_SERVER_IP&gt;</span></span><br><span class="line">            <span class="attr">path:</span> <span class="string">&lt;YOUR_NFS_SERVER_SHARE&gt;</span></span><br></pre></td></tr></table></figure>
-
-<ol start="5">
-<li>添加资源并发布</li>
-</ol>
-<p>汇总后的<code>kustomization.yaml</code>内容如下所示</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kustomization.yaml</span></span><br><span class="line">namespace: nfs-provisioner</span><br><span class="line">resources:</span><br><span class="line">  - ./deploy</span><br><span class="line">  - namespace.yaml</span><br><span class="line">patches:</span><br><span class="line">  - path: patch_nfs_details.yaml</span><br><span class="line">    target:</span><br><span class="line">      kind: Deployment</span><br><span class="line">      labelSelector: app=nfs-client-provisioner</span><br></pre></td></tr></table></figure>
-
-<p>执行命令</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 发布到集群中</span></span><br><span class="line">kubectl apply -k .</span><br><span class="line"><span class="comment"># 查看pod nfs-client-provisioner是否正常运行</span></span><br><span class="line">kubectl get pods -n nfs-provisioner</span><br></pre></td></tr></table></figure>
-
-<p>到这里，基于nfs的动态存储分配基本可用</p>
-<h2 id="wordpress实践"><a href="#wordpress实践" class="headerlink" title="wordpress实践"></a>wordpress实践</h2><p>从教程：<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/">wordpress</a>下载相关yaml配置</p>
-<p>修改<code>wordpress-deployment.yaml</code>以及<code>mysql-deployment.yaml</code>的pvc配置，在spec下添加<code>storageClassName: nfs-client</code></p>
-<p>当然，如果不添加上述命令，可以将storageclass：nfs-client设置成默认，这样一来就不需要改任何配置了</p>
-<h3 id="修改nfs-client为默认"><a href="#修改nfs-client为默认" class="headerlink" title="修改nfs-client为默认"></a>修改nfs-client为默认</h3><ol>
-<li>通过patch修改</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl patch storageclass nfs-client -p <span class="string">&#x27;&#123;&quot;metadata&quot;: &#123;&quot;annotations&quot;:&#123;&quot;storageclass.kubernetes.io/is-default-class&quot;:&quot;true&quot;&#125;&#125;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>修改storageclass的配置文件</li>
-</ol>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">...</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">storageclass.kubernetes.io/is-default-class:</span> <span class="string">&quot;true&quot;</span></span><br><span class="line"><span class="string">...</span></span><br></pre></td></tr></table></figure>
-
-<p>其他操作不再赘述，到这里就结束了</p>
-<h2 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h2><ol>
-<li>chown: changing ownership of ‘&#x2F;var&#x2F;lib&#x2F;mysql&#x2F;‘: Operation not permitted</li>
-</ol>
-<p>这是因为nfs需要添加<code>no_root_squash</code>权限，修改<code>/etc/exports</code>添加，这个权限太大，不适合线上使用</p>
-<ol start="2">
-<li>mount: &#x2F;mnt&#x2F;nfs_clientshare: bad option; for several filesystems (e.g. nfs, cifs) you might need a &#x2F;sbin&#x2F;mount.<type> helper program.</li>
-</ol>
-<p>节点没有安装nfs客户端导致的，安装nfs-common即可</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner">nfs-subdir-external-provisioner</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/k8s-pv-setup-tutorial/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -654,9 +527,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-08-25 19:32:30 / 修改时间：19:34:57" itemprop="dateCreated datePublished" datetime="2024-08-25T19:32:30+08:00">2024-08-25</time>
+      <time title="创建时间：2024-08-25 19:32:30" itemprop="dateCreated datePublished" datetime="2024-08-25T19:32:30+08:00">2024-08-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-03 10:06:26" itemprop="dateModified" datetime="2025-03-03T10:06:26+08:00">2025-03-03</time>
     </span>
 
   
@@ -693,54 +572,14 @@
 
 <p>执行命令写入k8s，查看并验证配置信息</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 写入k8s</span></span><br><span class="line">kubectl apply -f game-demo.yam</span><br><span class="line"><span class="comment"># </span></span><br><span class="line">kubectl get cm game-demo</span><br><span class="line"><span class="comment"># 查看config数据</span></span><br><span class="line">kubectl describe cm game-demo</span><br></pre></td></tr></table></figure>
-
-<p>有了配置信息，怎么搭配container使用？有4种使用方式可供参考</p>
-<ol>
-<li>在容器命令和参数内</li>
-<li>容器的环境变量</li>
-<li>在只读卷里面添加一个文件，让应用来读取</li>
-<li>编写代码在 Pod 中运行，使用 Kubernetes API 来读取 ConfigMap</li>
-</ol>
-<p>以下启动一个pod，在启动时打印输出config信息，主要展示的是环境变量跟配置文件两种方式，也就是上面的2和3</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">configmap-demo-pod</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">demo</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">registry.noname.io:5000/alpine:3.20.1</span></span><br><span class="line">      <span class="attr">command:</span> </span><br><span class="line">        <span class="bullet">-</span> <span class="string">/bin/sh</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;-c&quot;</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">|</span></span><br><span class="line"><span class="string">          echo $PLAYER_INITIAL_LIVES;</span></span><br><span class="line"><span class="string">          echo $UI_PROPERTIES_FILE_NAME;</span></span><br><span class="line"><span class="string">          ls -l /config/game.properties;</span></span><br><span class="line"><span class="string">          cat /config/game.properties;</span></span><br><span class="line"><span class="string">          ls -l /config/user-interface.properties;</span></span><br><span class="line"><span class="string">          cat /config/user-interface.properties;</span></span><br><span class="line"><span class="string"></span>      <span class="comment"># 方式2：configMap-&gt;环境变量</span></span><br><span class="line">      <span class="attr">env:</span></span><br><span class="line">        <span class="comment"># 定义环境变量</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">PLAYER_INITIAL_LIVES</span>    <span class="comment"># 请注意这里和 ConfigMap 中的键名是不一样的</span></span><br><span class="line">          <span class="attr">valueFrom:</span></span><br><span class="line">            <span class="attr">configMapKeyRef:</span></span><br><span class="line">              <span class="attr">name:</span> <span class="string">game-demo</span>           <span class="comment"># 这个值来自 ConfigMap</span></span><br><span class="line">              <span class="attr">key:</span> <span class="string">player_initial_lives</span> <span class="comment"># 需要取值的键</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">UI_PROPERTIES_FILE_NAME</span></span><br><span class="line">          <span class="attr">valueFrom:</span></span><br><span class="line">            <span class="attr">configMapKeyRef:</span></span><br><span class="line">              <span class="attr">name:</span> <span class="string">game-demo</span></span><br><span class="line">              <span class="attr">key:</span> <span class="string">ui_properties_file_name</span></span><br><span class="line">      <span class="comment"># 方式3：configMap-&gt;文件</span></span><br><span class="line">      <span class="attr">volumeMounts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">config</span></span><br><span class="line">        <span class="attr">mountPath:</span> <span class="string">&quot;/config&quot;</span></span><br><span class="line">        <span class="attr">readOnly:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">  <span class="comment"># 你可以在 Pod 级别设置卷，然后将其挂载到 Pod 内的容器中</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">config</span></span><br><span class="line">    <span class="attr">configMap:</span></span><br><span class="line">      <span class="comment"># ConfigMap的名字</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">game-demo</span></span><br><span class="line">      <span class="comment"># 指定key创建为path文件</span></span><br><span class="line">      <span class="attr">items:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;game.properties&quot;</span></span><br><span class="line">        <span class="attr">path:</span> <span class="string">&quot;game.properties&quot;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;user-interface.properties&quot;</span></span><br><span class="line">        <span class="attr">path:</span> <span class="string">&quot;user-interface.properties&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>执行命令</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建pod</span></span><br><span class="line">kubectl apply -f configmap-demo-pod.yaml</span><br><span class="line"><span class="comment"># 查看configmap-demo-pod运行情况</span></span><br><span class="line">kubectl get pod | grep configmap-demo-pod</span><br><span class="line"><span class="comment"># pod是否有其他异常</span></span><br><span class="line">kubectl describe pod configmap-demo-pod</span><br><span class="line"><span class="comment"># 查看command输出日志</span></span><br><span class="line">kubectl logs configmap-demo-pod</span><br><span class="line"><span class="comment"># 清理config、pod</span></span><br><span class="line">kubectl delete -f game-demo.yaml</span><br><span class="line">kubectl delete -f configmap-demo-pod.yaml</span><br></pre></td></tr></table></figure>
-
-<h2 id="Secret"><a href="#Secret" class="headerlink" title="Secret"></a>Secret</h2><p>secret的应用场景想到的只有数据库密码，如果真的要跟数据库其他配置分离也挺蛋疼的，以下简单展示如何使用</p>
-<p>secret与config非常相似，有如下相同点</p>
-<ol>
-<li>key&#x2F;value 的形式</li>
-<li>属于某个特定的 namespace</li>
-<li>可以导出到环境变量</li>
-<li>可以通过目录&#x2F;文件形式挂载 (支持挂载所有 key 和部分 key)</li>
-</ol>
-<p>不同点：</p>
-<ol>
-<li>secret 可以被 ServerAccount 关联 (使用)</li>
-<li>secret 可以存储 register 的鉴权信息，用在 ImagePullSecret 参数中，用于拉取私有仓库的镜像</li>
-<li>secret 支持 Base64 加密</li>
-<li>secret 文件存储在 tmpfs 文件系统中，Pod删除后secret文件也会对应的删除</li>
-</ol>
-<p>配置secret</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># dotfile-secret.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Secret</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">dotfile-secret</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="string">.secret-file:</span> <span class="string">dmFsdWUtMg0KDQo=</span></span><br></pre></td></tr></table></figure>
-
-<p>验证</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get secret dotfile-secret -o json | jq <span class="string">&#x27;.data | map_values(@base64d)&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>使用secret，有以下几种方式</p>
-<ol>
-<li>作为挂载到一个或多个容器上的卷中的文件</li>
-<li>作为容器的环境变量</li>
-<li>由kubelet在为Pod拉取镜像时使用</li>
-</ol>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># secret-dotfiles-pod.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">secret-dotfiles-pod</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">secret-volume</span></span><br><span class="line">      <span class="attr">secret:</span></span><br><span class="line">        <span class="attr">secretName:</span> <span class="string">dotfile-secret</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">dotfile-test-container</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">registry.noname.io:5000/alpine:3.20.1</span></span><br><span class="line">      <span class="attr">command:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">ls</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;-la&quot;</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;/etc/secret-volume&quot;</span></span><br><span class="line">      <span class="comment"># /etc/secret-volume/.secret-file</span></span><br><span class="line">      <span class="attr">volumeMounts:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">secret-volume</span></span><br><span class="line">          <span class="attr">readOnly:</span> <span class="literal">true</span></span><br><span class="line">          <span class="attr">mountPath:</span> <span class="string">&quot;/etc/secret-volume&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>执行命令</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建pod</span></span><br><span class="line">kubectl apply -f secret-dotfiles-pod.yaml</span><br><span class="line"><span class="comment"># 查看secret-dotfiles-pod运行情况</span></span><br><span class="line">kubectl get pod | grep secret-dotfiles-pod</span><br><span class="line"><span class="comment"># pod是否有其他异常</span></span><br><span class="line">kubectl describe pod secret-dotfiles-pod</span><br><span class="line"><span class="comment"># 查看command输出日志</span></span><br><span class="line">kubectl logs secret-dotfiles-pod</span><br><span class="line"><span class="comment"># 清理config、pod</span></span><br><span class="line">kubectl delete -f dotfile-secret.yaml</span><br><span class="line">kubectl delete -f secret-dotfiles-pod.yaml</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMaps</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/secret/">Secrets</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/k8s-config-and-secret-setup-tutorial/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -901,6 +740,13 @@
 
       <time title="创建时间：2024-08-18 11:31:46" itemprop="dateCreated datePublished" datetime="2024-08-18T11:31:46+08:00">2024-08-18</time>
     </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-03 10:05:35" itemprop="dateModified" datetime="2025-03-03T10:05:35+08:00">2025-03-03</time>
+    </span>
 
   
     <span class="post-meta-break"></span>
@@ -909,7 +755,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>553</span>
+      <span>554</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -942,23 +788,14 @@
 <li>修改m3u8文件</li>
 <li>使用ffmpeg合并</li>
 </ol>
-<h3 id="下载必须的文件"><a href="#下载必须的文件" class="headerlink" title="下载必须的文件"></a>下载必须的文件</h3><ol>
-<li>通过浏览器dev tool找到m3u8文件url</li>
-<li>复制m3u8文件内所有ts文件地址到下载器下载，这里可能还需要通过编辑器补全url</li>
-<li>复制m3u8文件内记录的key的地址（从EXT-X-KEY字段获取链接）到下载器下载，可进一步重命名，如改为crypt.key，该文件文件大小一般是16字节</li>
-</ol>
-<h3 id="修改m3u8文件"><a href="#修改m3u8文件" class="headerlink" title="修改m3u8文件"></a>修改m3u8文件</h3><ol>
-<li>修改key的地址，将url改为本地文件路径</li>
-<li>如果ts文件url是http链接，那么也改为本地文件路径</li>
-</ol>
-<p>示例如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#EXTM3U</span><br><span class="line">#EXT-X-VERSION:3</span><br><span class="line">#EXT-X-KEY:METHOD=AES-128,URI=&quot;crypt.key&quot;,IV=0xa746ff934e7fff621ba2cf5a32608914</span><br><span class="line">#EXT-X-MEDIA-SEQUENCE:0</span><br><span class="line">#EXT-X-TARGETDURATION:6</span><br><span class="line">#EXTINF:5.881,</span><br><span class="line">xxxxxxyyyyyyyy.ts</span><br></pre></td></tr></table></figure>
-
-<h3 id="使用ffmpeg合并"><a href="#使用ffmpeg合并" class="headerlink" title="使用ffmpeg合并"></a>使用ffmpeg合并</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -allowed_extensions ALL -protocol_whitelist <span class="string">&quot;file,http,crypto,tcp&quot;</span> -i example.m3u8 -c copy the_final_video.mp4</span><br></pre></td></tr></table></figure>
-
-<p>done</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/warcraft/p/13388280.html">记一次加密的ts视频下载</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/how-to-download-online-video/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1020,7 +857,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-01-18 20:48:48" itemprop="dateModified" datetime="2025-01-18T20:48:48+08:00">2025-01-18</time>
+      <time title="修改时间：2025-03-03 10:07:40" itemprop="dateModified" datetime="2025-03-03T10:07:40+08:00">2025-03-03</time>
     </span>
 
   
@@ -1053,192 +890,14 @@
 <p><img src="/images/kvm_create_vm1.png" alt="kvm create vm1"></p>
 <h3 id="配置vm1"><a href="#配置vm1" class="headerlink" title="配置vm1"></a>配置vm1</h3><p>根据教程：<a href="/deploy-docker-and-registry-service/">安装docker并部署registry服务</a>安装好containerd，再执行下面的配置</p>
 <h4 id="系统配置修改"><a href="#系统配置修改" class="headerlink" title="系统配置修改"></a>系统配置修改</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># linux 模块</span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt;<span class="string">EOF | sudo tee /etc/modules-load.d/k8s.conf</span></span><br><span class="line"><span class="string">overlay</span></span><br><span class="line"><span class="string">br_netfilter</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> modprobe overlay</span><br><span class="line"><span class="built_in">sudo</span> modprobe br_netfilter</span><br><span class="line"></span><br><span class="line"><span class="comment"># lsmod | grep overlay</span></span><br><span class="line"><span class="comment"># lsmod | grep br_netfilter</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 网络配置</span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt;<span class="string">EOF | sudo tee /etc/sysctl.d/k8s.conf</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-iptables  = 1</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-ip6tables = 1</span></span><br><span class="line"><span class="string">net.ipv4.ip_forward                 = 1</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/sysctl.d/k8s.conf</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> sysctl --system</span><br><span class="line"></span><br><span class="line"><span class="comment"># sudo sysctl -a | grep net.ipv4.ip_forward</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="关闭swap"><a href="#关闭swap" class="headerlink" title="关闭swap"></a>关闭swap</h4><p>关闭swap并移除文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看swap文件位置</span></span><br><span class="line"><span class="built_in">sudo</span> swapon</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭swap</span></span><br><span class="line"><span class="built_in">sudo</span> swapoff /swap.img</span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除swap文件</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> /swap.img</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动项注释</span></span><br><span class="line"><span class="built_in">sudo</span> vi /etc/fstab</span><br><span class="line"><span class="comment"># 删除或注释下面行</span></span><br><span class="line"><span class="comment">#/swap.img      none    swap    sw      0       0</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="registry证书导入"><a href="#registry证书导入" class="headerlink" title="registry证书导入"></a>registry证书导入</h4><p>私有registry使用self-signed证书，kubeadm拉取时会报错，故将证书添加到vm</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 物理机拷贝证书到vm1</span></span><br><span class="line">scp noname.io.crt noname@192.168.122.11:/home/noname/</span><br><span class="line"></span><br><span class="line"><span class="comment"># vm1 复制到系统目录</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">cp</span> noname.io.crt /usr/local/share/ca-certificates/</span><br><span class="line"><span class="built_in">sudo</span> update-ca-certificates</span><br><span class="line"><span class="built_in">sudo</span> systemctl restart containerd</span><br><span class="line"><span class="built_in">sudo</span> systemctl restart docker <span class="comment"># 可选</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="containerd设置"><a href="#containerd设置" class="headerlink" title="containerd设置"></a>containerd设置</h4><p>修改<code>/etc/containerd/config.toml</code>，设置cgroup driver为systemd，同时可以修改pause版本，version是必须的，否则不生效，缩进非必要，可以删除</p>
-<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version</span> = <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="section">[plugins]</span></span><br><span class="line">  <span class="section">[plugins.&quot;io.containerd.grpc.v1.cri&quot;.containerd.runtimes.runc]</span></span><br><span class="line">    <span class="attr">runtime_type</span> = <span class="string">&quot;io.containerd.runc.v2&quot;</span></span><br><span class="line">    <span class="section">[plugins.&quot;io.containerd.grpc.v1.cri&quot;.containerd.runtimes.runc.options]</span></span><br><span class="line">      <span class="attr">SystemdCgroup</span> = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">  <span class="section">[plugins.&quot;io.containerd.grpc.v1.cri&quot;]</span></span><br><span class="line">    <span class="attr">sandbox_image</span> = <span class="string">&quot;registry.noname.io:5000/pause:3.10&quot;</span> <span class="comment"># 默认是3.8，这里可以不修改</span></span><br></pre></td></tr></table></figure>
-
-<p>重启containerd服务</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl restart containerd</span><br></pre></td></tr></table></figure>
-
-<p>执行命令输出生效中的配置，验证配置是否跟预期一致</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">containerd config dump | grep SystemdCgroup</span><br></pre></td></tr></table></figure>
-
-<h4 id="docker配置（可选）"><a href="#docker配置（可选）" class="headerlink" title="docker配置（可选）"></a>docker配置（可选）</h4><p>k8s与docker分手后，vm只需要一个containerd就够了，但如果你同时也安装了docker，也可以修改<code>/etc/docker/daemon.json</code></p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;exec-opts&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;native.cgroupdriver=systemd&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;insecure-registries&quot;</span> <span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;registry.noname.io:5000&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<p>重启docker服务</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl restart docker</span><br></pre></td></tr></table></figure>
-
-<h4 id="镜像准备（可选）"><a href="#镜像准备（可选）" class="headerlink" title="镜像准备（可选）"></a>镜像准备（可选）</h4><p>为了避免kubeadm init长时间卡在镜像拉取上，可以先在物理机上通过proxy拉取到本地，再推送到私有registry，最后配置从私有registry拉取image</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># k8s需要的镜像，可以通过kubeadm config images list打印</span></span><br><span class="line">docker pull registry.k8s.io/kube-apiserver:v1.31.0</span><br><span class="line">docker pull registry.k8s.io/kube-controller-manager:v1.31.0</span><br><span class="line">docker pull registry.k8s.io/kube-scheduler:v1.31.0</span><br><span class="line">docker pull registry.k8s.io/kube-proxy:v1.31.0</span><br><span class="line">docker pull registry.k8s.io/coredns/coredns:v1.11.1</span><br><span class="line">docker pull registry.k8s.io/pause:3.10</span><br><span class="line">docker pull registry.k8s.io/etcd:3.5.15-0</span><br><span class="line"><span class="comment"># cilium依赖的镜像</span></span><br><span class="line">docker pull quay.io/cilium/cilium:v1.15.6</span><br><span class="line">docker pull quay.io/cilium/operator-generic:v1.15.6</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新打tag</span></span><br><span class="line">docker tag registry.k8s.io/kube-apiserver:v1.31.0 registry.noname.io:5000/kube-apiserver:v1.31.0</span><br><span class="line">docker tag registry.k8s.io/kube-controller-manager:v1.31.0 registry.noname.io:5000/kube-controller-manager:v1.31.0</span><br><span class="line">docker tag registry.k8s.io/kube-scheduler:v1.31.0 registry.noname.io:5000/kube-scheduler:v1.31.0</span><br><span class="line">docker tag registry.k8s.io/kube-proxy:v1.31.0 registry.noname.io:5000/kube-proxy:v1.31.0</span><br><span class="line">docker tag registry.k8s.io/coredns/coredns:v1.11.1 registry.noname.io:5000/coredns:v1.11.1</span><br><span class="line">docker tag registry.k8s.io/pause:3.10 registry.noname.io:5000/pause:3.10</span><br><span class="line">docker tag registry.k8s.io/etcd:3.5.15-0 registry.noname.io:5000/etcd:3.5.15-0</span><br><span class="line">docker tag quay.io/cilium/cilium:v1.15.6 registry.noname.io:5000/cilium/cilium:v1.15.6</span><br><span class="line">docker tag quay.io/cilium/operator-generic:v1.15.6 registry.noname.io:5000/cilium/operator-generic:v1.15.6</span><br><span class="line"></span><br><span class="line"><span class="comment"># 推送至私有registry</span></span><br><span class="line">docker push registry.noname.io:5000/kube-apiserver:v1.31.0</span><br><span class="line">docker push registry.noname.io:5000/kube-controller-manager:v1.31.0</span><br><span class="line">docker push registry.noname.io:5000/kube-scheduler:v1.31.0</span><br><span class="line">docker push registry.noname.io:5000/kube-proxy:v1.31.0</span><br><span class="line">docker push registry.noname.io:5000/coredns:v1.11.1</span><br><span class="line">docker push registry.noname.io:5000/pause:3.10</span><br><span class="line">docker push registry.noname.io:5000/etcd:3.5.15-0</span><br><span class="line">docker push registry.noname.io:5000/cilium/cilium:v1.15.6</span><br><span class="line">docker push registry.noname.io:5000/cilium/operator-generic:v1.15.6</span><br></pre></td></tr></table></figure>
-
-<p>在虚拟机vm1中使用critool导入镜像，示例如下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看containerd镜像</span></span><br><span class="line"><span class="built_in">sudo</span> crictl --runtime-endpoint unix:///var/run/containerd/containerd.sock image</span><br><span class="line"></span><br><span class="line"><span class="comment"># 拉取镜像到containerd</span></span><br><span class="line"><span class="built_in">sudo</span> crictl --runtime-endpoint unix:///var/run/containerd/containerd.sock pull registry.noname.io:5000/quay.io/cilium/operator-generic:v1.15.6</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新打tag</span></span><br><span class="line"><span class="built_in">sudo</span> ctr --namespace=k8s.io image tag registry.noname.io:5000/quay.io/cilium/operator-generic:v1.15.6 quay.io/cilium/operator-generic:v1.15.6</span><br></pre></td></tr></table></figure>
-
-<h2 id="安装组件"><a href="#安装组件" class="headerlink" title="安装组件"></a>安装组件</h2><h3 id="apt方式安装（推荐）"><a href="#apt方式安装（推荐）" class="headerlink" title="apt方式安装（推荐）"></a>apt方式安装（推荐）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="built_in">sudo</span> apt update -y &amp;&amp; <span class="built_in">sudo</span> apt upgrade -y</span><br><span class="line"></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="built_in">sudo</span> apt install -y apt-transport-https ca-certificates curl gpg</span><br><span class="line"></span><br><span class="line"><span class="comment"># 先创建好目录，如果没有的话</span></span><br><span class="line"><span class="comment"># sudo mkdir -p -m 755 /etc/apt/keyrings</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># curl这里需要使用http_proxy/https_proxy</span></span><br><span class="line">curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | <span class="built_in">sudo</span> gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg</span><br><span class="line"></span><br><span class="line"><span class="comment"># 默认会覆盖已存在的/etc/apt/sources.list.d/kubernetes.list</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /&#x27;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/apt/sources.list.d/kubernetes.list</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式一 安装最新版，同时会安装ebtables cri-tools kubernetes-cni组件</span></span><br><span class="line"><span class="built_in">sudo</span> apt install -y kubelet kubeadm kubectl</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式二 指定版本</span></span><br><span class="line"><span class="comment"># sudo apt install -y kubelet=1.31.0* kubeadm=1.31.0* kubectl=1.31.0*</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 同时检查下xzip ethtool socat conntrack net-tools这几个组件是否安装</span></span><br><span class="line"><span class="comment"># sudo apt install -y xzip ethtool socat conntrack net-tools</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 锁定版本</span></span><br><span class="line"><span class="built_in">sudo</span> apt-mark hold kubelet kubeadm kubectl</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> --now kubelet</span><br></pre></td></tr></table></figure>
-
-<h3 id="手动安装"><a href="#手动安装" class="headerlink" title="手动安装"></a>手动安装</h3><p><strong>重点</strong>：<code>/usr/local/bin</code>以及<code>/opt/cni/bin</code>这两个目录树以及所有文件要确保所有者是root，否则会导致部署失败</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 复制软件到vm</span></span><br><span class="line"><span class="comment"># cd Downloads/</span></span><br><span class="line">scp kube* kubelet.service 10-kubeadm.conf noname@192.168.122.11:/home/noname/   <span class="comment"># kubernetes相关</span></span><br><span class="line">scp crictl-v1.30.1-linux-amd64.tar.gz noname@192.168.122.11:/home/noname/       <span class="comment"># cri-tools</span></span><br><span class="line">scp cni-plugins-linux-amd64-v1.5.1.tgz noname@192.168.122.11:/home/noname/      <span class="comment"># kubernetes-cni</span></span><br><span class="line">scp cilium-linux-v0.16.13.tar.gz noname@192.168.122.11:/home/noname/            <span class="comment"># cilium</span></span><br><span class="line">scp helm-v3.15.3-linux-amd64.tar.gz noname@192.168.122.11:/home/noname/         <span class="comment"># </span></span><br><span class="line"></span><br><span class="line"><span class="comment"># kubernetes-cni</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /opt/cni/bin</span><br><span class="line"><span class="built_in">sudo</span> tar -C /opt/cni/bin -xzf cni-plugins-linux-amd64-v1.5.1.tgz</span><br><span class="line"></span><br><span class="line"><span class="comment"># cri-tools</span></span><br><span class="line"><span class="built_in">sudo</span> tar -C /usr/local/bin -xzf crictl-v1.31.1-linux-amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># cilium</span></span><br><span class="line"><span class="built_in">sudo</span> tar -C /usr/local/bin -xzf cilium-linux-v0.16.13.tar.gz </span><br><span class="line"></span><br><span class="line"><span class="comment"># helm</span></span><br><span class="line">tar zxf helm-v3.15.3-linux-amd64.tar.gz &amp;&amp; <span class="built_in">sudo</span> <span class="built_in">mv</span> linux-amd64/helm /usr/local/bin/ &amp;&amp; <span class="built_in">rm</span> -rf linux-amd64/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将kubeadm等组件放置到指定目录</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mv</span> kube* /usr/local/bin/ &amp;&amp; <span class="built_in">chmod</span> +x /usr/local/bin/kube*</span><br><span class="line"></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /var/lib/kubelet</span><br><span class="line"><span class="comment"># 修改配置文件中的bin目录并放置到指定位置</span></span><br><span class="line"><span class="built_in">cat</span> kubelet.service | sed <span class="string">&quot;s:/usr/bin:/usr/local/bin:g&quot;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> /usr/lib/systemd/system/kubelet.service</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /usr/lib/systemd/system/kubelet.service.d</span><br><span class="line"><span class="comment"># 同上</span></span><br><span class="line"><span class="built_in">cat</span> 10-kubeadm.conf | sed <span class="string">&quot;s:/usr/bin:/usr/local/bin:g&quot;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> --now kubelet</span><br><span class="line"></span><br><span class="line"><span class="comment"># 确保所有者是root</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chown</span> -R root:root /opt/cni</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chown</span> -R root:root /usr/local/bin</span><br></pre></td></tr></table></figure>
-
-<h2 id="克隆vm1"><a href="#克隆vm1" class="headerlink" title="克隆vm1"></a>克隆vm1</h2><p>以上初步准备安装好了k8s，现在还不能执行初始化部署，复制两个新的vm，避免每台机器都重复执行上面的操作，偷懒</p>
-<p>新的vm需要确保跟旧的vm1不能有相同的MAC地址、hostname、product_uuid</p>
-<h3 id="hostname重命名"><a href="#hostname重命名" class="headerlink" title="hostname重命名"></a>hostname重命名</h3><p>修改hostname</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> hostnamectl hostname vm1</span><br><span class="line"><span class="comment"># sudo hostnamectl hostname vm2</span></span><br><span class="line"><span class="comment"># sudo hostnamectl hostname vm3</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="重新生成machine-id"><a href="#重新生成machine-id" class="headerlink" title="重新生成machine-id"></a>重新生成machine-id</h3><p>dhcp获取IP时，依赖的是machine-id，如果三台机器的machine-id都一样，你会发现所有vm的IP地址都是一样的，会出现冲突，比如ssh突然断线</p>
-<p>先关闭其他机器如vm1，使用同样ssh命令如<code>ssh noname@192.168.122.11</code>连接到新的vm2&#x2F;vm3</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 需要确保/etc/machine-id与/var/lib/dbus/machine-id一致，软连接来的，只要改一个</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> /etc/machine-id</span><br><span class="line"><span class="built_in">sudo</span> dbus-uuidgen --ensure=/etc/machine-id</span><br><span class="line"></span><br><span class="line"><span class="comment"># 再次确认下，确定三台机器的product_uuid都不一样</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">cat</span> /sys/class/dmi/id/product_uuid</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启机器</span></span><br><span class="line"><span class="built_in">sudo</span> reboot now</span><br></pre></td></tr></table></figure>
-
-<h3 id="cockpit绑定MAC以及IP"><a href="#cockpit绑定MAC以及IP" class="headerlink" title="cockpit绑定MAC以及IP"></a>cockpit绑定MAC以及IP</h3><p>点击添加【静态主机条目】，绑定mac地址与ip地址，避免重启一次机器就变一次IP</p>
-<p><img src="/images/bind_ip_and_mac.png" alt="bind ip and mac"></p>
-<h3 id="hosts修改"><a href="#hosts修改" class="headerlink" title="hosts修改"></a>hosts修改</h3><p>往hosts添加三台vm的host映射，移除<code>127.0.0.1 vm1</code>字样的的记录</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">192.168.0.105 registry.noname.io</span><br><span class="line"></span><br><span class="line">192.168.122.11 vm1</span><br><span class="line">192.168.122.126 vm2</span><br><span class="line">192.168.122.235 vm3</span><br></pre></td></tr></table></figure>
-
-<h2 id="部署k8s"><a href="#部署k8s" class="headerlink" title="部署k8s"></a>部署k8s</h2><p>好了，到这里就可以开始使用kubeadm初始化部署k8s集群了</p>
-<h3 id="执行kubeadm-init"><a href="#执行kubeadm-init" class="headerlink" title="执行kubeadm init"></a>执行kubeadm init</h3><p>方法一，直接运行下面命令，比较适合简单的集群配置，不涉及太多配置修改</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> kubeadm init --skip-phases addon/kube-proxy --apiserver-advertise-address 192.168.122.11 --node-name vm1 --image-repository registry.noname.io:5000</span><br></pre></td></tr></table></figure>
-
-<p>方法二，通过命令导出默认配置内容，修改相关配置，最后指定config文件运行</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 导出默认配置</span></span><br><span class="line">kubeadm config <span class="built_in">print</span> init-defaults &gt; kubeadm_config.yaml</span><br></pre></td></tr></table></figure>
-
-<p>把advertiseAddress、name、skipPhases、imageRepository等需要修改的地方全改了</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubeadm.k8s.io/v1beta3</span></span><br><span class="line"><span class="attr">bootstrapTokens:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">groups:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">system:bootstrappers:kubeadm:default-node-token</span></span><br><span class="line">  <span class="attr">token:</span> <span class="string">abcdef.0123456789abcdef</span></span><br><span class="line">  <span class="attr">ttl:</span> <span class="string">24h0m0s</span></span><br><span class="line">  <span class="attr">usages:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">signing</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">authentication</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">InitConfiguration</span></span><br><span class="line"><span class="attr">localAPIEndpoint:</span></span><br><span class="line">  <span class="attr">advertiseAddress:</span> <span class="number">192.168</span><span class="number">.122</span><span class="number">.11</span></span><br><span class="line">  <span class="attr">bindPort:</span> <span class="number">6443</span></span><br><span class="line"><span class="attr">nodeRegistration:</span></span><br><span class="line">  <span class="attr">criSocket:</span> <span class="string">unix:///var/run/containerd/containerd.sock</span></span><br><span class="line">  <span class="attr">imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">vm1</span></span><br><span class="line">  <span class="attr">taints:</span> <span class="literal">null</span></span><br><span class="line"><span class="attr">skipPhases:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">addon/kube-proxy</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiServer:</span></span><br><span class="line">  <span class="attr">timeoutForControlPlane:</span> <span class="string">4m0s</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubeadm.k8s.io/v1beta3</span></span><br><span class="line"><span class="attr">certificatesDir:</span> <span class="string">/etc/kubernetes/pki</span></span><br><span class="line"><span class="attr">clusterName:</span> <span class="string">kubernetes</span></span><br><span class="line"><span class="attr">controllerManager:</span> &#123;&#125;</span><br><span class="line"><span class="attr">dns:</span> &#123;&#125;</span><br><span class="line"><span class="attr">etcd:</span></span><br><span class="line">  <span class="attr">local:</span></span><br><span class="line">    <span class="attr">dataDir:</span> <span class="string">/var/lib/etcd</span></span><br><span class="line"><span class="attr">imageRepository:</span> <span class="string">registry.noname.io:5000</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterConfiguration</span></span><br><span class="line"><span class="attr">kubernetesVersion:</span> <span class="number">1.31</span><span class="number">.0</span></span><br><span class="line"><span class="attr">networking:</span></span><br><span class="line">  <span class="attr">dnsDomain:</span> <span class="string">cluster.local</span></span><br><span class="line">  <span class="attr">serviceSubnet:</span> <span class="number">10.96</span><span class="number">.0</span><span class="number">.0</span><span class="string">/12</span></span><br><span class="line"><span class="attr">scheduler:</span> &#123;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>dry-run验证kubeadm_config.yaml文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> kubeadm init --config kubeadm_config.yaml --dry-run</span><br></pre></td></tr></table></figure>
-
-<p>执行初始化</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> kubeadm init --config kubeadm_config.yaml</span><br></pre></td></tr></table></figure>
-
-<p>正常情况下，只要没有中途退出报错，走到这里就是安装成功的第一步了。如果出现异常可以在初始化命令后面加<code>-v 5</code>打印更具体的报错信息，我也把遇到过的报错情况放到了最后的bug处理，接下来就是验证集群是否在正常工作了</p>
-<p>PS：kubeadm提示可以在执行init命令前可以先拉取image，我试了一下<code>kubeadm config images pull</code>，发现init还是会去拉取image，上面就不在记录这个步骤</p>
-<h3 id="集群状态验证"><a href="#集群状态验证" class="headerlink" title="集群状态验证"></a>集群状态验证</h3><p>配置bash</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p <span class="variable">$HOME</span>/.kube</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">cp</span> -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chown</span> $(<span class="built_in">id</span> -u):$(<span class="built_in">id</span> -g) <span class="variable">$HOME</span>/.kube/config</span><br></pre></td></tr></table></figure>
-
-<p>执行命令，验证集群的工作状态。<strong>注意</strong>：安装过程中如果有使用proxy会导致kubectl连接不上api server，导致超时，需要删除环境变量<code>unset http_proxy</code></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看6443端口的监听情况</span></span><br><span class="line"><span class="built_in">sudo</span> netstat -tnlp | grep 6443</span><br><span class="line"></span><br><span class="line"><span class="comment"># 导出集群状态</span></span><br><span class="line">kubectl cluster-info</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有节点信息</span></span><br><span class="line">kubectl get nodes -o wide</span><br><span class="line">kubectl describe nodes</span><br><span class="line"></span><br><span class="line"><span class="comment"># 由于现在还没有安装cilium cni，此时coredns应处于pending状态</span></span><br><span class="line">kubectl get pods -A -o wide</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果有pod反复崩溃重启，查看相关日志</span></span><br><span class="line">kubectl logs &lt;pod名称&gt; -n &lt;namespace&gt; -p</span><br><span class="line">kubectl describe &lt;pod名称&gt; -n &lt;namespace&gt; -p</span><br><span class="line"></span><br><span class="line"><span class="comment"># 也可以通过crictl查看container，操作类似docker</span></span><br><span class="line"><span class="built_in">sudo</span> crictl --runtime-endpoint unix:///var/run/containerd/containerd.sock ps -a</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装cilium"><a href="#安装cilium" class="headerlink" title="安装cilium"></a>安装cilium</h3><p>下载cilium，安装到&#x2F;usr&#x2F;local&#x2F;bin&#x2F;</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 可能需要proxy</span></span><br><span class="line">curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/v0.16.15/cilium-linux-amd64.tar.gz&#123;,.<span class="built_in">sha256sum</span>&#125;</span><br><span class="line"><span class="built_in">sha256sum</span> --check cilium-linux-amd64.tar.gz.sha256sum</span><br><span class="line"></span><br><span class="line"><span class="comment"># 省略目录操作了</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mv</span> cilium /usr/local/bin/</span><br></pre></td></tr></table></figure>
-
-<p>cilium查看组件安装情况以及报错信息，这里可以根据输出拉取相关image推送到私有registry，cni目录需要保证所有者是root</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看cilium状态、错误</span></span><br><span class="line">cilium status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 确保/opt/cni目录的所有者是root</span></span><br><span class="line"><span class="comment"># sudo chown -R root:root /opt/cni</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 集群安装cilium</span></span><br><span class="line">cilium install</span><br><span class="line"><span class="comment"># 指定版本安装</span></span><br><span class="line"><span class="comment"># cilium install v1.15.6</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看pod是否准备就绪-running</span></span><br><span class="line">kubectl get pods -A -o wide</span><br><span class="line"></span><br><span class="line"><span class="comment"># 节点状态应变为-Ready</span></span><br><span class="line">kubectl get nodes</span><br></pre></td></tr></table></figure>
-
-<p>到这里集群的初始化就完成了，congratulations</p>
-<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><h4 id="单节点k8s"><a href="#单节点k8s" class="headerlink" title="单节点k8s"></a>单节点k8s</h4><p>如果你不想要组集群了，想使用单个节点，那么移除taint即可</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl taint nodes --all node-role.kubernetes.io/control-plane-</span><br><span class="line"><span class="comment"># 这个taint未必存在</span></span><br><span class="line">kubectl taint nodes --all node-role.kubernetes.io/master-</span><br></pre></td></tr></table></figure>
-
-<h4 id="配置proxy拉取镜像"><a href="#配置proxy拉取镜像" class="headerlink" title="配置proxy拉取镜像"></a>配置proxy拉取镜像</h4><p>如果你不想使用私有的registry，那么可以使用proxy，containerd的配置如下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl set-environment HTTP_PROXY=192.168.0.105:8118</span><br><span class="line"><span class="built_in">sudo</span> systemctl set-environment HTTPS_PROXY=192.168.0.105:8118</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> systemctl restart containerd</span><br></pre></td></tr></table></figure>
-
-<p>然后，不论是直接执行<code>kubeadm init</code>还是<code>kubeadm config images pull</code>，拉取镜像都会通过proxy拉取</p>
-<h4 id="Dashboard-UI"><a href="#Dashboard-UI" class="headerlink" title="Dashboard UI"></a>Dashboard UI</h4><h5 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h5><p>方法一：使用helm安装（官方推荐）</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加 kubernetes-dashboard 仓库</span></span><br><span class="line">helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/</span><br><span class="line"><span class="comment"># 使用 kubernetes-dashboard Chart 部署名为 `kubernetes-dashboard` 的 Helm Release</span></span><br><span class="line">helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard</span><br></pre></td></tr></table></figure>
-
-<p>方法二：下载配置文件导入</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 可以下载后传送到vm</span></span><br><span class="line">kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml</span><br></pre></td></tr></table></figure>
-
-<p>执行<code>kubectl get pods -A</code>，你会在kubernetes-dashboard命名空间下看到两个pod</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NAMESPACE              NAME                                         READY   STATUS    RESTARTS      AGE     IP                NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">kubernetes-dashboard   dashboard-metrics-scraper-6b96ff7878-ct999   1/1     Running   0             6m57s   10.0.1.215        vm2    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">kubernetes-dashboard   kubernetes-dashboard-8696f5f494-8cx4d        1/1     Running   0             6m57s   10.0.1.62         vm2    &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
-
-<p>如果无法拉取image，可以在物理机下载后推送到私有registry</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker pull kubernetesui/dashboard:v2.7.0</span><br><span class="line">docker pull kubernetesui/metrics-scraper:v1.0.8</span><br></pre></td></tr></table></figure>
-
-<h5 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a>创建用户</h5><p>新建文件<code>dashboard-user.yaml</code>，创建用户、绑定角色，如下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: ServiceAccount</span><br><span class="line">metadata:</span><br><span class="line">  name: dashboard-user</span><br><span class="line">  namespace: kubernetes-dashboard</span><br><span class="line">---</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">kind: ClusterRoleBinding</span><br><span class="line">metadata:</span><br><span class="line">  name: dashboard-user</span><br><span class="line">roleRef:</span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br><span class="line">  kind: ClusterRole</span><br><span class="line">  name: cluster-admin</span><br><span class="line">subjects:</span><br><span class="line">- kind: ServiceAccount</span><br><span class="line">  name: dashboard-user</span><br><span class="line">  namespace: kubernetes-dashboard</span><br></pre></td></tr></table></figure>
-
-<p>执行命令</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f dashboard-user.yaml</span><br></pre></td></tr></table></figure>
-
-<h5 id="访问dashboard"><a href="#访问dashboard" class="headerlink" title="访问dashboard"></a>访问dashboard</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">kubectl proxy</span><br><span class="line"><span class="comment"># 新版本限制死了只能在执行了kubectl proxy的机器上打开，没什么意义</span></span><br><span class="line"><span class="comment"># kubectl proxy --address 0.0.0.0 --accept-hosts &#x27;.*&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取登陆的token</span></span><br><span class="line">kubectl -n kubernetes-dashboard create token dashboard-user</span><br><span class="line"></span><br><span class="line"><span class="comment"># 物理机建立ssh port forwarding</span></span><br><span class="line">ssh -L 8001:127.0.0.1:8001 noname@192.168.122.11</span><br></pre></td></tr></table></figure>
-
-<p>在物理机浏览器打开dashboard页面：<a target="_blank" rel="noopener" href="http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/">http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/</a> ，输入token即可进入dashboard界面</p>
-<h3 id="部署vm2-vm3"><a href="#部署vm2-vm3" class="headerlink" title="部署vm2&#x2F;vm3"></a>部署vm2&#x2F;vm3</h3><p>打印vm1的k8s token信息</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubeadm token create --print-join-command</span><br></pre></td></tr></table></figure>
-
-<p>在vm2&#x2F;vm3执行命令，加入集群</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> kubeadm <span class="built_in">join</span> 192.168.122.11:6443 --token 1kf3mx.6omg1ycbi6xul19q \</span><br><span class="line">  --discovery-token-ca-cert-hash sha256:9a412686425ed09f8156ec63cb52e798a61cf8de85069be0e36ec023f806ea4f</span><br></pre></td></tr></table></figure>
-
-<p>在vm1验证集群状态</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl get nodes</span><br><span class="line">kubectl get pods -n kube-system</span><br></pre></td></tr></table></figure>
-
-<h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><p>以下列出几个简单的app部署教程，从简单到复杂</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/run-application/run-stateless-application-deployment/">nginx-deployment</a></li>
-</ol>
-<p>该教程是最简单的deployment使用教程，提供的功能是一个简单的http服务器，对外输出静态html页面，pod只有一个nginx的container，不涉及多container交互、存储等，该教程是一个很好的入门切入点</p>
-<ol start="2">
-<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tutorials/stateless-application/guestbook/">guestbook</a></li>
-</ol>
-<p>该教程会教你如何部署一个redis主从服务、php服务，最后创建一个可对外的service，简单的说，是教你多个container如何交互并提供对外访问能力（集群内），这里不涉及存储、ingress等。应用提供的功能可以理解为动态http服务器，php从redis读取数据输出html页面、写入数据到redis</p>
-<ol start="3">
-<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/">wordpress</a></li>
-</ol>
-<p>该教程会教你如何创建持久卷保存数据，涉及mysql部署、wordpress部署、创建secret，到这里基本涵盖到平时大多数的使用场景了</p>
-<p><strong>注意</strong>：由于该教程是基于minikube的，直接部署到自建的k8s集群会有很多问题，比如</p>
-<ul>
-<li>不支持LoadBalancer，我们需要删除掉wordpress-deployment.yaml文件service声明配置里的<code>type: LoadBalancer</code></li>
-<li>缺少默认的storageclass，不支持动态制备，只能手动建立pv，然后在pvc关联pv，具体如下</li>
-</ul>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 把下面这部分配置插入到wordpress-deployment.yaml的pvc声明前面</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">PersistentVolume</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">mysql-pv</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">capacity:</span></span><br><span class="line">    <span class="attr">storage:</span> <span class="string">20Gi</span></span><br><span class="line">  <span class="attr">accessModes:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">ReadWriteOnce</span></span><br><span class="line">  <span class="attr">hostPath:</span></span><br><span class="line">    <span class="attr">path:</span> <span class="string">/data/k8s/pv/mysql-pv</span></span><br><span class="line"><span class="comment"># 同时往pvc的spec部分添加下面这句话</span></span><br><span class="line"><span class="comment"># volumeName: mysql-pv</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># 把下面这部分配置插入到mysql-deployment.yaml的pvc声明前面</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">PersistentVolume</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">wp-pv</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">capacity:</span></span><br><span class="line">    <span class="attr">storage:</span> <span class="string">20Gi</span></span><br><span class="line">  <span class="attr">accessModes:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">ReadWriteOnce</span></span><br><span class="line">  <span class="attr">hostPath:</span></span><br><span class="line">    <span class="attr">path:</span> <span class="string">/data/k8s/pv/wp-pv</span></span><br><span class="line"><span class="comment"># 同时往pvc的spec部分添加下面这句话</span></span><br><span class="line"><span class="comment"># volumeName: wp-pv</span></span><br></pre></td></tr></table></figure>
-
-<p>最后，在vm1节点执行命令创建端口转发</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 映射到vm1</span></span><br><span class="line">kubectl port-forward svc/wordpress 8888:80</span><br><span class="line"><span class="comment"># 映射到物理机</span></span><br><span class="line">ssh -L 8888:127.0.0.1:8888 noname@192.168.122.11</span><br></pre></td></tr></table></figure>
-
-<p>done!</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>注意，按照以上教程安装的集群属于裸集群（bare-metal），默认不支持以下几个功能</p>
-<ul>
-<li>Load Balancer Service</li>
-<li>Persistent Volume</li>
-<li>Ingress&#x2F;Gateway</li>
-</ul>
-<p>如果你的角色是开发者，还是老老实实使用Minikube，避免耗费太多时间精力在集群运维上</p>
-<p>另外，一个完整的运维系统不仅仅只是k8s，应当包含以下组件</p>
-<ul>
-<li>k8s，负责管理pod资源（cpu&#x2F;内存）、node资源</li>
-<li>分布式文件系统，负责持久存储</li>
-<li>gateway，负责控制外部流量对集群内服务的访问</li>
-<li>elk，负责日志收集、分析、告警</li>
-<li>jaeger&#x2F;prometheus，负责收集指标、链路分析、告警</li>
-<li>ci&#x2F;cd系统，如gitlab，负责开发-发布系统流程</li>
-<li>管理后台，负责应用管理、发布审核、记录审计信息等</li>
-</ul>
-<h3 id="bug处理"><a href="#bug处理" class="headerlink" title="bug处理"></a>bug处理</h3><ol>
-<li><code>kubeadm init</code>执行后集群组件反复崩溃重启<code>CrashLoopBackOff</code>或者是卡在<code>kubelet-check</code>检查步骤</li>
-</ol>
-<p>该问题原因与下面的cilium报错原因一致，软件权限导致的。在最开始时我使用的是手动安装方式，软件都是解压缩复制到bin目录，没有注意到所有组件的owner不是root，这才导致了上面这个问题。虽然是一个很容易忽视的问题，但却让我花了很长时间去debug，太亏了</p>
-<ol start="2">
-<li>cilium安装报错<code>cp: cannot create regular file &#39;/hostbin/cilium-mount&#39;: Permission denied</code></li>
-</ol>
-<p>这是因为这个目录是我手动创建的，在执行apt安装前就存在，目录的owner不是root，需要确保虚拟机&#x2F;opt&#x2F;cni目录的所有者是root，执行<code>sudo chown -R root:root /opt/cni</code>解决，详细看：<a target="_blank" rel="noopener" href="https://github.com/cilium/cilium/issues/23838">https://github.com/cilium/cilium/issues/23838</a></p>
-<ol start="3">
-<li>kubeadm join报错<code>&#39;/run/systemd/resolve/resolv.conf&#39;: No such file or directory</code></li>
-</ol>
-<p>从服务器我换了一个debian，毕竟线上服务器通常都不是同一类系统，而这次报错的服务器bookworm就没有安装<code>systemd-resolved</code>，下载安装即可</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install systemd-resolved</span><br></pre></td></tr></table></figure>
-
-<p>上面debian的修改会引入另一个问题，就是vm无法连通外网了，发现是dhcp有异常，进而导致<code>ImagePullBackOff</code>，也不知道为什么不能直接读取本地的image，需要使用<code>systemd-networkd</code>才行，详细看问题描述<a target="_blank" rel="noopener" href="https://garajau.com.br/2022/01/configure-networkd-debian">Configuring systemd-networkd on Debian</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 备份</span></span><br><span class="line"><span class="built_in">mv</span> /etc/network/interfaces /etc/network/interfaces.bak</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新增systemd-dhcp配置</span></span><br><span class="line"><span class="built_in">sudo</span> vi /etc/systemd/network/dhcp.network</span><br></pre></td></tr></table></figure>
-
-<p>dhcp.network文件内容如下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># </span></span><br><span class="line">[Match]</span><br><span class="line">Name=en*</span><br><span class="line">   </span><br><span class="line">[Network]</span><br><span class="line">DHCP=<span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
-
-<p>设置开机启动并重启服务</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> systemd-networkd</span><br><span class="line"><span class="built_in">sudo</span> systemctl restart systemd-networkd</span><br></pre></td></tr></table></figure>
-
-<ol start="4">
-<li>nginx-deployment报错<code>ImagePullBackOff</code></li>
-</ol>
-<p>这个问题很奇怪，除了前面提到的网络问题，还可能是hash值不匹配</p>
-<p>当时我改了<a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/kubernetes/website/main/content/en/examples/controllers/nginx-deployment.yaml">nginx-deployment.yaml</a>里的镜像，而且确认本地已经拉取过来了，但部署时就一直报错，最后我在物理机重新拉取镜像时发现hash值居然对不上，最后重新打tag推送才解决</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/install-kubeadm/">安装 kubeadm</a><br><a target="_blank" rel="noopener" href="https://blog.radwell.codes/2022/07/single-node-kubernetes-cluster-via-kubeadm-on-ubuntu-22-04/">Simple Single-node Kubernetes Cluster via kubeadm on Ubuntu 22.04</a><br><a target="_blank" rel="noopener" href="https://www.linuxtechi.com/install-kubernetes-cluster-on-debian/">How to Install Kubernetes Cluster on Debian 12 | 11</a><br><a target="_blank" rel="noopener" href="https://izsk.me/2023/06/03/cilium-on-kubernetes-install/">cilium在kubernetes中的生产实践二(cilium部署)</a><br><a target="_blank" rel="noopener" href="https://www.tutorialworks.com/difference-docker-containerd-runc-crio-oci/#:~:text=runc%20provides%20all%20of%20the,create%20and%20run%20container%20processes.">The differences between Docker, containerd, CRI-O and runc</a><br><a target="_blank" rel="noopener" href="https://spacelift.io/blog/kubernetes-dashboard">Kubernetes Dashboard: Tutorial, Best Practices &amp; Alternatives</a><br><a target="_blank" rel="noopener" href="https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md">Creating sample user</a><br><a target="_blank" rel="noopener" href="https://unix.stackexchange.com/questions/402999/is-it-ok-to-change-etc-machine-id">Is it OK to change &#x2F;etc&#x2F;machine-id?</a><br><a target="_blank" rel="noopener" href="https://developer-friendly.blog/blog/2024/03/03/kubernetes-the-hard-way/">Kubernetes The Hard Way</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/use-kubeadm-to-deploy-k8s-cluster/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1300,7 +959,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-16 13:13:31" itemprop="dateModified" datetime="2024-08-16T13:13:31+08:00">2024-08-16</time>
+      <time title="修改时间：2025-03-03 10:07:15" itemprop="dateModified" datetime="2025-03-03T10:07:15+08:00">2025-03-03</time>
     </span>
 
   
@@ -1335,44 +994,14 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 进入源代码目录</span></span><br><span class="line"><span class="built_in">cd</span> postgresql-16.4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定安装目录、设置支持systemd</span></span><br><span class="line">./configure --prefix=/usr/local/postgresql-16.4 --with-systemd --with-ssl=openssl</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编译安装</span></span><br><span class="line">make</span><br><span class="line"><span class="built_in">sudo</span> make install</span><br><span class="line"></span><br><span class="line"><span class="comment"># 软连接，方便升级用</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">ln</span> -s /usr/local/postgresql-16.4 /usr/local/pgsql</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建用户</span></span><br><span class="line"><span class="built_in">sudo</span> adduser postgres</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据库数据存储目录，与app目录分离</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /var/lib/pgsql/data</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chown</span> -R postgres /var/lib/pgsql</span><br><span class="line"></span><br><span class="line"><span class="comment"># 切换到postgres用户</span></span><br><span class="line">su - postgres</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化数据库目录、启动实例</span></span><br><span class="line">/usr/local/pgsql/bin/initdb -D /var/lib/pgsql/data</span><br><span class="line">/usr/local/pgsql/bin/pg_ctl -D /var/lib/pgsql/data -l logfile start</span><br><span class="line"><span class="comment"># 验证</span></span><br><span class="line">/usr/local/pgsql/bin/psql</span><br><span class="line"><span class="comment"># 关闭实例</span></span><br><span class="line"><span class="comment"># /usr/local/pgsql/bin/pg_ctl -D /var/lib/pgsql/data/ -l logfile stop</span></span><br></pre></td></tr></table></figure>
 
 <p>到这里，postgresql完成安装、初始化</p>
-<h3 id="systemd配置"><a href="#systemd配置" class="headerlink" title="systemd配置"></a>systemd配置</h3><p>开机启动配置systemd，添加配置文件<code>/etc/systemd/system/postgresql.service</code>，内容如下</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=PostgreSQL database server</span><br><span class="line">Documentation=man:postgres(1)</span><br><span class="line">After=network-online.target</span><br><span class="line">Wants=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=notify</span><br><span class="line">User=postgres</span><br><span class="line">ExecStart=/usr/local/pgsql/bin/postgres -D /var/lib/pgsql/data</span><br><span class="line">ExecReload=/bin/kill -HUP $MAINPID</span><br><span class="line">KillMode=mixed</span><br><span class="line">KillSignal=SIGINT</span><br><span class="line">TimeoutSec=infinity</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
-
-<p>使用systemd启动postgresql</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl daemon-reload</span><br><span class="line"><span class="built_in">sudo</span> systemctl start postgresql</span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> postgresql</span><br></pre></td></tr></table></figure>
-
-<h2 id="pgsql配置"><a href="#pgsql配置" class="headerlink" title="pgsql配置"></a>pgsql配置</h2><p>以上完成pg安装，本地可以直接访问使用。接下来是配置数据库提供对外访问能力，如配置tcp监听地址、添加用户、配置权限等</p>
-<p>进入pg的data数据存储目录，修改相关配置文件</p>
-<h3 id="tcp配置"><a href="#tcp配置" class="headerlink" title="tcp配置"></a>tcp配置</h3><p>修改<code>postgresql.conf</code>文件，配置监听地址</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 默认localhost，改为&#x27;*&#x27;</span><br><span class="line">listen_addresses = &#x27;*&#x27;</span><br></pre></td></tr></table></figure>
-
-<h3 id="auth配置"><a href="#auth配置" class="headerlink" title="auth配置"></a>auth配置</h3><p>PS: pg的授权配置没有像mysql一样开箱即用，先简单配置下吧</p>
-<p>修改<code>pg_hba.conf</code>文件，开放数据库&#x2F;用户对外访问权限</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># TYPE  DATABASE        USER            ADDRESS                 METHOD</span><br><span class="line">host    blogdb          all             0.0.0.0/0               scram-sha-256</span><br><span class="line">host    blogdb          all             ::0/0                   scram-sha-256</span><br></pre></td></tr></table></figure>
-
-<p>重启postgresql</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl start postgresql</span><br></pre></td></tr></table></figure>
-
-<p>修改超级用户密码或者创建新角色并授权</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 修改postgres密码</span></span><br><span class="line"><span class="comment">-- alter user postgres password &#x27;your_password&#x27;;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 创建新角色并授权</span></span><br><span class="line">\c blogdb;</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> ROLE blog_read_only <span class="keyword">WITH</span> LOGIN PASSWORD <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> ROLE blog_read_write <span class="keyword">WITH</span> LOGIN PASSWORD <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> ROLE blog_admin <span class="keyword">WITH</span> LOGIN PASSWORD <span class="string">&#x27;your_password&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> <span class="keyword">ALL</span> TABLES <span class="keyword">IN</span> SCHEMA public <span class="keyword">TO</span> blog_read_only;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>, <span class="keyword">DELETE</span> <span class="keyword">ON</span> <span class="keyword">ALL</span> TABLES <span class="keyword">IN</span> SCHEMA public <span class="keyword">TO</span> blog_read_write;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> <span class="keyword">ALL</span> TABLES <span class="keyword">IN</span> SCHEMA public <span class="keyword">TO</span> blog_admin;</span><br></pre></td></tr></table></figure>
-
-<h2 id="curd-example"><a href="#curd-example" class="headerlink" title="curd example"></a>curd example</h2><p>完成了pg的安装配置，接下来就是写一个demo测试了，首先，找一个数据表导入</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取countries.csv数据</span></span><br><span class="line">curl <span class="string">&#x27;https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv&#x27;</span> \</span><br><span class="line">    --output ./countries.csv</span><br></pre></td></tr></table></figure>
-
-<p>创建数据库blogdb，并导入countries.csv</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> database blogdb;</span><br><span class="line">\c blogdb;</span><br><span class="line"></span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> countries (</span><br><span class="line">  id <span class="type">integer</span> <span class="keyword">primary</span> key generated always <span class="keyword">as</span> <span class="keyword">identity</span>,</span><br><span class="line">  name text <span class="keyword">not</span> <span class="keyword">null</span> <span class="keyword">unique</span>,</span><br><span class="line">  alpha_2 <span class="type">char</span>(<span class="number">2</span>) <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">  alpha_3 <span class="type">char</span>(<span class="number">3</span>) <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">  numeric_3 <span class="type">char</span>(<span class="number">3</span>) <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">  iso_3166_2 text <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line">  region text,</span><br><span class="line">  sub_region text,</span><br><span class="line">  intermediate_region text,</span><br><span class="line">  region_code <span class="type">char</span>(<span class="number">3</span>),</span><br><span class="line">  sub_region_code <span class="type">char</span>(<span class="number">3</span>),</span><br><span class="line">  intermediate_region_code <span class="type">char</span>(<span class="number">3</span>)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">copy</span> countries (</span><br><span class="line">  name,</span><br><span class="line">  alpha_2,</span><br><span class="line">  alpha_3,</span><br><span class="line">  numeric_3,</span><br><span class="line">  iso_3166_2,</span><br><span class="line">  region,</span><br><span class="line">  sub_region,</span><br><span class="line">  intermediate_region,</span><br><span class="line">  region_code,</span><br><span class="line">  sub_region_code,</span><br><span class="line">  intermediate_region_code</span><br><span class="line">)</span><br><span class="line"><span class="keyword">from</span> <span class="string">&#x27;/var/lib/pgsql/data/countries.csv&#x27;</span></span><br><span class="line">delimiter <span class="string">&#x27;,&#x27;</span> csv header;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Check that the data got loaded into the table ok.</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> countries limit <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Should say 249.</span></span><br><span class="line"><span class="keyword">select</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">from</span> countries;</span><br></pre></td></tr></table></figure>
-
-<p>使用golang写一个简单的app，查询countries数据，到这里完成!</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/jackc/pgx/v5&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	ctx := context.Background()</span><br><span class="line"></span><br><span class="line">	conn, err := pgx.Connect(ctx, <span class="string">&quot;postgres://postgres:your_password@192.168.33.10:5432/blogdb?sslmode=disable&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close(ctx)</span><br><span class="line"></span><br><span class="line">	rows, err := conn.Query(ctx, <span class="string">&quot;SELECT id, name FROM countries LIMIT 10&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> rows.Close()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> rows.Next() &#123;</span><br><span class="line">		<span class="keyword">var</span> id <span class="type">int</span></span><br><span class="line">		<span class="keyword">var</span> name <span class="type">string</span></span><br><span class="line">		err = rows.Scan(&amp;id, &amp;name)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="built_in">panic</span>(err)</span><br><span class="line">		&#125;</span><br><span class="line">		fmt.Println(id, <span class="string">&quot;-&quot;</span>, name)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="开启ssl"><a href="#开启ssl" class="headerlink" title="开启ssl"></a>开启ssl</h3><p>如果想要在本地提前体验ssl加密配置的过程，那么按照下面的流程，先生成self-signed证书、私钥，最后修改配置</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">su - postgres</span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入数据存储目录</span></span><br><span class="line"><span class="built_in">cd</span> /var/lib/pgsql/data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成self-signed ssl相关证书、私钥</span></span><br><span class="line">openssl req -new -x509 -days 365 -nodes -text -out server.crt \</span><br><span class="line">  -keyout server.key -subj <span class="string">&quot;/CN=dbhost.yourdomain.com&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除other、group的访问权限</span></span><br><span class="line"><span class="built_in">chmod</span> og-rwx server.key</span><br></pre></td></tr></table></figure>
-
-<p>修改<code>postgresql.conf</code>文件，取消下面三行注释，需要保证证书放置在data目录，生产环境如果使用授权ca证书，修改的命令就不是ssl_cert_file以及ssl_key_file，按官网描述修改</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ssl = on</span><br><span class="line">ssl_cert_file = &#x27;server.crt&#x27;</span><br><span class="line">ssl_key_file = &#x27;server.key&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>最后，demo里dsn移除<code>sslmode=disable</code>，然后重新运行验证</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/postgres-setup-example/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1434,7 +1063,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-02-07 20:07:44" itemprop="dateModified" datetime="2025-02-07T20:07:44+08:00">2025-02-07</time>
+      <time title="修改时间：2025-03-03 10:02:50" itemprop="dateModified" datetime="2025-03-03T10:02:50+08:00">2025-03-03</time>
     </span>
 
   
@@ -1472,67 +1101,14 @@
 
 <p>添加proxy配置，默认源地址配置直连，如此后续配置docker源后，使用<code>apt update</code>便可直接访问</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Acquire::http::Proxy &quot;http://127.0.0.1:8118&quot;;</span><br><span class="line">Acquire::http::Proxy &#123;</span><br><span class="line">    archive.ubuntu.com DIRECT;</span><br><span class="line">    security.ubuntu.com DIRECT;</span><br><span class="line">    cn.archive.ubuntu.com DIRECT;</span><br><span class="line">    mirrors.tuna.tsinghua.edu.cn DIRECT;</span><br><span class="line">&#125;</span><br><span class="line">Acquire::https::Proxy &quot;http://127.0.0.1:8118&quot;;</span><br><span class="line">Acquire::https::Proxy &#123;</span><br><span class="line">    archive.ubuntu.com DIRECT;</span><br><span class="line">    security.ubuntu.com DIRECT;</span><br><span class="line">    cn.archive.ubuntu.com DIRECT;</span><br><span class="line">    mirrors.tuna.tsinghua.edu.cn DIRECT;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="配置源并安装"><a href="#配置源并安装" class="headerlink" title="配置源并安装"></a>配置源并安装</h4><p>按照docker官方教材安装docker，其中，下载<code>docker.asc</code>的命令做了一些修改</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Add Docker&#x27;s official GPG key:</span></span><br><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="built_in">sudo</span> apt install ca-certificates curl</span><br><span class="line"><span class="built_in">sudo</span> install -m 0755 -d /etc/apt/keyrings</span><br><span class="line"><span class="comment"># 配置proxy</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8118;<span class="built_in">export</span> https_proxy=http://127.0.0.1:8118;</span><br><span class="line"><span class="comment"># 下载后在使用sudo搬到指定目录</span></span><br><span class="line">curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o docker.asc &amp;&amp; <span class="built_in">sudo</span> <span class="built_in">mv</span> docker.asc /etc/apt/keyrings/docker.asc</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chmod</span> a+r /etc/apt/keyrings/docker.asc</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add the repository to Apt sources:</span></span><br><span class="line"><span class="built_in">echo</span> \</span><br><span class="line">  <span class="string">&quot;deb [arch=<span class="subst">$(dpkg --print-architecture)</span> signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \</span></span><br><span class="line"><span class="string">  <span class="subst">$(. /etc/os-release &amp;&amp; echo <span class="string">&quot;<span class="variable">$VERSION_CODENAME</span>&quot;</span>)</span> stable&quot;</span> | \</span><br><span class="line">  <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/apt/sources.list.d/docker.list &gt; /dev/null</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果是k8s部署，只需要containerd就够了</span></span><br><span class="line"><span class="built_in">sudo</span> apt install containerd.io docker-ce docker-ce-cli docker-buildx-plugin docker-compose-plugin</span><br></pre></td></tr></table></figure>
-
-<h4 id="后续"><a href="#后续" class="headerlink" title="后续"></a>后续</h4><p>将当前用户加入<code>docker</code>用户组</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> groupadd docker</span><br><span class="line"><span class="built_in">sudo</span> usermod -aG docker <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="部署registry"><a href="#部署registry" class="headerlink" title="部署registry"></a>部署registry</h2><h3 id="配置代理"><a href="#配置代理" class="headerlink" title="配置代理"></a>配置代理</h3><p>因为gfw的原因，docker hub的访问会时不时抽风，在使用docker pull前可以先配置代理，当前步骤可跳过</p>
-<p>创建配置文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /etc/systemd/system/docker.service.d</span><br><span class="line"><span class="built_in">sudo</span> vi /etc/systemd/system/docker.service.d/http-proxy.conf</span><br></pre></td></tr></table></figure>
-
-<p>配置proxy</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[Service]</span><br><span class="line">Environment=&quot;HTTP_PROXY=http://127.0.0.1:8118&quot;</span><br><span class="line">Environment=&quot;HTTPS_PROXY=http://127.0.0.1:8118&quot;</span><br><span class="line">Environment=&quot;NO_PROXY=localhost,127.0.0.1,registry.noname.io&quot;</span><br></pre></td></tr></table></figure>
-
-<p>重启并验证docker环境变量</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl daemon-reload</span><br><span class="line"><span class="built_in">sudo</span> systemctl restart docker</span><br><span class="line"><span class="built_in">sudo</span> systemctl show --property=Environment docker</span><br><span class="line"><span class="comment"># 输出如下</span></span><br><span class="line"><span class="comment"># Environment=HTTP_PROXY=http://127.0.0.1:8118 HTTPS_PROXY=http://127.0.0.1:8118 NO_PROXY=localhost,127.0.0.1,registry.noname.io</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="生成ssl证书"><a href="#生成ssl证书" class="headerlink" title="生成ssl证书"></a>生成ssl证书</h3><p>可以直接使用http，但后续k8s镜像的下载必须使用https，没有那么多耐心再去折腾，在这里先解决了，一劳永逸</p>
-<p><code>/data/docker/</code>是我用于专门存放与registry相关的数据，包括certs以及后续docker push上来的镜像数据</p>
-<p>下面命令关键的域名registry.noname.io要填好</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">openssl req \</span><br><span class="line">  -newkey rsa:4096 -nodes -sha256 -keyout /data/docker/certs/noname.io.key \</span><br><span class="line">  -addext <span class="string">&quot;subjectAltName = DNS:registry.noname.io&quot;</span> \</span><br><span class="line">  -x509 -days 365 -out /data/docker/certs/noname.io.crt</span><br></pre></td></tr></table></figure>
-
-<p>由此，https所需要的证书也就准备好了</p>
-<h3 id="创建registry服务"><a href="#创建registry服务" class="headerlink" title="创建registry服务"></a>创建registry服务</h3><h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><ol>
-<li>将<code>/data/docker/certs</code>挂载到container的<code>/data/certs</code>目录</li>
-<li><code>/data/docker/registry</code>挂载到container的<code>/var/lib/registry</code>目录，后续删除重建container时就保留下了image数据</li>
-</ol>
-<h4 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h4><p>如果只是创建一个简单的可运行registry，直接运行docker run</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 5000:5000 --restart always --name registry \</span><br><span class="line">  -v /data/docker/registry:/var/lib/registry \</span><br><span class="line">  -v /data/docker/certs:/data/certs \</span><br><span class="line">  -e REGISTRY_HTTP_TLS_CERTIFICATE=/data/certs/noname.io.crt \</span><br><span class="line">  -e REGISTRY_HTTP_TLS_KEY=/data/certs/noname.io.key \</span><br><span class="line">  registry:2.8.3</span><br></pre></td></tr></table></figure>
-
-<h4 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h4><p>如果涉及比较复杂的配置，像权限管理、接入s3文件系统、缓存配置、中继配置等，则使用配置文件方式比较好</p>
-<p>创建registry配置文件，参考配置文件：<a target="_blank" rel="noopener" href="https://github.com/distribution/distribution/blob/master/cmd/registry/config-example.yml">example YAML file</a>，修改后如下</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="number">0.1</span></span><br><span class="line"><span class="attr">storage:</span></span><br><span class="line">  <span class="attr">filesystem:</span></span><br><span class="line">    <span class="attr">rootdirectory:</span> <span class="string">/var/lib/registry</span></span><br><span class="line"><span class="attr">http:</span></span><br><span class="line">  <span class="attr">addr:</span> <span class="string">:5000</span></span><br><span class="line">  <span class="attr">tls:</span></span><br><span class="line">    <span class="attr">certificate:</span> <span class="string">/data/certs/noname.io.crt</span></span><br><span class="line">    <span class="attr">key:</span> <span class="string">/data/certs/noname.io.key</span></span><br></pre></td></tr></table></figure>
-
-<p>运行docker run</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 5000:5000 --restart always --name registry \</span><br><span class="line">  -v /data/docker/registry:/var/lib/registry \</span><br><span class="line">  -v /data/docker/certs:/data/certs \</span><br><span class="line">  -v /data/docker/config/config.yml:/etc/docker/registry/config.yml \</span><br><span class="line">  registry:2.8.3</span><br></pre></td></tr></table></figure>
-
-<h3 id="修改系统配置"><a href="#修改系统配置" class="headerlink" title="修改系统配置"></a>修改系统配置</h3><h4 id="修改hosts"><a href="#修改hosts" class="headerlink" title="修改hosts"></a>修改hosts</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> vi /etc/hosts</span><br></pre></td></tr></table></figure>
-
-<p>添加私有registry的域名</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1 registry.noname.io</span><br></pre></td></tr></table></figure>
-
-<h4 id="修改docker配置"><a href="#修改docker配置" class="headerlink" title="修改docker配置"></a>修改docker配置</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> /etc/docker</span><br><span class="line"><span class="built_in">sudo</span> vi /etc/docker/daemon.json</span><br></pre></td></tr></table></figure>
-
-<p><code>insecure-registries</code>需要添加registry的域名端口</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;exec-opts&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;native.cgroupdriver=systemd&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;insecure-registries&quot;</span> <span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;registry.noname.io:5000&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<p>重启服务</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl restart docker</span><br></pre></td></tr></table></figure>
-
-<p>如果要开放局域网内的访问，配置防火墙</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 5000/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
-
-<h3 id="测试验证"><a href="#测试验证" class="headerlink" title="测试验证"></a>测试验证</h3><p>访问registry接口，此时因为registry还没有任何image数据，输出为空</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -k https://registry.noname.io:5000/v2/_catalog | jq .</span><br></pre></td></tr></table></figure>
-
-<p>推送镜像测试</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker tag alpine:3.20.1 registry.noname.io:5000/alpine:3.20.1</span><br><span class="line">docker push registry.noname.io:5000/alpine:3.20.1</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/install/ubuntu/">Install Docker Engine on Ubuntu</a><br><a target="_blank" rel="noopener" href="https://distribution.github.io/distribution/">Distribution Registry</a><br><a target="_blank" rel="noopener" href="https://medium.com/@haminhsang1903/private-docker-registry-with-https-and-a-nginx-reverse-proxy-using-docker-compose-6c1335c5e820">Private Docker registry with HTTPS and a Nginx reverse proxy using Docker Compose</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/deploy-docker-and-registry-service/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1594,7 +1170,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-28 14:45:36" itemprop="dateModified" datetime="2024-08-28T14:45:36+08:00">2024-08-28</time>
+      <time title="修改时间：2025-03-03 10:02:57" itemprop="dateModified" datetime="2025-03-03T10:02:57+08:00">2025-03-03</time>
     </span>
 
   
@@ -1604,7 +1180,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>454</span>
+      <span>455</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -1638,19 +1214,14 @@
 
 <h3 id="安装kvm"><a href="#安装kvm" class="headerlink" title="安装kvm"></a>安装kvm</h3><p>安装kvm以及依赖软件</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install qemu-system-x86 libvirt-daemon-system virtinst \</span><br><span class="line">  virt-manager virt-viewer ovmf swtpm qemu-utils guestfs-tools \</span><br><span class="line">  libosinfo-bin tuned</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> libvirtd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line"><span class="built_in">sudo</span> virt-host-validate qemu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果有使用window的需要，可以下载virtio</span></span><br><span class="line">wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装后工作"><a href="#安装后工作" class="headerlink" title="安装后工作"></a>安装后工作</h3><p>将用户添加到kvm跟libvirt组</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> usermod -aG kvm <span class="variable">$USER</span></span><br><span class="line"><span class="built_in">sudo</span> usermod -aG libvirt <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="cockpit安装"><a href="#cockpit安装" class="headerlink" title="cockpit安装"></a>cockpit安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install cockpit cockpit-machines</span><br></pre></td></tr></table></figure>
-
-<p>防火墙配置</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw allow 9090/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
-
-<p>浏览器打开访问web管理页面 <a target="_blank" rel="noopener" href="https://192.168.0.105:9090/">https://192.168.0.105:9090</a></p>
-<p><img src="/images/kvm_with_cockpit.png" alt="kvm with cockpit preview"></p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://www.tecmint.com/install-qemu-kvm-ubuntu-create-virtual-machines/">How to Install QEMU&#x2F;KVM on Ubuntu to Create Virtual Machines</a><br><a target="_blank" rel="noopener" href="https://www.tecmint.com/manage-kvm-virtual-machines-using-cockpit-web-console/">Managing KVM Virtual Machines with Cockpit Web Console in Linux</a><br><a target="_blank" rel="noopener" href="https://github.com/bryansteiner/gpu-passthrough-tutorial">gpu-passthrough-tutorial</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/deploy-kvm-and-cockpit/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 

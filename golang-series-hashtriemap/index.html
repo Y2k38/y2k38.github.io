@@ -27,7 +27,7 @@
 <meta property="og:description" content="从1.24版开始，sync.Map改用HashTrieMap重构，与之前的双map实现不同，HashTrieMap更像是一个B树，简单的示例图如下 1234567&#x2F;&#x2F;  root -&gt; | idx0    | idx1       | ... | idx15 |&#x2F;&#x2F;          | &amp;entry0 | &amp;indirect0 | ... | nil   |&#x2F;&#x2F;">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-02-20T15:06:09.000Z">
-<meta property="article:modified_time" content="2025-02-20T15:06:09.222Z">
+<meta property="article:modified_time" content="2025-03-03T02:03:26.844Z">
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="golang">
 <meta name="twitter:card" content="summary">
@@ -182,6 +182,13 @@
 
       <time title="创建时间：2025-02-20 23:06:09" itemprop="dateCreated datePublished" datetime="2025-02-20T23:06:09+08:00">2025-02-20</time>
     </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-03 10:03:26" itemprop="dateModified" datetime="2025-03-03T10:03:26+08:00">2025-03-03</time>
+    </span>
 
   
     <span class="post-meta-break"></span>
@@ -216,6 +223,8 @@
 <p>HashTrieMap的开关放在文件<code>src/internal/buildcfg/exp.go</code>的函数<code>ParseGOEXPERIMENT</code>中</p>
 </blockquote>
 <h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> HashTrieMap[K comparable, V any] <span class="keyword">struct</span> &#123;</span><br><span class="line">    inited   atomic.Uint32                          <span class="comment">// 是否已初始化</span></span><br><span class="line">    initMu   Mutex                                  <span class="comment">// 锁，用于初始化</span></span><br><span class="line">    root     atomic.Pointer[indirect[K, V]]         <span class="comment">// 根节点</span></span><br><span class="line">    keyHash  hashFunc                               <span class="comment">// 哈希函数，用于key</span></span><br><span class="line">    valEqual equalFunc                              <span class="comment">// cmp函数，用于value</span></span><br><span class="line">    seed     <span class="type">uintptr</span>                                <span class="comment">// 哈希种子</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 内部节点</span></span><br><span class="line"><span class="keyword">type</span> indirect[K comparable, V any] <span class="keyword">struct</span> &#123;</span><br><span class="line">    node[K, V]                                      <span class="comment">// isEntry=false</span></span><br><span class="line">    dead     atomic.Bool                            <span class="comment">// 是否被删除</span></span><br><span class="line">    mu       Mutex                                  <span class="comment">// 锁，用于children</span></span><br><span class="line">    parent   *indirect[K, V]                        <span class="comment">// 父节点指针</span></span><br><span class="line">    children [nChildren]atomic.Pointer[node[K, V]]  <span class="comment">// 16个子节点，指向indirect或entry</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 叶子节点</span></span><br><span class="line"><span class="keyword">type</span> entry[K comparable, V any] <span class="keyword">struct</span> &#123;</span><br><span class="line">    node[K, V]                                      <span class="comment">// isEntry=true</span></span><br><span class="line">    overflow atomic.Pointer[entry[K, V]]            <span class="comment">// 指针，当两个entry哈希值相同时以链表方式存储</span></span><br><span class="line">    key      K                                      <span class="comment">// 键</span></span><br><span class="line">    value    V                                      <span class="comment">// 值</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// entry和indirect的共有属性</span></span><br><span class="line"><span class="keyword">type</span> node[K comparable, V any] <span class="keyword">struct</span> &#123;</span><br><span class="line">    isEntry <span class="type">bool</span>                                    <span class="comment">// 判断是叶子节点还是内部节点</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
 
 <h2 id="核心方法"><a href="#核心方法" class="headerlink" title="核心方法"></a>核心方法</h2><h3 id="Load"><a href="#Load" class="headerlink" title="Load"></a>Load</h3><p>根据key获取value，具体逻辑如下</p>
 <ol>
