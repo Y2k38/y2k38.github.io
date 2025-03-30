@@ -27,7 +27,7 @@
 <meta property="og:description" content="并发情况下，如果需要等待所有的goroutine完成任务，需要使用Waitgroup等待 当前go版本：1.24 快速上手先简单列举一个使用案例，了解Waitgroup的使用 1234567891011121314151617181920212223242526272829303132package mainimport (    &quot;fmt&quot;    &quot;sync&amp;quo">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-02-16T12:48:45.000Z">
-<meta property="article:modified_time" content="2025-03-03T02:04:55.961Z">
+<meta property="article:modified_time" content="2025-03-25T07:46:39.740Z">
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="golang">
 <meta name="twitter:card" content="summary">
@@ -118,7 +118,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-count">42</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -187,7 +187,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-03 10:04:55" itemprop="dateModified" datetime="2025-03-03T10:04:55+08:00">2025-03-03</time>
+      <time title="修改时间：2025-03-25 15:46:39" itemprop="dateModified" datetime="2025-03-25T15:46:39+08:00">2025-03-25</time>
     </span>
 
   
@@ -197,7 +197,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>715</span>
+      <span>723</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -251,7 +251,7 @@
 <li>被唤醒后直接返回</li>
 </ol>
 <p>具体源代码如下</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Wait blocks until the [WaitGroup] counter is zero.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(wg *WaitGroup)</span></span> Wait() &#123;</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        state := wg.state.Load()</span><br><span class="line"></span><br><span class="line">        v := <span class="type">int32</span>(state &gt;&gt; <span class="number">32</span>)     <span class="comment">// counter：还在运行中的goroutine数量</span></span><br><span class="line">        w := <span class="type">uint32</span>(state)          <span class="comment">// waiter_counter：等待中的goroutine数量</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 没有在运行中的goroutine，不需要等待</span></span><br><span class="line">        <span class="keyword">if</span> v == <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// waiter_counter++</span></span><br><span class="line">        <span class="keyword">if</span> wg.state.CompareAndSwap(state, state+<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="comment">// 挂起等待</span></span><br><span class="line">            runtime_SemacquireWaitGroup(&amp;wg.sema)</span><br><span class="line">            <span class="comment">// 被唤醒</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// 异常</span></span><br><span class="line">            <span class="keyword">if</span> wg.state.Load() != <span class="number">0</span> &#123;</span><br><span class="line">                <span class="built_in">panic</span>(<span class="string">&quot;sync: WaitGroup is reused before previous Wait has returned&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//go:linkname sync_runtime_SemacquireWaitGroup sync.runtime_SemacquireWaitGroup</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sync_runtime_SemacquireWaitGroup</span><span class="params">(addr *<span class="type">uint32</span>)</span></span> &#123;</span><br><span class="line">	semacquire1(addr, <span class="literal">false</span>, semaBlockProfile, <span class="number">0</span>, waitReasonSyncWaitGroupWait)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Wait blocks until the [WaitGroup] counter is zero.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(wg *WaitGroup)</span></span> Wait() &#123;</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        state := wg.state.Load()</span><br><span class="line"></span><br><span class="line">        v := <span class="type">int32</span>(state &gt;&gt; <span class="number">32</span>)     <span class="comment">// counter：还在运行中的goroutine数量</span></span><br><span class="line">        w := <span class="type">uint32</span>(state)          <span class="comment">// waiter_counter：等待中的goroutine数量</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 没有在运行中的goroutine，不需要等待</span></span><br><span class="line">        <span class="keyword">if</span> v == <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// waiter_counter++</span></span><br><span class="line">        <span class="keyword">if</span> wg.state.CompareAndSwap(state, state+<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="comment">// 尝试获取wg.sema，失败则挂起等待</span></span><br><span class="line">            runtime_SemacquireWaitGroup(&amp;wg.sema)</span><br><span class="line">            <span class="comment">// 被唤醒</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// 异常</span></span><br><span class="line">            <span class="keyword">if</span> wg.state.Load() != <span class="number">0</span> &#123;</span><br><span class="line">                <span class="built_in">panic</span>(<span class="string">&quot;sync: WaitGroup is reused before previous Wait has returned&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//go:linkname sync_runtime_SemacquireWaitGroup sync.runtime_SemacquireWaitGroup</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sync_runtime_SemacquireWaitGroup</span><span class="params">(addr *<span class="type">uint32</span>)</span></span> &#123;</span><br><span class="line">	semacquire1(addr, <span class="literal">false</span>, semaBlockProfile, <span class="number">0</span>, waitReasonSyncWaitGroupWait)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://victoriametrics.com/blog/go-sync-waitgroup/index.html">Go sync.WaitGroup and The Alignment Problem</a></p>
 
@@ -314,13 +314,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">81k</span>
+    <span title="站点总字数">106k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:53</span>
+    <span title="站点阅读时长">6:26</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动

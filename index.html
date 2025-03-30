@@ -114,7 +114,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-count">42</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -137,6 +137,131 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-bootstrap-and-gmp-model/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/golang-series-bootstrap-and-gmp-model/" class="post-title-link" itemprop="url">golang系列之-程序运行流程及GMP模型</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-03-30 13:12:29 / 修改时间：17:09:17" itemprop="dateCreated datePublished" datetime="2025-03-30T13:12:29+08:00">2025-03-30</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>26k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1:33</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>本文仅介绍程序运行流程以及GMP如何寻找g并运行，其他如抢占、死锁、信号处理、profiling等内容不打算深入。当前go版本：1.24</p>
+<h2 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h2><p>先讲几个概念</p>
+<p><strong>进程、线程、协程</strong></p>
+<ol>
+<li>进程：程序的一个实例，也是操作系统的一个task，操作系统的资源分配最小单位</li>
+<li>线程：一种概念，操作系统调度的最小单位，一个进程可以包含多个线程，线程之间共享内存、文件描述符等资源。不同操作系统的实现并不一致，linux下进程与线程的结构都是task_structure，也就是说他们是一样的，不同线程之间用指针指向同一份资源如内存空间实现共享。</li>
+<li>协程：也称为用户态线程，由应用程序自行实现&#x2F;调度，一般情况下是协作式的，由开发者决定task何时让出cpu，go支持抢占式调度</li>
+</ol>
+<p><strong>线程与协程的映射模型</strong></p>
+<ol>
+<li>1:1模型，每个用户线程对应一个内核线程，如在c中pthread创建的线程，此时也可以理解为用户态线程就是内核态线程</li>
+<li>1:N模型，一个内核线程对应多个用户线程，无法充分利用多核的并行性，现已淘汰</li>
+<li>M:N模型，多个用户线程对应多个内核线程，实现较复杂，使用者较少，go是其中一个</li>
+</ol>
+<p><strong>GMP模型</strong></p>
+<p>go早期的M:N模型遇到一些性能问题，如锁竞争激烈、线程创建&#x2F;销毁频繁、CPU缓存失效等，为了解决这些问题引入了P。在GMP模型中</p>
+<ol>
+<li>G-goroutine，用户态线程</li>
+<li>M-machine，系统线程相关</li>
+<li>P-processor，缓存、调度上下文等，其数量一般与CPU核心数量一致。P的出现使得调度变得本地化，避免全局锁竞争，提升了CPU缓存命中率等，最终使得go的并发调度更加高效</li>
+</ol>
+<h2 id="go程序的运行流程"><a href="#go程序的运行流程" class="headerlink" title="go程序的运行流程"></a>go程序的运行流程</h2><p>go程序启动时的入口是<code>_rt0_amd64</code>，该函数是汇编代码，具体如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// src/runtime/asm_amd64.s</span><br><span class="line">// 系统入口点</span><br><span class="line">TEXT _rt0_amd64(SB),NOSPLIT,$-8</span><br><span class="line">    MOVQ    0(SP), DI    // argc</span><br><span class="line">    LEAQ    8(SP), SI    // argv</span><br><span class="line">    JMP    runtime·rt0_go(SB)</span><br></pre></td></tr></table></figure>
+
+<p><code>runtime·rt0_go</code>也是汇编代码，比较长，主要逻辑如下</p>
+<ol>
+<li>g0、m0双向绑定（g0、m0是全局变量，静态编译，因此指针已知，放在src&#x2F;runtime&#x2F;proc.go）</li>
+<li>runtime·args      - 复制命令行参数（args函数放在src&#x2F;runtime&#x2F;runtime1.go）</li>
+<li>runtime·osinit    - 系统初始化（osinit函数放在src&#x2F;runtime&#x2F;os_linux.go）</li>
+<li>runtime·schedinit - 调度器初始化（schedinit函数放在src&#x2F;runtime&#x2F;proc.go）</li>
+<li>runtime·mainPC    - 纪录runtime·main的地址（main函数放在src&#x2F;runtime&#x2F;proc.go，其内部调用main_main，也就是用户自己编写的main函数）</li>
+<li>runtime·newproc   - 创建G用于运行runtime·main，放到p的runq里，等待调度</li>
+<li>runtime·mstart    - 运行runtime·mstart（汇编函数，实际调用的是runtime·mstart0，放在src&#x2F;runtime&#x2F;proc.go，内部进行栈初始化、信号注册等，最后运行调度函数schedule）</li>
+</ol>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/golang-series-bootstrap-and-gmp-model/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1160,7 +1285,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-03 10:04:26" itemprop="dateModified" datetime="2025-03-03T10:04:26+08:00">2025-03-03</time>
+      <time title="修改时间：2025-03-25 15:47:14" itemprop="dateModified" datetime="2025-03-25T15:47:14+08:00">2025-03-25</time>
     </span>
 
   
@@ -1219,107 +1344,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-sync-cond/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/golang-series-sync-cond/" class="post-title-link" itemprop="url">golang系列之-sync.Cond</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-02-17 09:54:38" itemprop="dateCreated datePublished" datetime="2025-02-17T09:54:38+08:00">2025-02-17</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-10 09:13:10" itemprop="dateModified" datetime="2025-03-10T09:13:10+08:00">2025-03-10</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>sync.Cond经常用在多个 goroutine 等待，一个 goroutine 通知（事件发生）的场景。如果是一个通知，一个等待，使用互斥锁或 channel 就能搞定了。底层实现基于信号量semaphore</p>
-<p>当前go版本：1.24</p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>以下展示一个sync.Cond的使用案例</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;sync&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> shared = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">string</span>]<span class="keyword">interface</span>&#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">    wg.Add(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">    cond := sync.NewCond(&amp;sync.Mutex&#123;&#125;)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// reader 打印shared[key]</span></span><br><span class="line">    reader := <span class="function"><span class="keyword">func</span><span class="params">(key <span class="type">string</span>)</span></span> &#123;</span><br><span class="line">        cond.L.Lock()</span><br><span class="line">        <span class="comment">// 等待，直到shared有数据</span></span><br><span class="line">        <span class="keyword">for</span> <span class="built_in">len</span>(shared) == <span class="number">0</span> &#123;</span><br><span class="line">            cond.Wait() <span class="comment">// Wait内部会暂时解锁/加锁</span></span><br><span class="line">        &#125;</span><br><span class="line">        fmt.Println(shared[key])</span><br><span class="line">        cond.L.Unlock()</span><br><span class="line">        wg.Done()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建两个goroutine</span></span><br><span class="line">    <span class="keyword">go</span> reader(<span class="string">&quot;rsc1&quot;</span>)</span><br><span class="line">    <span class="keyword">go</span> reader(<span class="string">&quot;rsc2&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// writer</span></span><br><span class="line">    cond.L.Lock()</span><br><span class="line">    <span class="comment">// 写入</span></span><br><span class="line">    shared[<span class="string">&quot;rsc1&quot;</span>] = <span class="string">&quot;foo&quot;</span></span><br><span class="line">    shared[<span class="string">&quot;rsc2&quot;</span>] = <span class="string">&quot;bar&quot;</span></span><br><span class="line">    <span class="comment">// 通知所有goroutine</span></span><br><span class="line">    cond.Broadcast()</span><br><span class="line">    cond.L.Unlock()</span><br><span class="line"></span><br><span class="line">    wg.Wait()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/golang-series-sync-cond/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1343,13 +1367,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">81k</span>
+    <span title="站点总字数">106k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:53</span>
+    <span title="站点阅读时长">6:26</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
