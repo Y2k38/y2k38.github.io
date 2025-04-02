@@ -114,7 +114,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-count">43</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -137,6 +137,111 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/php-extension-writing-part1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/php-extension-writing-part1/" class="post-title-link" itemprop="url">PHP扩展开发 - Part 1</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-09-03 11:09:06" itemprop="dateCreated datePublished" datetime="2019-09-03T11:09:06+08:00">2019-09-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-03-03 10:06:56" itemprop="dateModified" datetime="2025-03-03T10:06:56+08:00">2025-03-03</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在网上找到几篇基于PHP5的扩展开发的文章，有些古老，与PHP7不完全兼容，自己做了些简单的翻译、修改。</p>
+<p>建议开发者先阅读<a target="_blank" rel="noopener" href="http://www.phpinternalsbook.com/">PHP Internals Book</a>这份在线文档，里面对PHP做了比较全面的讲解。由于PHP扩展开发的资料比较少，也鲜有PHP开发者触及到这块，编写扩展时如果遇到问题，最好是先查找PHP源代码是否有相关的使用案例，再通过网上论坛、QQ等方式寻求帮助。</p>
+<p>本文是PHP扩展开发系列的第一篇，主要介绍如何开发一个简单的PHP扩展、如何获取ini配置参数、如何配置全局变量</p>
+<p>前期准备：</p>
+<p>PHP编译选项加入<code>--enable-debug</code>以及<code>--enable-maintainer-zts</code>。<code>--enable-debug</code>生成额外的调试符号，并将优化等级设置为<code>-O0</code>，报告内存泄露等错误，使使用gdb进行debug时更为准确；<code>--enable-maintainer-zts</code>启用线程安全，开启<code>ZTS</code>宏定义，配置PHP为TSRM机制，用于编写调试多线程代码</p>
+<h2 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h2><h3 id="扩展目录结构"><a href="#扩展目录结构" class="headerlink" title="扩展目录结构"></a>扩展目录结构</h3><p>你可能会使用PHP源代码自带的脚本<code>ext/ext_skel.php</code>生成扩展骨架，但这里选择极简方式创建一个扩展，最基本的扩展只需要三个文件：配置文件<code>config.m4</code>，头文件<code>php_test.h</code>，源文件<code>test.c</code></p>
+<p><code>test</code>扩展目录结构</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">php-7.4.1</span><br><span class="line">└── ext</span><br><span class="line">    └── <span class="built_in">test</span></span><br><span class="line">        ├── config.m4</span><br><span class="line">        ├── php_test.h</span><br><span class="line">        └── test.c</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/php-extension-writing-part1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -388,13 +493,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">106k</span>
+    <span title="站点总字数">133k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6:26</span>
+    <span title="站点阅读时长">8:05</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动

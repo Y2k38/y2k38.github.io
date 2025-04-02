@@ -114,7 +114,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-count">43</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -137,6 +137,225 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-memory-allocation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/golang-series-memory-allocation/" class="post-title-link" itemprop="url">golang系列之-内存分配</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-04-02 09:35:00 / 修改时间：20:17:16" itemprop="dateCreated datePublished" datetime="2025-04-02T09:35:00+08:00">2025-04-02</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>27k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1:38</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>golang的内存分配机制最初是基于TCMalloc，演化至今已经有了很大差异。其原理是：slab + tiling algorithm + 层级内存分配。本文仅介绍如何通过mallocgc分配内存，不涉及栈内存分配管理、手动内存管理等内容。当前go版本：1.24</p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h3 id="slab-tiling"><a href="#slab-tiling" class="headerlink" title="slab + tiling"></a>slab + tiling</h3><p>内存分配基本单位-mspan（即slab），内部再划分更小的块（即tiling）</p>
+<p>小对象（&lt;&#x3D;32KB）按预定义的sizeclass分成不同的mspan，每个mspan最低有8KB，切割成指定大小的块。而大对象（&gt;32KB）的sizeclass&#x3D;0，不限制大小，mspan不分块。如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// mspann -&gt; sizeclass=0  -&gt; nKB  -&gt; | &lt;-----   nKB   -----&gt; |</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// mspanx -&gt; sizeclass=1  -&gt; 8KB  -&gt; | 8B  | 8B  | ... | 8B  |</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// mspany -&gt; sizeclass=5  -&gt; 8KB  -&gt; | 48B | 48B | ... | 48B |</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// mspanz -&gt; sizeclass=65 -&gt; 80KB</span></span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+
+<p>如<code>make([]int, 5)</code>，创建一块40B大小的内存区域，经过计算这个内存块会从sizeclass&#x3D;5的mspan分配（该mspan的每个元素大小为48B）</p>
+<h3 id="层级内存分配"><a href="#层级内存分配" class="headerlink" title="层级内存分配"></a>层级内存分配</h3><p>参考TCMalloc，内存分配时主要分为3级：mcache、mcentral、mheap</p>
+<ol>
+<li>mcache为线程缓存，每个p都有一个，所有的内存分配&#x2F;回收都是先通过mcache，访问不需要加锁</li>
+<li>mcentral负责向mheap申请分配内存、管理mspan，按spanclass分组，嵌入到mheap结构体，全局唯一</li>
+<li>mheap负责从系统申请内存进行分配管理，一般情况下访问都要加锁，全局唯一</li>
+</ol>
+<p>执行mallocgc分配内存时，mheap、mcentral、mcache的关系如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//  mallocgc</span></span><br><span class="line"><span class="comment">//     |</span></span><br><span class="line"><span class="comment">//     |    (&lt;=32KB)</span></span><br><span class="line"><span class="comment">//     |--&gt; p.mcache.alloc[spanclass] --&gt; mheap.central[spanclass] --&gt; mheap</span></span><br><span class="line"><span class="comment">//     |</span></span><br><span class="line"><span class="comment">//     |    (&gt;32KB)</span></span><br><span class="line"><span class="comment">//     |--&gt; mheap</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果对象&lt;&#x3D;32KB<ul>
+<li>从p的mcache找一个空闲的mspan分配一段内存&#x2F;地址空间</li>
+<li>如果mspan没有空闲空间，从mcentral申请一个新的&#x2F;重用一个已清扫的mspan</li>
+<li>如果mcentral也没有可用mspan，通过mheap跟OS申请一段内存，初始化一个mspan返回</li>
+</ul>
+</li>
+<li>如果对象&gt;32KB<ul>
+<li>通过mheap跟OS申请一段内存，初始化一个mspan返回</li>
+</ul>
+</li>
+</ul>
+<h3 id="系统内存状态"><a href="#系统内存状态" class="headerlink" title="系统内存状态"></a>系统内存状态</h3><p>这里需要了解系统内存的几个状态，以及go内部是如何从系统分配、释放内存的</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>None</strong></td>
+<td>默认状态，未映射，地址空间未被保留或使用</td>
+</tr>
+<tr>
+<td><strong>Reserved</strong></td>
+<td>已保留，但未提交，即地址空间已经被申请，但尚未向操作系统请求实际物理内存</td>
+</tr>
+<tr>
+<td><strong>Prepared</strong></td>
+<td>已提交但未使用，已经向操作系统申请了物理内存，但可能未完全初始化</td>
+</tr>
+<tr>
+<td><strong>Ready</strong></td>
+<td>可用状态，内存已初始化，可用于分配</td>
+</tr>
+</tbody></table>
+<p>状态转换函数</p>
+<table>
+<thead>
+<tr>
+<th align="left">函数</th>
+<th align="left">主要作用</th>
+<th align="left">是否分配物理内存</th>
+<th align="left">是否映射虚拟内存</th>
+<th align="left">内存状态转换</th>
+<th align="left">备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>sysAlloc</code></td>
+<td align="left"><strong>直接申请内存</strong></td>
+<td align="left">✅ 是</td>
+<td align="left">✅ 是</td>
+<td align="left">None -&gt; Ready</td>
+<td align="left">可能会触发 <code>mmap</code></td>
+</tr>
+<tr>
+<td align="left"><code>sysReserve</code></td>
+<td align="left"><strong>保留虚拟地址空间，但不映射</strong></td>
+<td align="left">❌ 否</td>
+<td align="left">✅ 是</td>
+<td align="left">None -&gt; Reserved</td>
+<td align="left">预留地址，后续 <code>sysMap</code></td>
+</tr>
+<tr>
+<td align="left"><code>sysMap</code></td>
+<td align="left"><strong>将预留的虚拟地址映射为实际物理内存</strong></td>
+<td align="left">✅ 是</td>
+<td align="left">✅ 是</td>
+<td align="left">Reserved -&gt; Prepared</td>
+<td align="left">只有 <code>sysReserve</code> 过的地址能 <code>sysMap</code></td>
+</tr>
+<tr>
+<td align="left"><code>sysUsed</code></td>
+<td align="left"><strong>标记某段地址正在使用</strong></td>
+<td align="left">✅ 是</td>
+<td align="left">✅ 是</td>
+<td align="left">Prepared -&gt; Ready</td>
+<td align="left">可能会触发 <code>madvise</code> 让物理页生效</td>
+</tr>
+<tr>
+<td align="left"><code>sysUnused</code></td>
+<td align="left"><strong>标记某段地址未使用</strong>，可以回收物理内存</td>
+<td align="left">⚠️ 可能</td>
+<td align="left">❌ 否</td>
+<td align="left">Ready -&gt; Prepared</td>
+<td align="left"><code>MADV_DONTNEED</code>，内存仍属于进程</td>
+</tr>
+<tr>
+<td align="left"><code>sysFault</code></td>
+<td align="left"><strong>让一段地址变成不可访问</strong></td>
+<td align="left">❌ 否</td>
+<td align="left">✅ 是</td>
+<td align="left">Ready -&gt; Reserved</td>
+<td align="left"><code>mprotect(PROT_NONE)</code>，用于调试</td>
+</tr>
+<tr>
+<td align="left"><code>sysFree</code></td>
+<td align="left"><strong>释放虚拟内存，归还给 OS</strong></td>
+<td align="left">✅ 是</td>
+<td align="left">✅ 是</td>
+<td align="left">-&gt; None</td>
+<td align="left"><code>munmap</code>，这段内存不能再用</td>
+</tr>
+</tbody></table>
+<p><strong>我对Go内存分配的理解</strong></p>
+<ol>
+<li>内存管理的本质是地址空间的组织和维护</li>
+<li>Go的内存策略：尽量保留虚拟地址，按需释放物理页</li>
+<li>Go会一次性申请64MB内存（Reserved-虚拟地址空间），但并不是立即分配物理页，而是在需要分配时使用sysMap + sysUsed使一小部份内存可用（Reserved-&gt;Prepared-&gt;Ready）</li>
+</ol>
+<h3 id="GC助攻"><a href="#GC助攻" class="headerlink" title="GC助攻"></a>GC助攻</h3><p>为了防止内存分配速度过快，导致GC跟不上，分配时会判断是否需要协助GC标记&#x2F;清扫。每次都要判断是否需要协助标记，而清扫只发生在获取新的mspan和大对象分配场景下</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/golang-series-memory-allocation/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -174,9 +393,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2025-03-30 13:12:29 / 修改时间：17:09:17" itemprop="dateCreated datePublished" datetime="2025-03-30T13:12:29+08:00">2025-03-30</time>
+      <time title="创建时间：2025-03-30 13:12:29" itemprop="dateCreated datePublished" datetime="2025-03-30T13:12:29+08:00">2025-03-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-04-01 16:55:27" itemprop="dateModified" datetime="2025-04-01T16:55:27+08:00">2025-04-01</time>
     </span>
 
   
@@ -193,7 +418,7 @@
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1:33</span>
+      <span>1:34</span>
     </span>
 </div>
 
@@ -1241,109 +1466,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-sync-mutex/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/golang-series-sync-mutex/" class="post-title-link" itemprop="url">golang系列之-sync.Mutex</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-02-18 09:28:12" itemprop="dateCreated datePublished" datetime="2025-02-18T09:28:12+08:00">2025-02-18</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-25 15:47:14" itemprop="dateModified" datetime="2025-03-25T15:47:14+08:00">2025-03-25</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>7 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Mutex（MUTualEx）-互斥锁是一种可以保证每次只有一个goroutine访问贡献资源的方法。这个资源可以是一段程序代码、一个整数、一个map、一个struct、一个channel或其他任何东西。通过观察Mutex的源代码实现，可以将Mutex看作是一个队列（FIFO&#x2F;LIFO），具体看后面的详细描述</p>
-<p>当前go版本：1.24</p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;sync&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Container <span class="keyword">struct</span> &#123;</span><br><span class="line">    mu       sync.Mutex</span><br><span class="line">    counters <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Container)</span></span> inc(name <span class="type">string</span>) &#123;</span><br><span class="line">    c.mu.Lock()         <span class="comment">// 互斥锁，获取失败等待挂起</span></span><br><span class="line">    <span class="keyword">defer</span> c.mu.Unlock() <span class="comment">// 解锁</span></span><br><span class="line">    c.counters[name]++  <span class="comment">// 共享资源</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    c := Container&#123;</span><br><span class="line">        counters: <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">int</span>&#123;<span class="string">&quot;a&quot;</span>: <span class="number">0</span>, <span class="string">&quot;b&quot;</span>: <span class="number">0</span>&#125;,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line"></span><br><span class="line">    doIncrement := <span class="function"><span class="keyword">func</span><span class="params">(name <span class="type">string</span>, n <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; n; i++ &#123;</span><br><span class="line">            c.inc(name)</span><br><span class="line">        &#125;</span><br><span class="line">        wg.Done()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    wg.Add(<span class="number">3</span>)</span><br><span class="line">    <span class="keyword">go</span> doIncrement(<span class="string">&quot;a&quot;</span>, <span class="number">10000</span>)</span><br><span class="line">    <span class="keyword">go</span> doIncrement(<span class="string">&quot;a&quot;</span>, <span class="number">10000</span>)</span><br><span class="line">    <span class="keyword">go</span> doIncrement(<span class="string">&quot;b&quot;</span>, <span class="number">10000</span>)</span><br><span class="line"></span><br><span class="line">    wg.Wait()</span><br><span class="line">    fmt.Println(c.counters)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上述代码运行结果如下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">go run ./main.go</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出如下</span></span><br><span class="line"><span class="comment"># map[a:20000 b:10000]</span></span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/golang-series-sync-mutex/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1367,13 +1489,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">106k</span>
+    <span title="站点总字数">133k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6:26</span>
+    <span title="站点阅读时长">8:05</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
