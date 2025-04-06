@@ -114,7 +114,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-count">44</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -137,6 +137,240 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-garbage-collection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="y2k38">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="noname">
+      <meta itemprop="description" content="个人笔记">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | noname">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/golang-series-garbage-collection/" class="post-title-link" itemprop="url">golang系列之-垃圾回收</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-04-06 10:58:06 / 修改时间：12:39:49" itemprop="dateCreated datePublished" datetime="2025-04-06T10:58:06+08:00">2025-04-06</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>35k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2:08</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>go的垃圾回收原理官方说法是是三色标记法+混合写屏障，但是，理论上怎么说是一回事，具体实现又是另一回事了，或者说实现已经偏离文档描述。总的来说，GC这部份的内容要比GMP跟内存分配都要复杂的多且出人意料。当前go版本：1.24</p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h3 id="目标对象"><a href="#目标对象" class="headerlink" title="目标对象"></a>目标对象</h3><p>Go的GC并不扫描整个内存，只关注以下区域：</p>
+<ol>
+<li>heap上分配的对象（在mspan管理范围）</li>
+<li>data&#x2F;bss段的全局变量</li>
+<li>栈上的引用（扫描stackRoots）</li>
+</ol>
+<h3 id="触发类型"><a href="#触发类型" class="headerlink" title="触发类型"></a>触发类型</h3><table>
+<thead>
+<tr>
+<th align="left">触发类型</th>
+<th align="left">备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">gcTriggerHeap</td>
+<td align="left">堆大小触发，heap内存达到一个临界点触发（最常用）</td>
+</tr>
+<tr>
+<td align="left">gcTriggerTime</td>
+<td align="left">时间触发，超时2min未执行GC则强制执行</td>
+</tr>
+<tr>
+<td align="left">gcTriggerCycle</td>
+<td align="left">手动触发，用户调用runtime.GC()</td>
+</tr>
+</tbody></table>
+<h3 id="角色-分工"><a href="#角色-分工" class="headerlink" title="角色&#x2F;分工"></a>角色&#x2F;分工</h3><table>
+<thead>
+<tr>
+<th>角色</th>
+<th>作用</th>
+<th>工作阶段</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Mark Worker（标记工作线程）</td>
+<td>遍历对象图，标记存活对象，防止被错误回收</td>
+<td>标记阶段（Marking）</td>
+<td>运行时创建多个并发 Mark Worker，加快标记速度</td>
+</tr>
+<tr>
+<td>Sweeper（清扫器）</td>
+<td>清理未标记的对象，将其内存释放回空闲列表（mheap.free）</td>
+<td>清扫阶段（Sweeping）</td>
+<td>逐步清理，避免一次性 STW（Stop The World）</td>
+</tr>
+<tr>
+<td>Scavenger（内存回收器）</td>
+<td>释放长期未使用的堆内存，归还给OS以减少RSS</td>
+<td>后台运行（定期触发）</td>
+<td>主要针对大对象或空闲mspans，减少物理内存占用</td>
+</tr>
+</tbody></table>
+<p><strong>标记工作线程</strong></p>
+<p>其中，标记工作线程的会根据工作模式进一步区分，如下</p>
+<table>
+<thead>
+<tr>
+<th align="left">标记工作线程模式</th>
+<th align="left">备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">gcMarkWorkerNotWorker</td>
+<td align="left">默认，未运行</td>
+</tr>
+<tr>
+<td align="left">gcMarkWorkerDedicatedMode</td>
+<td align="left">专用标记任务，最高优先级，非抢占</td>
+</tr>
+<tr>
+<td align="left">gcMarkWorkerFractionalMode</td>
+<td align="left">比例标记任务，跟其他g共享时间，可被抢占</td>
+</tr>
+<tr>
+<td align="left">gcMarkWorkerIdleMode</td>
+<td align="left">空闲时执行的低优先级标记任务，需要p空闲</td>
+</tr>
+</tbody></table>
+<p><strong>CPU限制</strong></p>
+<p>标记工作线程的CPU使用率被限制在25%（GOGC&#x3D;100时），假设系统使用一个6核CPU，那么GC在标记阶段大约会使用1.5个CPU资源：</p>
+<ol>
+<li>1个CPU由Dedicated（专用模式）的标记工作线程持续占用，该线程不允许抢占，直到标记任务完成</li>
+<li>0.5个CPU由Fractional（比例模式）的标记工作线程使用，该线程仅在由额外CPU资源可用时运行，并会根据系统负责动态调整自身的CPU使用率</li>
+</ol>
+<h3 id="完整运行流程"><a href="#完整运行流程" class="headerlink" title="完整运行流程"></a>完整运行流程</h3><ol>
+<li><p>Sweep Termination（清理终止）</p>
+<ul>
+<li>STW（Stop The World），确保所有P都达到GC安全点</li>
+<li>完成上一轮GC未完成的sweep（清扫），回收剩余的的mspan</li>
+<li>准备GC统计数据，为新一轮的GC计算目标heap大小、触发阈值等</li>
+</ul>
+</li>
+<li><p>Mark（标记）</p>
+<ul>
+<li>STW，切换GC状态<ul>
+<li>gcphase从_GCoff切换到_GCmark</li>
+<li>开启写屏障（write barrier），允许Mutator协助GC标记，以维护三色标记不变性</li>
+<li>启动GC后台线程，执行并发标记任务</li>
+<li>根对象入队（包括栈、全局变量）</li>
+</ul>
+</li>
+<li>恢复世界（Start The World），GC线程进入并发标记阶段<ul>
+<li>从根对象开始标记，遍历所有可达对象</li>
+<li>扫描灰色对象（已发现但未完全扫描的对象）并进行扫描，将其置黑，并将其引用的对象入队为灰色</li>
+<li>混合写屏障（Hybrid Write Barrier）确保一致性</li>
+</ul>
+</li>
+<li>完成标记</li>
+</ul>
+</li>
+<li><p>Mark Termination（标记终止）</p>
+<ul>
+<li>STW，切换GC状态<ul>
+<li>gcphase从_GCmark切换到_GCmarktermination</li>
+<li>停止并发标记任务</li>
+<li>执行终结器finalizer，如果有的话</li>
+<li>清理mcache以确保没有悬挂对象</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Sweep（清理）</p>
+<ul>
+<li>切换GC状态<ul>
+<li>gcphase从_GCmarktermination切换回_GCoff</li>
+<li>关闭写屏障（Mutator不再协助GC标记）</li>
+</ul>
+</li>
+<li>恢复世界（Start The World），进入并发清扫阶段<ul>
+<li>清理未被标记的对象</li>
+<li>回收mspan到mheap或mcentral，部份回收到mcache</li>
+<li>Mutator分配内存时，可能会触发增量清扫（Incremental Sweeping），加快回收过程</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>满足触发条件，启动下一轮GC</p>
+</li>
+</ol>
+<p>简单的说，标记然后清扫</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/golang-series-garbage-collection/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -174,9 +408,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2025-04-02 09:35:00 / 修改时间：20:18:03" itemprop="dateCreated datePublished" datetime="2025-04-02T09:35:00+08:00">2025-04-02</time>
+      <time title="创建时间：2025-04-02 09:35:00" itemprop="dateCreated datePublished" datetime="2025-04-02T09:35:00+08:00">2025-04-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-04-06 11:56:42" itemprop="dateModified" datetime="2025-04-06T11:56:42+08:00">2025-04-06</time>
     </span>
 
   
@@ -186,14 +426,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>27k</span>
+      <span>28k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1:38</span>
+      <span>1:41</span>
     </span>
 </div>
 
@@ -401,7 +641,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-04-01 16:55:27" itemprop="dateModified" datetime="2025-04-01T16:55:27+08:00">2025-04-01</time>
+      <time title="修改时间：2025-04-06 08:10:31" itemprop="dateModified" datetime="2025-04-06T08:10:31+08:00">2025-04-06</time>
     </span>
 
   
@@ -682,7 +922,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-10 09:11:18" itemprop="dateModified" datetime="2025-03-10T09:11:18+08:00">2025-03-10</time>
+      <time title="修改时间：2025-04-05 20:00:21" itemprop="dateModified" datetime="2025-04-05T20:00:21+08:00">2025-04-05</time>
     </span>
 
   
@@ -842,7 +1082,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-03 10:05:05" itemprop="dateModified" datetime="2025-03-03T10:05:05+08:00">2025-03-03</time>
+      <time title="修改时间：2025-04-05 20:00:21" itemprop="dateModified" datetime="2025-04-05T20:00:21+08:00">2025-04-05</time>
     </span>
 
   
@@ -1366,106 +1606,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-sync-rwmutex/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/golang-series-sync-rwmutex/" class="post-title-link" itemprop="url">golang系列之-sync.RWMutex</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-02-18 17:12:21" itemprop="dateCreated datePublished" datetime="2025-02-18T17:12:21+08:00">2025-02-18</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-03 10:04:42" itemprop="dateModified" datetime="2025-03-03T10:04:42+08:00">2025-03-03</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>976</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>RWMutex-读写锁，该锁可以被任意多个reader持有，或被一个writer持有。通过观察RWMutex的源代码实现，可以将RWMutex看作是FIFO队列，具体看后面的详细描述</p>
-<p>当前go版本：1.24</p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;sync&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> size = <span class="number">100</span></span><br><span class="line">    <span class="keyword">var</span> count <span class="type">int</span></span><br><span class="line">    <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">    <span class="keyword">var</span> rwm sync.RWMutex</span><br><span class="line"></span><br><span class="line">    queue := <span class="built_in">make</span>([]<span class="type">int</span>, size)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; size; i++ &#123;</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">            wg.Add(<span class="number">1</span>)</span><br><span class="line">            <span class="keyword">defer</span> wg.Done()</span><br><span class="line"></span><br><span class="line">            rwm.Lock()          <span class="comment">// 写锁</span></span><br><span class="line">            count++             <span class="comment">// 更新资源</span></span><br><span class="line">            rwm.Unlock()</span><br><span class="line">        &#125;()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; size; i++ &#123;</span><br><span class="line">        indx := i</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">            wg.Add(<span class="number">1</span>)</span><br><span class="line">            <span class="keyword">defer</span> wg.Done()</span><br><span class="line"></span><br><span class="line">            rwm.RLock()         <span class="comment">// 读锁</span></span><br><span class="line">            queue[indx] = count <span class="comment">// 只读</span></span><br><span class="line">            rwm.RUnlock()</span><br><span class="line">        &#125;()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    wg.Wait()</span><br><span class="line"></span><br><span class="line">    fmt.Println(count)</span><br><span class="line">    fmt.Println(queue)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/golang-series-sync-rwmutex/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1489,13 +1629,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">133k</span>
+    <span title="站点总字数">170k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">8:05</span>
+    <span title="站点阅读时长">10:16</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
