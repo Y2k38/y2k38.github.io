@@ -27,7 +27,7 @@
 <meta property="og:description" content="go的垃圾回收原理官方说法是是三色标记法+混合写屏障，但是，理论上怎么说是一回事，具体实现又是另一回事了，或者说实现已经偏离文档描述。总的来说，GC这部份的内容要比GMP跟内存分配都要复杂的多且出人意料。当前go版本：1.24 前言目标对象Go的GC并不扫描整个内存，只关注以下区域：  heap上分配的对象（在mspan管理范围） data&#x2F;bss段的全局变量 栈上的引用（扫描stack">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-04-06T02:58:06.000Z">
-<meta property="article:modified_time" content="2025-04-06T04:39:49.814Z">
+<meta property="article:modified_time" content="2025-04-06T08:14:30.366Z">
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="golang">
 <meta name="twitter:card" content="summary">
@@ -181,7 +181,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-04-06 10:58:06 / 修改时间：12:39:49" itemprop="dateCreated datePublished" datetime="2025-04-06T10:58:06+08:00">2025-04-06</time>
+      <time title="创建时间：2025-04-06 10:58:06 / 修改时间：16:14:30" itemprop="dateCreated datePublished" datetime="2025-04-06T10:58:06+08:00">2025-04-06</time>
     </span>
 
   
@@ -519,7 +519,7 @@
 
 <h2 id="混合写屏障"><a href="#混合写屏障" class="headerlink" title="混合写屏障"></a>混合写屏障</h2><p><strong>不知道怎么说，从源代码看，跟设计思路对不上</strong></p>
 <p>设计思路伪代码：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//     writePointer(slot, ptr):</span></span><br><span class="line"><span class="comment">//         shade(*slot)              // 删除写屏障</span></span><br><span class="line"><span class="comment">//         if current stack is grey:</span></span><br><span class="line"><span class="comment">//             shade(ptr)            // 插入写屏障</span></span><br><span class="line"><span class="comment">//         *slot = ptr</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// slot - 目标写入点</span></span><br><span class="line"><span class="comment">// ptr  - 元数据指针</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//     writePointer(slot, ptr):</span></span><br><span class="line"><span class="comment">//         shade(*slot)              // 删除写屏障</span></span><br><span class="line"><span class="comment">//         if current stack is grey:</span></span><br><span class="line"><span class="comment">//             shade(ptr)            // 插入写屏障</span></span><br><span class="line"><span class="comment">//         *slot = ptr</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// slot - 目标写入点</span></span><br><span class="line"><span class="comment">// ptr  - 源数据指针</span></span><br></pre></td></tr></table></figure>
 
 <p>实际：</p>
 <p>在开启写屏障后，一些内存复制函数会将源内存区域跟目标内存区域内的指针对象收集起来，放入写屏障缓冲区，交给标记工作线程标记。涉及到slice、map、channel等组件，相关内存处理函数如下所示：</p>
