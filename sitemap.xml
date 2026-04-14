@@ -489,6 +489,34 @@
   </url>
   
   <url>
+    <loc>https://y2k38.github.io/tags/kvm/</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/cockpit/</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/raspberry-pi/</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/lineageos/</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://y2k38.github.io/tags/docker/</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -518,34 +546,6 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/privoxy/</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/kvm/</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/cockpit/</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/raspberry-pi/</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://y2k38.github.io/tags/lineageos/</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -615,13 +615,6 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/shadowsocks-rust/</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://y2k38.github.io/tags/wireguard/</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -630,6 +623,13 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/samba/</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/shadowsocks-rust/</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -699,13 +699,6 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/mysql/</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://y2k38.github.io/tags/macOS/</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -720,7 +713,7 @@
   </url>
   
   <url>
-    <loc>https://y2k38.github.io/tags/kubeadm/</loc>
+    <loc>https://y2k38.github.io/tags/mysql/</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -735,6 +728,13 @@
   
   <url>
     <loc>https://y2k38.github.io/tags/xdebug/</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://y2k38.github.io/tags/kubeadm/</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
