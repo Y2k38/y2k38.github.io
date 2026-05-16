@@ -1,29 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang=zh>
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
-
-<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
-
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
     <meta name="description" content="golang的内存分配机制最初是基于TCMalloc，演化至今已经有了很大差异。其原理是：slab + tiling algorithm + 层级内存分配。本文仅介绍如何通过mallocgc分配内存，不涉及栈内存分配管理、手动内存管理等内容。当前go版本：1.24 前言slab + tiling内存分配基本单位-mspan（即slab），内部再划分更小的块（即tiling） 小对象（&lt;&amp;#x">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang系列之-内存分配">
 <meta property="og:url" content="https://y2k38.github.io/golang-series-memory-allocation/index.html">
-<meta property="og:site_name" content="noname">
+<meta property="og:site_name" content="Y2k38&#39;s blog">
 <meta property="og:description" content="golang的内存分配机制最初是基于TCMalloc，演化至今已经有了很大差异。其原理是：slab + tiling algorithm + 层级内存分配。本文仅介绍如何通过mallocgc分配内存，不涉及栈内存分配管理、手动内存管理等内容。当前go版本：1.24 前言slab + tiling内存分配基本单位-mspan（即slab），内部再划分更小的块（即tiling） 小对象（&lt;&amp;#x">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-04-02T01:35:00.000Z">
@@ -31,190 +18,274 @@
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="golang">
 <meta name="twitter:card" content="summary">
-
-
-<link rel="canonical" href="https://y2k38.github.io/golang-series-memory-allocation/">
-
-
-
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/golang-series-memory-allocation/","path":"golang-series-memory-allocation/","title":"golang系列之-内存分配"}</script>
-
-<script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>golang系列之-内存分配 | noname</title>
-  
-
-
-
-
-
-
-
-
-  <noscript>
-    <link rel="stylesheet" href="/css/noscript.css">
-  </noscript>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
-
-  <main class="main">
-    <div class="column">
-      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏" role="button">
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <p class="site-title">noname</p>
-      <i class="logo-line"></i>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="搜索" role="button">
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
-</header>
+    
+    
+      
         
-  
-  <aside class="sidebar">
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>golang系列之-内存分配</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+     -->
       </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/golang-series-garbage-collection/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/golang-series-bootstrap-and-gmp-model/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://y2k38.github.io/golang-series-memory-allocation/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://y2k38.github.io/golang-series-memory-allocation/&text=golang系列之-内存分配"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://y2k38.github.io/golang-series-memory-allocation/&title=golang系列之-内存分配"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://y2k38.github.io/golang-series-memory-allocation/&is_video=false&description=golang系列之-内存分配"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=golang系列之-内存分配&body=Check out this article: https://y2k38.github.io/golang-series-memory-allocation/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://y2k38.github.io/golang-series-memory-allocation/&title=golang系列之-内存分配"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://y2k38.github.io/golang-series-memory-allocation/&title=golang系列之-内存分配"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://y2k38.github.io/golang-series-memory-allocation/&title=golang系列之-内存分配"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://y2k38.github.io/golang-series-memory-allocation/&title=golang系列之-内存分配"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://y2k38.github.io/golang-series-memory-allocation/&name=golang系列之-内存分配&description=&lt;p&gt;golang的内存分配机制最初是基于TCMalloc，演化至今已经有了很大差异。其原理是：slab + tiling algorithm + 层级内存分配。本文仅介绍如何通过mallocgc分配内存，不涉及栈内存分配管理、手动内存管理等内容。当前go版本：1.24&lt;/p&gt;
+&lt;h2 id=&#34;前言&#34;&gt;&lt;a href=&#34;#前言&#34; class=&#34;headerlink&#34; title=&#34;前言&#34;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;h3 id=&#34;slab-tiling&#34;&gt;&lt;a href=&#34;#slab-tiling&#34; class=&#34;headerlink&#34; title=&#34;slab + tiling&#34;&gt;&lt;/a&gt;slab + tiling&lt;/h3&gt;&lt;p&gt;内存分配基本单位-mspan（即slab），内部再划分更小的块（即tiling）&lt;/p&gt;
+&lt;p&gt;小对象（&amp;lt;&amp;#x3D;32KB）按预定义的sizeclass分成不同的mspan，每个mspan最低有8KB，切割成指定大小的块。而大对象（&amp;gt;32KB）的sizeclass&amp;#x3D;0，不限制大小，mspan不分块。如下&lt;/p&gt;
+&lt;figure class=&#34;highlight go&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// mspann -&amp;gt; sizeclass=0  -&amp;gt; nKB  -&amp;gt; | &amp;lt;-----   nKB   -----&amp;gt; |&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// ...&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// mspanx -&amp;gt; sizeclass=1  -&amp;gt; 8KB  -&amp;gt; | 8B  | 8B  | ... | 8B  |&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// ...&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// mspany -&amp;gt; sizeclass=5  -&amp;gt; 8KB  -&amp;gt; | 48B | 48B | ... | 48B |&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// ...&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// mspanz -&amp;gt; sizeclass=65 -&amp;gt; 80KB&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// ...&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
 
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#slab-tiling"><span class="nav-number">1.1.</span> <span class="nav-text">slab + tiling</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%82%E7%BA%A7%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="nav-number">1.2.</span> <span class="nav-text">层级内存分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E5%86%85%E5%AD%98%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.</span> <span class="nav-text">系统内存状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GC%E5%8A%A9%E6%94%BB"><span class="nav-number">1.4.</span> <span class="nav-text">GC助攻</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mspan"><span class="nav-number">2.1.</span> <span class="nav-text">mspan</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mcache"><span class="nav-number">2.2.</span> <span class="nav-text">mcache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mcentral"><span class="nav-number">2.3.</span> <span class="nav-text">mcentral</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mheap"><span class="nav-number">2.4.</span> <span class="nav-text">mheap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E9%85%8D%E5%99%A8"><span class="nav-number">2.5.</span> <span class="nav-text">分配器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#fixalloc"><span class="nav-number">2.5.1.</span> <span class="nav-text">fixalloc</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pageAlloc"><span class="nav-number">2.5.2.</span> <span class="nav-text">pageAlloc</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mallocgc"><span class="nav-number">3.</span> <span class="nav-text">mallocgc</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mallocgcTiny"><span class="nav-number">3.1.</span> <span class="nav-text">mallocgcTiny</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mallocgcSmallNoscan"><span class="nav-number">3.2.</span> <span class="nav-text">mallocgcSmallNoscan</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mallocgcSmallScanNoHeader"><span class="nav-number">3.3.</span> <span class="nav-text">mallocgcSmallScanNoHeader</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mallocgcSmallScanHeader"><span class="nav-number">3.4.</span> <span class="nav-text">mallocgcSmallScanHeader</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mallocgcLarge"><span class="nav-number">3.5.</span> <span class="nav-text">mallocgcLarge</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96%E5%87%BD%E6%95%B0"><span class="nav-number">4.</span> <span class="nav-text">相关依赖函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#malloc"><span class="nav-number">4.1.</span> <span class="nav-text">malloc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mheap-1"><span class="nav-number">4.2.</span> <span class="nav-text">mheap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mcentral-1"><span class="nav-number">4.3.</span> <span class="nav-text">mcentral</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mcache-1"><span class="nav-number">4.4.</span> <span class="nav-text">mcache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mspan-1"><span class="nav-number">4.5.</span> <span class="nav-text">mspan</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pageCache"><span class="nav-number">4.6.</span> <span class="nav-text">pageCache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pageAlloc-1"><span class="nav-number">4.7.</span> <span class="nav-text">pageAlloc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pallocBits"><span class="nav-number">4.8.</span> <span class="nav-text">pallocBits</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GC%E5%8A%A9%E6%94%BB-1"><span class="nav-number">4.9.</span> <span class="nav-text">GC助攻</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%99%E5%B1%8F%E9%9A%9C"><span class="nav-number">4.10.</span> <span class="nav-text">写屏障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OS%E5%86%85%E5%AD%98%E7%94%B3%E8%AF%B7"><span class="nav-number">4.11.</span> <span class="nav-text">OS内存申请</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#profile%E7%9B%B8%E5%85%B3"><span class="nav-number">4.12.</span> <span class="nav-text">profile相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">4.13.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="nav-number">5.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
-        </div>
-        <!--/noindex-->
+&lt;p&gt;如&lt;code&gt;make([]int, 5)&lt;/code&gt;，创建一块40B大小的内存区域，经过计算这个内存块会从sizeclass&amp;#x3D;5的mspan分配（该mspan的每个元素大小为48B）&lt;/p&gt;
+&lt;h3 id=&#34;层级内存分配&#34;&gt;&lt;a href=&#34;#层级内存分配&#34; class=&#34;headerlink&#34; title=&#34;层级内存分配&#34;&gt;&lt;/a&gt;层级内存分配&lt;/h3&gt;&lt;p&gt;参考TCMalloc，内存分配时主要分为3级：mcache、mcentral、mheap&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;mcache为线程缓存，每个p都有一个，所有的内存分配&amp;#x2F;回收都是先通过mcache，访问不需要加锁&lt;/li&gt;
+&lt;li&gt;mcentral负责向mheap申请分配内存、管理mspan，按spanclass分组，嵌入到mheap结构体，全局唯一&lt;/li&gt;
+&lt;li&gt;mheap负责从系统申请内存进行分配管理，一般情况下访问都要加锁，全局唯一&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;执行mallocgc分配内存时，mheap、mcentral、mcache的关系如下&lt;/p&gt;
+&lt;figure class=&#34;highlight go&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//  mallocgc&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//     |&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//     |    (&amp;lt;=32KB)&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//     |--&amp;gt; p.mcache.alloc[spanclass] --&amp;gt; mheap.central[spanclass] --&amp;gt; mheap&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//     |&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//     |    (&amp;gt;32KB)&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//     |--&amp;gt; mheap&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
 
-        <div class="site-overview-wrap sidebar-panel">
-          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">y2k38</p>
-  <div class="site-description" itemprop="description">个人笔记</div>
+&lt;ul&gt;
+&lt;li&gt;如果对象&amp;lt;&amp;#x3D;32KB&lt;ul&gt;
+&lt;li&gt;从p的mcache找一个空闲的mspan分配一段内存&amp;#x2F;地址空间&lt;/li&gt;
+&lt;li&gt;如果mspan没有空闲空间，从mcentral申请一个新的&amp;#x2F;重用一个已清扫的mspan&lt;/li&gt;
+&lt;li&gt;如果mcentral也没有可用mspan，通过mheap跟OS申请一段内存，初始化一个mspan返回&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;如果对象&amp;gt;32KB&lt;ul&gt;
+&lt;li&gt;通过mheap跟OS申请一段内存，初始化一个mspan返回&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;系统内存状态&#34;&gt;&lt;a href=&#34;#系统内存状态&#34; class=&#34;headerlink&#34; title=&#34;系统内存状态&#34;&gt;&lt;/a&gt;系统内存状态&lt;/h3&gt;&lt;p&gt;这里需要了解系统内存的几个状态，以及go内部是如何从系统分配、释放内存的&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;状态&lt;/th&gt;
+&lt;th&gt;含义&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;None&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;默认状态，未映射，地址空间未被保留或使用&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Reserved&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;已保留，但未提交，即地址空间已经被申请，但尚未向操作系统请求实际物理内存&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Prepared&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;已提交但未使用，已经向操作系统申请了物理内存，但可能未完全初始化&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Ready&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;可用状态，内存已初始化，可用于分配&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;p&gt;状态转换函数&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;函数&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;主要作用&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;是否分配物理内存&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;是否映射虚拟内存&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;内存状态转换&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;备注&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysAlloc&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;直接申请内存&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;None -&amp;gt; Ready&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;可能会触发 &lt;code&gt;mmap&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysReserve&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;保留虚拟地址空间，但不映射&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;❌ 否&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;None -&amp;gt; Reserved&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;预留地址，后续 &lt;code&gt;sysMap&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysMap&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;将预留的虚拟地址映射为实际物理内存&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Reserved -&amp;gt; Prepared&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;只有 &lt;code&gt;sysReserve&lt;/code&gt; 过的地址能 &lt;code&gt;sysMap&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysUsed&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;标记某段地址正在使用&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Prepared -&amp;gt; Ready&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;可能会触发 &lt;code&gt;madvise&lt;/code&gt; 让物理页生效&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysUnused&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;标记某段地址未使用&lt;/strong&gt;，可以回收物理内存&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;⚠️ 可能&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;❌ 否&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Ready -&amp;gt; Prepared&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;MADV_DONTNEED&lt;/code&gt;，内存仍属于进程&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysFault&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;让一段地址变成不可访问&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;❌ 否&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Ready -&amp;gt; Reserved&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;mprotect(PROT_NONE)&lt;/code&gt;，用于调试&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysFree&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;释放虚拟内存，归还给 OS&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;-&amp;gt; None&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;munmap&lt;/code&gt;，这段内存不能再用&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;我对Go内存分配的理解&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;内存管理的本质是地址空间的组织和维护&lt;/li&gt;
+&lt;li&gt;Go的内存策略：尽量保留虚拟地址，按需释放物理页&lt;/li&gt;
+&lt;li&gt;Go会一次性申请64MB内存（Reserved-虚拟地址空间），但并不是立即分配物理页，而是在需要分配时使用sysMap + sysUsed使一小部份内存可用（Reserved-&amp;gt;Prepared-&amp;gt;Ready）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;GC助攻&#34;&gt;&lt;a href=&#34;#GC助攻&#34; class=&#34;headerlink&#34; title=&#34;GC助攻&#34;&gt;&lt;/a&gt;GC助攻&lt;/h3&gt;&lt;p&gt;为了防止内存分配速度过快，导致GC跟不上，分配时会判断是否需要协助GC标记&amp;#x2F;清扫。每次都要判断是否需要协助标记，而清扫只发生在获取新的mspan和大对象分配场景下&lt;/p&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://y2k38.github.io/golang-series-memory-allocation/&t=golang系列之-内存分配"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#slab-tiling"><span class="toc-number">1.1.</span> <span class="toc-text">slab + tiling</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B1%82%E7%BA%A7%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="toc-number">1.2.</span> <span class="toc-text">层级内存分配</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E5%86%85%E5%AD%98%E7%8A%B6%E6%80%81"><span class="toc-number">1.3.</span> <span class="toc-text">系统内存状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GC%E5%8A%A9%E6%94%BB"><span class="toc-number">1.4.</span> <span class="toc-text">GC助攻</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#mspan"><span class="toc-number">2.1.</span> <span class="toc-text">mspan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mcache"><span class="toc-number">2.2.</span> <span class="toc-text">mcache</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mcentral"><span class="toc-number">2.3.</span> <span class="toc-text">mcentral</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mheap"><span class="toc-number">2.4.</span> <span class="toc-text">mheap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E9%85%8D%E5%99%A8"><span class="toc-number">2.5.</span> <span class="toc-text">分配器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#fixalloc"><span class="toc-number">2.5.1.</span> <span class="toc-text">fixalloc</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#pageAlloc"><span class="toc-number">2.5.2.</span> <span class="toc-text">pageAlloc</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mallocgc"><span class="toc-number">3.</span> <span class="toc-text">mallocgc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#mallocgcTiny"><span class="toc-number">3.1.</span> <span class="toc-text">mallocgcTiny</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mallocgcSmallNoscan"><span class="toc-number">3.2.</span> <span class="toc-text">mallocgcSmallNoscan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mallocgcSmallScanNoHeader"><span class="toc-number">3.3.</span> <span class="toc-text">mallocgcSmallScanNoHeader</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mallocgcSmallScanHeader"><span class="toc-number">3.4.</span> <span class="toc-text">mallocgcSmallScanHeader</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mallocgcLarge"><span class="toc-number">3.5.</span> <span class="toc-text">mallocgcLarge</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96%E5%87%BD%E6%95%B0"><span class="toc-number">4.</span> <span class="toc-text">相关依赖函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#malloc"><span class="toc-number">4.1.</span> <span class="toc-text">malloc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mheap-1"><span class="toc-number">4.2.</span> <span class="toc-text">mheap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mcentral-1"><span class="toc-number">4.3.</span> <span class="toc-text">mcentral</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mcache-1"><span class="toc-number">4.4.</span> <span class="toc-text">mcache</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mspan-1"><span class="toc-number">4.5.</span> <span class="toc-text">mspan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pageCache"><span class="toc-number">4.6.</span> <span class="toc-text">pageCache</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pageAlloc-1"><span class="toc-number">4.7.</span> <span class="toc-text">pageAlloc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pallocBits"><span class="toc-number">4.8.</span> <span class="toc-text">pallocBits</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GC%E5%8A%A9%E6%94%BB-1"><span class="toc-number">4.9.</span> <span class="toc-text">GC助攻</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99%E5%B1%8F%E9%9A%9C"><span class="toc-number">4.10.</span> <span class="toc-text">写屏障</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#OS%E5%86%85%E5%AD%98%E7%94%B3%E8%AF%B7"><span class="toc-number">4.11.</span> <span class="toc-text">OS内存申请</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#profile%E7%9B%B8%E5%85%B3"><span class="toc-number">4.12.</span> <span class="toc-text">profile相关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96"><span class="toc-number">4.13.</span> <span class="toc-text">其他</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">5.</span> <span class="toc-text">参考文档</span></a></li></ol>
+      </div>
+    
+  </span>
 </div>
-<div class="site-state-wrap animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-        <a href="/archives/">
-          <span class="site-state-item-count">48</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-          <a href="/tags/">
-        <span class="site-state-item-count">40</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
 
-        </div>
-      </div>
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        golang系列之-内存分配
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">y2k38</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-02T01:35:00.000Z" class="dt-published" itemprop="datePublished">2025-04-02</time>
+        
+      
     </div>
 
-    
-  </aside>
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/golang/" rel="tag">golang</a>
+    </div>
 
 
     </div>
-
-    <div class="main-inner post posts-expand">
-
-
+  </header>
   
 
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-memory-allocation/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="golang系列之-内存分配 | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          golang系列之-内存分配
-        </h1>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-04-02 09:35:00" itemprop="dateCreated datePublished" datetime="2025-04-02T09:35:00+08:00">2025-04-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-04-10 17:16:01" itemprop="dateModified" datetime="2025-04-10T17:16:01+08:00">2025-04-10</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>28k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1:41</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody"><p>golang的内存分配机制最初是基于TCMalloc，演化至今已经有了很大差异。其原理是：slab + tiling algorithm + 层级内存分配。本文仅介绍如何通过mallocgc分配内存，不涉及栈内存分配管理、手动内存管理等内容。当前go版本：1.24</p>
+  <div class="content e-content" itemprop="articleBody">
+    <p>golang的内存分配机制最初是基于TCMalloc，演化至今已经有了很大差异。其原理是：slab + tiling algorithm + 层级内存分配。本文仅介绍如何通过mallocgc分配内存，不涉及栈内存分配管理、手动内存管理等内容。当前go版本：1.24</p>
 <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h3 id="slab-tiling"><a href="#slab-tiling" class="headerlink" title="slab + tiling"></a>slab + tiling</h3><p>内存分配基本单位-mspan（即slab），内部再划分更小的块（即tiling）</p>
 <p>小对象（&lt;&#x3D;32KB）按预定义的sizeclass分成不同的mspan，每个mspan最低有8KB，切割成指定大小的块。而大对象（&gt;32KB）的sizeclass&#x3D;0，不限制大小，mspan不分块。如下</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// mspann -&gt; sizeclass=0  -&gt; nKB  -&gt; | &lt;-----   nKB   -----&gt; |</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// mspanx -&gt; sizeclass=1  -&gt; 8KB  -&gt; | 8B  | 8B  | ... | 8B  |</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// mspany -&gt; sizeclass=5  -&gt; 8KB  -&gt; | 48B | 48B | ... | 48B |</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// mspanz -&gt; sizeclass=65 -&gt; 80KB</span></span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
@@ -682,141 +753,266 @@
 
 <h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://medium.com/safetycultureengineering/an-overview-of-memory-management-in-go-9a72ec7c76a8">An overview of memory management in Go</a><br><a target="_blank" rel="noopener" href="https://medium.com/@ankur_anand/a-visual-guide-to-golang-memory-allocator-from-ground-up-e132258453ed">A visual guide to Go Memory Allocator from scratch (Golang)</a><br><a target="_blank" rel="noopener" href="https://medium.com/a-journey-with-go/go-memory-management-and-allocation-a7396d430f44">Go: Memory Management and Allocation</a><br><a target="_blank" rel="noopener" href="https://andrestc.com/post/go-memory-allocation-pt1/">Go’s Memory Allocator - Overview</a><br><a target="_blank" rel="noopener" href="https://deepu.tech/memory-management-in-golang/">Visualizing memory management in Golang</a><br><a target="_blank" rel="noopener" href="https://about.sourcegraph.com/blog/go/gophercon-2018-allocator-wrestling">GopherCon 2018 - Allocator Wrestling</a><br><a target="_blank" rel="noopener" href="https://draveness.me/golang/docs/part3-runtime/ch07-memory/golang-memory-allocator/">7.1 内存分配器</a><br><a target="_blank" rel="noopener" href="https://agis.io/post/contiguous-stacks-golang/">Contiguous stacks in Go</a><br><a target="_blank" rel="noopener" href="https://medium.com/@kai.chihkaiyu/golang-memory-management-based-on-1-12-5-51fcc97f3c92">Golang Memory Management (based on 1.12.5)</a><br><a target="_blank" rel="noopener" href="https://mhh12121.github.io/2020/02/24/Go/memManage/">Golang Memory Allocator</a></p>
 
-    </div>
+  </div>
+</article>
 
-    
-    
-    
 
-    <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/golang/" rel="tag"># golang</a>
-          </div>
 
         
+          <div id="footer-post-container">
+  <div id="footer-post">
 
-          <div class="post-nav">
-            <div class="post-nav-item">
-                <a href="/golang-series-bootstrap-and-gmp-model/" rel="prev" title="golang系列之-程序运行流程及GMP模型">
-                  <i class="fa fa-angle-left"></i> golang系列之-程序运行流程及GMP模型
-                </a>
-            </div>
-            <div class="post-nav-item">
-                <a href="/golang-series-garbage-collection/" rel="next" title="golang系列之-垃圾回收">
-                  golang系列之-垃圾回收 <i class="fa fa-angle-right"></i>
-                </a>
-            </div>
-          </div>
-    </footer>
-  </article>
-</div>
-
-
-
-
-
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li>
+        
+      </ul>
+    </div>
 
     
-  
-  <div class="comments giscus-container">
-  </div>
-  
-  
-</div>
-  </main>
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#slab-tiling"><span class="toc-number">1.1.</span> <span class="toc-text">slab + tiling</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B1%82%E7%BA%A7%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="toc-number">1.2.</span> <span class="toc-text">层级内存分配</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E5%86%85%E5%AD%98%E7%8A%B6%E6%80%81"><span class="toc-number">1.3.</span> <span class="toc-text">系统内存状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GC%E5%8A%A9%E6%94%BB"><span class="toc-number">1.4.</span> <span class="toc-text">GC助攻</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#mspan"><span class="toc-number">2.1.</span> <span class="toc-text">mspan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mcache"><span class="toc-number">2.2.</span> <span class="toc-text">mcache</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mcentral"><span class="toc-number">2.3.</span> <span class="toc-text">mcentral</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mheap"><span class="toc-number">2.4.</span> <span class="toc-text">mheap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E9%85%8D%E5%99%A8"><span class="toc-number">2.5.</span> <span class="toc-text">分配器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#fixalloc"><span class="toc-number">2.5.1.</span> <span class="toc-text">fixalloc</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#pageAlloc"><span class="toc-number">2.5.2.</span> <span class="toc-text">pageAlloc</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mallocgc"><span class="toc-number">3.</span> <span class="toc-text">mallocgc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#mallocgcTiny"><span class="toc-number">3.1.</span> <span class="toc-text">mallocgcTiny</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mallocgcSmallNoscan"><span class="toc-number">3.2.</span> <span class="toc-text">mallocgcSmallNoscan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mallocgcSmallScanNoHeader"><span class="toc-number">3.3.</span> <span class="toc-text">mallocgcSmallScanNoHeader</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mallocgcSmallScanHeader"><span class="toc-number">3.4.</span> <span class="toc-text">mallocgcSmallScanHeader</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mallocgcLarge"><span class="toc-number">3.5.</span> <span class="toc-text">mallocgcLarge</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96%E5%87%BD%E6%95%B0"><span class="toc-number">4.</span> <span class="toc-text">相关依赖函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#malloc"><span class="toc-number">4.1.</span> <span class="toc-text">malloc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mheap-1"><span class="toc-number">4.2.</span> <span class="toc-text">mheap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mcentral-1"><span class="toc-number">4.3.</span> <span class="toc-text">mcentral</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mcache-1"><span class="toc-number">4.4.</span> <span class="toc-text">mcache</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mspan-1"><span class="toc-number">4.5.</span> <span class="toc-text">mspan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pageCache"><span class="toc-number">4.6.</span> <span class="toc-text">pageCache</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pageAlloc-1"><span class="toc-number">4.7.</span> <span class="toc-text">pageAlloc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pallocBits"><span class="toc-number">4.8.</span> <span class="toc-text">pallocBits</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GC%E5%8A%A9%E6%94%BB-1"><span class="toc-number">4.9.</span> <span class="toc-text">GC助攻</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99%E5%B1%8F%E9%9A%9C"><span class="toc-number">4.10.</span> <span class="toc-text">写屏障</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#OS%E5%86%85%E5%AD%98%E7%94%B3%E8%AF%B7"><span class="toc-number">4.11.</span> <span class="toc-text">OS内存申请</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#profile%E7%9B%B8%E5%85%B3"><span class="toc-number">4.12.</span> <span class="toc-text">profile相关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96"><span class="toc-number">4.13.</span> <span class="toc-text">其他</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">5.</span> <span class="toc-text">参考文档</span></a></li></ol>
+      </div>
+    
 
-  <footer class="footer">
-    <div class="footer-inner">
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://y2k38.github.io/golang-series-memory-allocation/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://y2k38.github.io/golang-series-memory-allocation/&text=golang系列之-内存分配"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://y2k38.github.io/golang-series-memory-allocation/&title=golang系列之-内存分配"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://y2k38.github.io/golang-series-memory-allocation/&is_video=false&description=golang系列之-内存分配"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=golang系列之-内存分配&body=Check out this article: https://y2k38.github.io/golang-series-memory-allocation/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://y2k38.github.io/golang-series-memory-allocation/&title=golang系列之-内存分配"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://y2k38.github.io/golang-series-memory-allocation/&title=golang系列之-内存分配"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://y2k38.github.io/golang-series-memory-allocation/&title=golang系列之-内存分配"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://y2k38.github.io/golang-series-memory-allocation/&title=golang系列之-内存分配"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://y2k38.github.io/golang-series-memory-allocation/&name=golang系列之-内存分配&description=&lt;p&gt;golang的内存分配机制最初是基于TCMalloc，演化至今已经有了很大差异。其原理是：slab + tiling algorithm + 层级内存分配。本文仅介绍如何通过mallocgc分配内存，不涉及栈内存分配管理、手动内存管理等内容。当前go版本：1.24&lt;/p&gt;
+&lt;h2 id=&#34;前言&#34;&gt;&lt;a href=&#34;#前言&#34; class=&#34;headerlink&#34; title=&#34;前言&#34;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;h3 id=&#34;slab-tiling&#34;&gt;&lt;a href=&#34;#slab-tiling&#34; class=&#34;headerlink&#34; title=&#34;slab + tiling&#34;&gt;&lt;/a&gt;slab + tiling&lt;/h3&gt;&lt;p&gt;内存分配基本单位-mspan（即slab），内部再划分更小的块（即tiling）&lt;/p&gt;
+&lt;p&gt;小对象（&amp;lt;&amp;#x3D;32KB）按预定义的sizeclass分成不同的mspan，每个mspan最低有8KB，切割成指定大小的块。而大对象（&amp;gt;32KB）的sizeclass&amp;#x3D;0，不限制大小，mspan不分块。如下&lt;/p&gt;
+&lt;figure class=&#34;highlight go&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// mspann -&amp;gt; sizeclass=0  -&amp;gt; nKB  -&amp;gt; | &amp;lt;-----   nKB   -----&amp;gt; |&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// ...&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// mspanx -&amp;gt; sizeclass=1  -&amp;gt; 8KB  -&amp;gt; | 8B  | 8B  | ... | 8B  |&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// ...&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// mspany -&amp;gt; sizeclass=5  -&amp;gt; 8KB  -&amp;gt; | 48B | 48B | ... | 48B |&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// ...&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// mspanz -&amp;gt; sizeclass=65 -&amp;gt; 80KB&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;// ...&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
 
-  <div class="copyright">
-    &copy; 
-    <span itemprop="copyrightYear">2026</span>
-    <span class="with-love">
-      <i class="fa fa-heart"></i>
-    </span>
-    <span class="author" itemprop="copyrightHolder">y2k38</span>
-  </div>
-<div class="wordcount">
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-chart-line"></i>
-    </span>
-    <span title="站点总字数">176k</span>
-  </span>
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-coffee"></i>
-    </span>
-    <span title="站点阅读时长">10:41</span>
-  </span>
-</div>
-  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
-  </div>
+&lt;p&gt;如&lt;code&gt;make([]int, 5)&lt;/code&gt;，创建一块40B大小的内存区域，经过计算这个内存块会从sizeclass&amp;#x3D;5的mspan分配（该mspan的每个元素大小为48B）&lt;/p&gt;
+&lt;h3 id=&#34;层级内存分配&#34;&gt;&lt;a href=&#34;#层级内存分配&#34; class=&#34;headerlink&#34; title=&#34;层级内存分配&#34;&gt;&lt;/a&gt;层级内存分配&lt;/h3&gt;&lt;p&gt;参考TCMalloc，内存分配时主要分为3级：mcache、mcentral、mheap&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;mcache为线程缓存，每个p都有一个，所有的内存分配&amp;#x2F;回收都是先通过mcache，访问不需要加锁&lt;/li&gt;
+&lt;li&gt;mcentral负责向mheap申请分配内存、管理mspan，按spanclass分组，嵌入到mheap结构体，全局唯一&lt;/li&gt;
+&lt;li&gt;mheap负责从系统申请内存进行分配管理，一般情况下访问都要加锁，全局唯一&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;执行mallocgc分配内存时，mheap、mcentral、mcache的关系如下&lt;/p&gt;
+&lt;figure class=&#34;highlight go&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//  mallocgc&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//     |&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//     |    (&amp;lt;=32KB)&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//     |--&amp;gt; p.mcache.alloc[spanclass] --&amp;gt; mheap.central[spanclass] --&amp;gt; mheap&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//     |&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//     |    (&amp;gt;32KB)&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;//     |--&amp;gt; mheap&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+&lt;li&gt;如果对象&amp;lt;&amp;#x3D;32KB&lt;ul&gt;
+&lt;li&gt;从p的mcache找一个空闲的mspan分配一段内存&amp;#x2F;地址空间&lt;/li&gt;
+&lt;li&gt;如果mspan没有空闲空间，从mcentral申请一个新的&amp;#x2F;重用一个已清扫的mspan&lt;/li&gt;
+&lt;li&gt;如果mcentral也没有可用mspan，通过mheap跟OS申请一段内存，初始化一个mspan返回&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;如果对象&amp;gt;32KB&lt;ul&gt;
+&lt;li&gt;通过mheap跟OS申请一段内存，初始化一个mspan返回&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;系统内存状态&#34;&gt;&lt;a href=&#34;#系统内存状态&#34; class=&#34;headerlink&#34; title=&#34;系统内存状态&#34;&gt;&lt;/a&gt;系统内存状态&lt;/h3&gt;&lt;p&gt;这里需要了解系统内存的几个状态，以及go内部是如何从系统分配、释放内存的&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;状态&lt;/th&gt;
+&lt;th&gt;含义&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;None&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;默认状态，未映射，地址空间未被保留或使用&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Reserved&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;已保留，但未提交，即地址空间已经被申请，但尚未向操作系统请求实际物理内存&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Prepared&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;已提交但未使用，已经向操作系统申请了物理内存，但可能未完全初始化&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Ready&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;可用状态，内存已初始化，可用于分配&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;p&gt;状态转换函数&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;函数&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;主要作用&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;是否分配物理内存&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;是否映射虚拟内存&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;内存状态转换&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;备注&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysAlloc&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;直接申请内存&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;None -&amp;gt; Ready&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;可能会触发 &lt;code&gt;mmap&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysReserve&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;保留虚拟地址空间，但不映射&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;❌ 否&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;None -&amp;gt; Reserved&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;预留地址，后续 &lt;code&gt;sysMap&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysMap&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;将预留的虚拟地址映射为实际物理内存&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Reserved -&amp;gt; Prepared&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;只有 &lt;code&gt;sysReserve&lt;/code&gt; 过的地址能 &lt;code&gt;sysMap&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysUsed&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;标记某段地址正在使用&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Prepared -&amp;gt; Ready&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;可能会触发 &lt;code&gt;madvise&lt;/code&gt; 让物理页生效&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysUnused&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;标记某段地址未使用&lt;/strong&gt;，可以回收物理内存&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;⚠️ 可能&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;❌ 否&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Ready -&amp;gt; Prepared&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;MADV_DONTNEED&lt;/code&gt;，内存仍属于进程&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysFault&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;让一段地址变成不可访问&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;❌ 否&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Ready -&amp;gt; Reserved&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;mprotect(PROT_NONE)&lt;/code&gt;，用于调试&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sysFree&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;释放虚拟内存，归还给 OS&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;✅ 是&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;-&amp;gt; None&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;munmap&lt;/code&gt;，这段内存不能再用&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;我对Go内存分配的理解&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;内存管理的本质是地址空间的组织和维护&lt;/li&gt;
+&lt;li&gt;Go的内存策略：尽量保留虚拟地址，按需释放物理页&lt;/li&gt;
+&lt;li&gt;Go会一次性申请64MB内存（Reserved-虚拟地址空间），但并不是立即分配物理页，而是在需要分配时使用sysMap + sysUsed使一小部份内存可用（Reserved-&amp;gt;Prepared-&amp;gt;Ready）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;GC助攻&#34;&gt;&lt;a href=&#34;#GC助攻&#34; class=&#34;headerlink&#34; title=&#34;GC助攻&#34;&gt;&lt;/a&gt;GC助攻&lt;/h3&gt;&lt;p&gt;为了防止内存分配速度过快，导致GC跟不上，分配时会判断是否需要协助GC标记&amp;#x2F;清扫。每次都要判断是否需要协助标记，而清扫只发生在获取新的mspan和大对象分配场景下&lt;/p&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://y2k38.github.io/golang-series-memory-allocation/&t=golang系列之-内存分配"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
 
     </div>
-  </footer>
 
-  
-  <div class="toggle sidebar-toggle" role="button">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
   </div>
-  <div class="sidebar-dimmer"></div>
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2026
+    y2k38
   </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
 
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
+    </div>
+    <!-- styles -->
 
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
 
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
-<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
   
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
 
 
+<script src="/js/main.js"></script>
 
+<!-- search -->
 
+<!-- Baidu Analytics -->
 
+<!-- Cloudflare Analytics -->
 
-  
+<!-- Disqus Comments -->
 
-
-
-
-<script class="next-config" data-name="giscus" type="application/json">{"enable":true,"repo":"Y2k38/y2k38.github.io","repo_id":"R_kgDOMZGvZA","category":"Announcements","category_id":"DIC_kwDOMZGvZM4CirXX","mapping":"pathname","strict":0,"reactions_enabled":1,"emit_metadata":0,"theme":"preferred_color_scheme","lang":"zh-CN","crossorigin":"anonymous","input_position":"bottom","loading":"lazy"}</script>
-
-<script>
-document.addEventListener('page:loaded', () => {
-  if (!CONFIG.page.comments) return;
-
-  NexT.utils.loadComments('.giscus-container')
-    .then(() => NexT.utils.getScript('https://giscus.app/client.js', {
-      attributes: {
-        async                   : true,
-        crossOrigin             : 'anonymous',
-        'data-repo'             : CONFIG.giscus.repo,
-        'data-repo-id'          : CONFIG.giscus.repo_id,
-        'data-category'         : CONFIG.giscus.category,
-        'data-category-id'      : CONFIG.giscus.category_id,
-        'data-mapping'          : CONFIG.giscus.mapping,
-        'data-strict'           : CONFIG.giscus.strict,
-        'data-reactions-enabled': CONFIG.giscus.reactions_enabled,
-        'data-emit-metadata'    : CONFIG.giscus.emit_metadata,
-        'data-theme'            : CONFIG.giscus.theme,
-        'data-lang'             : CONFIG.giscus.lang,
-        'data-input-position'   : CONFIG.giscus.input_position,
-        'data-loading'          : CONFIG.giscus.loading
-      },
-      parentNode: document.querySelector('.giscus-container')
-    }));
-});
-</script>
+<!-- utterances Comments -->
 
 </body>
 </html>

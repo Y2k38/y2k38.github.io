@@ -1,29 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang=zh>
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
-
-<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
-
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
     <meta name="description" content="go的垃圾回收原理官方说法是是三色标记法+混合写屏障，但是，理论上怎么说是一回事，具体实现又是另一回事了，或者说实现已经偏离文档描述。总的来说，GC这部份的内容要比GMP跟内存分配都要复杂的多且出人意料。当前go版本：1.24 前言目标对象Go的GC并不扫描整个内存，只关注以下区域：  heap上分配的对象（在mspan管理范围） data&#x2F;bss段的全局变量 栈上的引用（扫描stack">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang系列之-垃圾回收">
 <meta property="og:url" content="https://y2k38.github.io/golang-series-garbage-collection/index.html">
-<meta property="og:site_name" content="noname">
+<meta property="og:site_name" content="Y2k38&#39;s blog">
 <meta property="og:description" content="go的垃圾回收原理官方说法是是三色标记法+混合写屏障，但是，理论上怎么说是一回事，具体实现又是另一回事了，或者说实现已经偏离文档描述。总的来说，GC这部份的内容要比GMP跟内存分配都要复杂的多且出人意料。当前go版本：1.24 前言目标对象Go的GC并不扫描整个内存，只关注以下区域：  heap上分配的对象（在mspan管理范围） data&#x2F;bss段的全局变量 栈上的引用（扫描stack">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-04-06T02:58:06.000Z">
@@ -31,190 +18,289 @@
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="golang">
 <meta name="twitter:card" content="summary">
-
-
-<link rel="canonical" href="https://y2k38.github.io/golang-series-garbage-collection/">
-
-
-
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/golang-series-garbage-collection/","path":"golang-series-garbage-collection/","title":"golang系列之-垃圾回收"}</script>
-
-<script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>golang系列之-垃圾回收 | noname</title>
-  
-
-
-
-
-
-
-
-
-  <noscript>
-    <link rel="stylesheet" href="/css/noscript.css">
-  </noscript>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
-
-  <main class="main">
-    <div class="column">
-      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏" role="button">
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <p class="site-title">noname</p>
-      <i class="logo-line"></i>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="搜索" role="button">
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
-</header>
+    
+    
+      
         
-  
-  <aside class="sidebar">
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>golang系列之-垃圾回收</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+     -->
       </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/summary-of-reading-shadowsocks-libev-source-code/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/golang-series-memory-allocation/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://y2k38.github.io/golang-series-garbage-collection/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://y2k38.github.io/golang-series-garbage-collection/&text=golang系列之-垃圾回收"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://y2k38.github.io/golang-series-garbage-collection/&title=golang系列之-垃圾回收"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://y2k38.github.io/golang-series-garbage-collection/&is_video=false&description=golang系列之-垃圾回收"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=golang系列之-垃圾回收&body=Check out this article: https://y2k38.github.io/golang-series-garbage-collection/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://y2k38.github.io/golang-series-garbage-collection/&title=golang系列之-垃圾回收"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://y2k38.github.io/golang-series-garbage-collection/&title=golang系列之-垃圾回收"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://y2k38.github.io/golang-series-garbage-collection/&title=golang系列之-垃圾回收"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://y2k38.github.io/golang-series-garbage-collection/&title=golang系列之-垃圾回收"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://y2k38.github.io/golang-series-garbage-collection/&name=golang系列之-垃圾回收&description=&lt;p&gt;go的垃圾回收原理官方说法是是三色标记法+混合写屏障，但是，理论上怎么说是一回事，具体实现又是另一回事了，或者说实现已经偏离文档描述。总的来说，GC这部份的内容要比GMP跟内存分配都要复杂的多且出人意料。当前go版本：1.24&lt;/p&gt;
+&lt;h2 id=&#34;前言&#34;&gt;&lt;a href=&#34;#前言&#34; class=&#34;headerlink&#34; title=&#34;前言&#34;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;h3 id=&#34;目标对象&#34;&gt;&lt;a href=&#34;#目标对象&#34; class=&#34;headerlink&#34; title=&#34;目标对象&#34;&gt;&lt;/a&gt;目标对象&lt;/h3&gt;&lt;p&gt;Go的GC并不扫描整个内存，只关注以下区域：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;heap上分配的对象（在mspan管理范围）&lt;/li&gt;
+&lt;li&gt;data&amp;#x2F;bss段的全局变量&lt;/li&gt;
+&lt;li&gt;栈上的引用（扫描stackRoots）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;触发类型&#34;&gt;&lt;a href=&#34;#触发类型&#34; class=&#34;headerlink&#34; title=&#34;触发类型&#34;&gt;&lt;/a&gt;触发类型&lt;/h3&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;触发类型&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;备注&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcTriggerHeap&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;堆大小触发，heap内存达到一个临界点触发（最常用）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcTriggerTime&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;时间触发，超时2min未执行GC则强制执行&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcTriggerCycle&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;手动触发，用户调用runtime.GC()&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;h3 id=&#34;角色-分工&#34;&gt;&lt;a href=&#34;#角色-分工&#34; class=&#34;headerlink&#34; title=&#34;角色&amp;#x2F;分工&#34;&gt;&lt;/a&gt;角色&amp;#x2F;分工&lt;/h3&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;角色&lt;/th&gt;
+&lt;th&gt;作用&lt;/th&gt;
+&lt;th&gt;工作阶段&lt;/th&gt;
+&lt;th&gt;备注&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;Mark Worker（标记工作线程）&lt;/td&gt;
+&lt;td&gt;遍历对象图，标记存活对象，防止被错误回收&lt;/td&gt;
+&lt;td&gt;标记阶段（Marking）&lt;/td&gt;
+&lt;td&gt;运行时创建多个并发 Mark Worker，加快标记速度&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Sweeper（清扫器）&lt;/td&gt;
+&lt;td&gt;清理未标记的对象，将其内存释放回空闲列表（mheap.free）&lt;/td&gt;
+&lt;td&gt;清扫阶段（Sweeping）&lt;/td&gt;
+&lt;td&gt;逐步清理，避免一次性 STW（Stop The World）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Scavenger（内存回收器）&lt;/td&gt;
+&lt;td&gt;释放长期未使用的堆内存，归还给OS以减少RSS&lt;/td&gt;
+&lt;td&gt;后台运行（定期触发）&lt;/td&gt;
+&lt;td&gt;主要针对大对象或空闲mspans，减少物理内存占用&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;标记工作线程&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;其中，标记工作线程的会根据工作模式进一步区分，如下&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;标记工作线程模式&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;备注&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcMarkWorkerNotWorker&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;默认，未运行&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcMarkWorkerDedicatedMode&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;专用标记任务，最高优先级，非抢占&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcMarkWorkerFractionalMode&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;比例标记任务，跟其他g共享时间，可被抢占&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcMarkWorkerIdleMode&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;空闲时执行的低优先级标记任务，需要p空闲&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;CPU限制&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;标记工作线程的CPU使用率被限制在25%（GOGC&amp;#x3D;100时），假设系统使用一个6核CPU，那么GC在标记阶段大约会使用1.5个CPU资源：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;1个CPU由Dedicated（专用模式）的标记工作线程持续占用，该线程不允许抢占，直到标记任务完成&lt;/li&gt;
+&lt;li&gt;0.5个CPU由Fractional（比例模式）的标记工作线程使用，该线程仅在由额外CPU资源可用时运行，并会根据系统负责动态调整自身的CPU使用率&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;完整运行流程&#34;&gt;&lt;a href=&#34;#完整运行流程&#34; class=&#34;headerlink&#34; title=&#34;完整运行流程&#34;&gt;&lt;/a&gt;完整运行流程&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Sweep Termination（清理终止）&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;STW（Stop The World），确保所有P都达到GC安全点&lt;/li&gt;
+&lt;li&gt;完成上一轮GC未完成的sweep（清扫），回收剩余的的mspan&lt;/li&gt;
+&lt;li&gt;准备GC统计数据，为新一轮的GC计算目标heap大小、触发阈值等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Mark（标记）&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;STW，切换GC状态&lt;ul&gt;
+&lt;li&gt;gcphase从_GCoff切换到_GCmark&lt;/li&gt;
+&lt;li&gt;开启写屏障（write barrier），允许Mutator协助GC标记，以维护三色标记不变性&lt;/li&gt;
+&lt;li&gt;启动GC后台线程，执行并发标记任务&lt;/li&gt;
+&lt;li&gt;根对象入队（包括栈、全局变量）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;恢复世界（Start The World），GC线程进入并发标记阶段&lt;ul&gt;
+&lt;li&gt;从根对象开始标记，遍历所有可达对象&lt;/li&gt;
+&lt;li&gt;扫描灰色对象（已发现但未完全扫描的对象）并进行扫描，将其置黑，并将其引用的对象入队为灰色&lt;/li&gt;
+&lt;li&gt;混合写屏障（Hybrid Write Barrier）确保一致性&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;完成标记&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Mark Termination（标记终止）&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;STW，切换GC状态&lt;ul&gt;
+&lt;li&gt;gcphase从_GCmark切换到_GCmarktermination&lt;/li&gt;
+&lt;li&gt;停止并发标记任务&lt;/li&gt;
+&lt;li&gt;执行终结器finalizer，如果有的话&lt;/li&gt;
+&lt;li&gt;清理mcache以确保没有悬挂对象&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Sweep（清理）&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;切换GC状态&lt;ul&gt;
+&lt;li&gt;gcphase从_GCmarktermination切换回_GCoff&lt;/li&gt;
+&lt;li&gt;关闭写屏障（Mutator不再协助GC标记）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;恢复世界（Start The World），进入并发清扫阶段&lt;ul&gt;
+&lt;li&gt;清理未被标记的对象&lt;/li&gt;
+&lt;li&gt;回收mspan到mheap或mcentral，部份回收到mcache&lt;/li&gt;
+&lt;li&gt;Mutator分配内存时，可能会触发增量清扫（Incremental Sweeping），加快回收过程&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;满足触发条件，启动下一轮GC&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;简单的说，标记然后清扫&lt;/p&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://y2k38.github.io/golang-series-garbage-collection/&t=golang系列之-垃圾回收"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
 
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87%E5%AF%B9%E8%B1%A1"><span class="nav-number">1.1.</span> <span class="nav-text">目标对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A6%E5%8F%91%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.2.</span> <span class="nav-text">触发类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%92%E8%89%B2-%E5%88%86%E5%B7%A5"><span class="nav-number">1.3.</span> <span class="nav-text">角色&#x2F;分工</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E8%BF%90%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.4.</span> <span class="nav-text">完整运行流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#workType"><span class="nav-number">2.1.</span> <span class="nav-text">workType</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gcControllerState"><span class="nav-number">2.2.</span> <span class="nav-text">gcControllerState</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gcCPULimiterState"><span class="nav-number">2.3.</span> <span class="nav-text">gcCPULimiterState</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E6%89%AB%E5%99%A8"><span class="nav-number">2.4.</span> <span class="nav-text">清扫器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="nav-number">2.5.</span> <span class="nav-text">内存回收器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%93%E5%86%B2%E5%8C%BA"><span class="nav-number">2.6.</span> <span class="nav-text">缓冲区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">2.7.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A6%E5%8F%91%E6%96%B9%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">触发方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E8%A7%A6%E5%8F%91"><span class="nav-number">3.1.</span> <span class="nav-text">时间触发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%86%E5%A4%A7%E5%B0%8F%E8%A7%A6%E5%8F%91"><span class="nav-number">3.2.</span> <span class="nav-text">堆大小触发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E8%A7%A6%E5%8F%91"><span class="nav-number">3.3.</span> <span class="nav-text">手动触发</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">完整流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC1%E9%98%B6%E6%AE%B5%EF%BC%9ASweep-Termination%EF%BC%88%E6%B8%85%E7%90%86%E7%BB%88%E6%AD%A2%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">第1阶段：Sweep Termination（清理终止）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC2%E9%98%B6%E6%AE%B5%EF%BC%9AMark%EF%BC%88%E6%A0%87%E8%AE%B0%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">第2阶段：Mark（标记）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC3%E9%98%B6%E6%AE%B5%EF%BC%9AMark-Termination%EF%BC%88%E6%A0%87%E8%AE%B0%E7%BB%88%E6%AD%A2%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">第3阶段：Mark Termination（标记终止）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC4%E9%98%B6%E6%AE%B5%EF%BC%9ASweep%EF%BC%88%E6%B8%85%E7%90%86%EF%BC%89"><span class="nav-number">4.4.</span> <span class="nav-text">第4阶段：Sweep（清理）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C"><span class="nav-number">5.</span> <span class="nav-text">混合写屏障</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96%E5%87%BD%E6%95%B0"><span class="nav-number">6.</span> <span class="nav-text">相关依赖函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GC%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">6.1.</span> <span class="nav-text">GC初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gcTrigger-GC%E8%A7%A6%E5%8F%91"><span class="nav-number">6.2.</span> <span class="nav-text">gcTrigger-GC触发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%96%E7%95%8C%E5%81%9C%E6%AD%A2-%E6%81%A2%E5%A4%8D"><span class="nav-number">6.3.</span> <span class="nav-text">世界停止&#x2F;恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E8%AE%B0%E7%BA%BF%E7%A8%8B%E7%9B%B8%E5%85%B3"><span class="nav-number">6.4.</span> <span class="nav-text">标记线程相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E6%89%AB%E5%99%A8%E7%9B%B8%E5%85%B3"><span class="nav-number">6.5.</span> <span class="nav-text">清扫器相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E5%99%A8%E7%9B%B8%E5%85%B3"><span class="nav-number">6.6.</span> <span class="nav-text">内存回收器相关</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#scavengerState-%E8%8A%82%E5%A5%8F%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="nav-number">6.6.1.</span> <span class="nav-text">scavengerState-节奏调度器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#scavengeIndex-%E5%9B%9E%E6%94%B6%E7%B4%A2%E5%BC%95"><span class="nav-number">6.6.2.</span> <span class="nav-text">scavengeIndex-回收索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9B%B8%E5%85%B3"><span class="nav-number">6.6.3.</span> <span class="nav-text">内存管理相关</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%93%E5%86%B2%E5%8C%BA-1"><span class="nav-number">6.7.</span> <span class="nav-text">缓冲区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E7%BC%93%E5%86%B2%E5%8C%BA"><span class="nav-number">6.7.1.</span> <span class="nav-text">任务缓冲区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%99%E5%B1%8F%E9%9A%9C%E7%BC%93%E5%86%B2%E5%8C%BA"><span class="nav-number">6.7.2.</span> <span class="nav-text">写屏障缓冲区</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gcControllerState-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E8%8A%82%E5%A5%8F%E6%8E%A7%E5%88%B6"><span class="nav-number">6.8.</span> <span class="nav-text">gcControllerState-垃圾回收节奏控制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gcCPULimiterState-CPU%E9%99%90%E5%88%B6%E5%99%A8"><span class="nav-number">6.9.</span> <span class="nav-text">gcCPULimiterState-CPU限制器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GMP%E8%B0%83%E5%BA%A6%E7%9B%B8%E5%85%B3"><span class="nav-number">6.10.</span> <span class="nav-text">GMP调度相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%88%E7%9B%B8%E5%85%B3"><span class="nav-number">6.11.</span> <span class="nav-text">栈相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bitmap%E6%93%8D%E4%BD%9C%E7%9B%B8%E5%85%B3"><span class="nav-number">6.12.</span> <span class="nav-text">bitmap操作相关</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="nav-number">7.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
-        </div>
-        <!--/noindex-->
-
-        <div class="site-overview-wrap sidebar-panel">
-          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">y2k38</p>
-  <div class="site-description" itemprop="description">个人笔记</div>
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87%E5%AF%B9%E8%B1%A1"><span class="toc-number">1.1.</span> <span class="toc-text">目标对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.2.</span> <span class="toc-text">触发类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%92%E8%89%B2-%E5%88%86%E5%B7%A5"><span class="toc-number">1.3.</span> <span class="toc-text">角色&#x2F;分工</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%BF%90%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.4.</span> <span class="toc-text">完整运行流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#workType"><span class="toc-number">2.1.</span> <span class="toc-text">workType</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gcControllerState"><span class="toc-number">2.2.</span> <span class="toc-text">gcControllerState</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gcCPULimiterState"><span class="toc-number">2.3.</span> <span class="toc-text">gcCPULimiterState</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B8%85%E6%89%AB%E5%99%A8"><span class="toc-number">2.4.</span> <span class="toc-text">清扫器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">2.5.</span> <span class="toc-text">内存回收器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%86%B2%E5%8C%BA"><span class="toc-number">2.6.</span> <span class="toc-text">缓冲区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96"><span class="toc-number">2.7.</span> <span class="toc-text">其他</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91%E6%96%B9%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">触发方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E8%A7%A6%E5%8F%91"><span class="toc-number">3.1.</span> <span class="toc-text">时间触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A0%86%E5%A4%A7%E5%B0%8F%E8%A7%A6%E5%8F%91"><span class="toc-number">3.2.</span> <span class="toc-text">堆大小触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E8%A7%A6%E5%8F%91"><span class="toc-number">3.3.</span> <span class="toc-text">手动触发</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">完整流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC1%E9%98%B6%E6%AE%B5%EF%BC%9ASweep-Termination%EF%BC%88%E6%B8%85%E7%90%86%E7%BB%88%E6%AD%A2%EF%BC%89"><span class="toc-number">4.1.</span> <span class="toc-text">第1阶段：Sweep Termination（清理终止）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC2%E9%98%B6%E6%AE%B5%EF%BC%9AMark%EF%BC%88%E6%A0%87%E8%AE%B0%EF%BC%89"><span class="toc-number">4.2.</span> <span class="toc-text">第2阶段：Mark（标记）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC3%E9%98%B6%E6%AE%B5%EF%BC%9AMark-Termination%EF%BC%88%E6%A0%87%E8%AE%B0%E7%BB%88%E6%AD%A2%EF%BC%89"><span class="toc-number">4.3.</span> <span class="toc-text">第3阶段：Mark Termination（标记终止）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC4%E9%98%B6%E6%AE%B5%EF%BC%9ASweep%EF%BC%88%E6%B8%85%E7%90%86%EF%BC%89"><span class="toc-number">4.4.</span> <span class="toc-text">第4阶段：Sweep（清理）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C"><span class="toc-number">5.</span> <span class="toc-text">混合写屏障</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96%E5%87%BD%E6%95%B0"><span class="toc-number">6.</span> <span class="toc-text">相关依赖函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#GC%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">6.1.</span> <span class="toc-text">GC初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gcTrigger-GC%E8%A7%A6%E5%8F%91"><span class="toc-number">6.2.</span> <span class="toc-text">gcTrigger-GC触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%96%E7%95%8C%E5%81%9C%E6%AD%A2-%E6%81%A2%E5%A4%8D"><span class="toc-number">6.3.</span> <span class="toc-text">世界停止&#x2F;恢复</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%87%E8%AE%B0%E7%BA%BF%E7%A8%8B%E7%9B%B8%E5%85%B3"><span class="toc-number">6.4.</span> <span class="toc-text">标记线程相关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B8%85%E6%89%AB%E5%99%A8%E7%9B%B8%E5%85%B3"><span class="toc-number">6.5.</span> <span class="toc-text">清扫器相关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E5%99%A8%E7%9B%B8%E5%85%B3"><span class="toc-number">6.6.</span> <span class="toc-text">内存回收器相关</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#scavengerState-%E8%8A%82%E5%A5%8F%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="toc-number">6.6.1.</span> <span class="toc-text">scavengerState-节奏调度器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#scavengeIndex-%E5%9B%9E%E6%94%B6%E7%B4%A2%E5%BC%95"><span class="toc-number">6.6.2.</span> <span class="toc-text">scavengeIndex-回收索引</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9B%B8%E5%85%B3"><span class="toc-number">6.6.3.</span> <span class="toc-text">内存管理相关</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%86%B2%E5%8C%BA-1"><span class="toc-number">6.7.</span> <span class="toc-text">缓冲区</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E7%BC%93%E5%86%B2%E5%8C%BA"><span class="toc-number">6.7.1.</span> <span class="toc-text">任务缓冲区</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%99%E5%B1%8F%E9%9A%9C%E7%BC%93%E5%86%B2%E5%8C%BA"><span class="toc-number">6.7.2.</span> <span class="toc-text">写屏障缓冲区</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gcControllerState-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E8%8A%82%E5%A5%8F%E6%8E%A7%E5%88%B6"><span class="toc-number">6.8.</span> <span class="toc-text">gcControllerState-垃圾回收节奏控制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gcCPULimiterState-CPU%E9%99%90%E5%88%B6%E5%99%A8"><span class="toc-number">6.9.</span> <span class="toc-text">gcCPULimiterState-CPU限制器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GMP%E8%B0%83%E5%BA%A6%E7%9B%B8%E5%85%B3"><span class="toc-number">6.10.</span> <span class="toc-text">GMP调度相关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%88%E7%9B%B8%E5%85%B3"><span class="toc-number">6.11.</span> <span class="toc-text">栈相关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#bitmap%E6%93%8D%E4%BD%9C%E7%9B%B8%E5%85%B3"><span class="toc-number">6.12.</span> <span class="toc-text">bitmap操作相关</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">7.</span> <span class="toc-text">参考文档</span></a></li></ol>
+      </div>
+    
+  </span>
 </div>
-<div class="site-state-wrap animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-        <a href="/archives/">
-          <span class="site-state-item-count">48</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-          <a href="/tags/">
-        <span class="site-state-item-count">40</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
 
-        </div>
-      </div>
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        golang系列之-垃圾回收
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">y2k38</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-06T02:58:06.000Z" class="dt-published" itemprop="datePublished">2025-04-06</time>
+        
+      
     </div>
 
-    
-  </aside>
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/golang/" rel="tag">golang</a>
+    </div>
 
 
     </div>
-
-    <div class="main-inner post posts-expand">
-
-
+  </header>
   
 
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-garbage-collection/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="golang系列之-垃圾回收 | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          golang系列之-垃圾回收
-        </h1>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-04-06 10:58:06" itemprop="dateCreated datePublished" datetime="2025-04-06T10:58:06+08:00">2025-04-06</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-04-07 15:43:46" itemprop="dateModified" datetime="2025-04-07T15:43:46+08:00">2025-04-07</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>36k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2:11</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody"><p>go的垃圾回收原理官方说法是是三色标记法+混合写屏障，但是，理论上怎么说是一回事，具体实现又是另一回事了，或者说实现已经偏离文档描述。总的来说，GC这部份的内容要比GMP跟内存分配都要复杂的多且出人意料。当前go版本：1.24</p>
+  <div class="content e-content" itemprop="articleBody">
+    <p>go的垃圾回收原理官方说法是是三色标记法+混合写屏障，但是，理论上怎么说是一回事，具体实现又是另一回事了，或者说实现已经偏离文档描述。总的来说，GC这部份的内容要比GMP跟内存分配都要复杂的多且出人意料。当前go版本：1.24</p>
 <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h3 id="目标对象"><a href="#目标对象" class="headerlink" title="目标对象"></a>目标对象</h3><p>Go的GC并不扫描整个内存，只关注以下区域：</p>
 <ol>
 <li>heap上分配的对象（在mspan管理范围）</li>
@@ -608,141 +694,281 @@
 
 <h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://betterprogramming.pub/memory-optimization-and-garbage-collector-management-in-go-71da4612a960">Memory Optimization and Garbage Collector Management in Go</a><br><a target="_blank" rel="noopener" href="https://tip.golang.org/doc/gc-guide">A Guide to the Go Garbage Collector</a><br><a target="_blank" rel="noopener" href="https://medium.com/a-journey-with-go/go-how-does-the-garbage-collector-mark-the-memory-72cfc12c6976">Go: How Does the Garbage Collector Mark the Memory?</a><br><a target="_blank" rel="noopener" href="https://itnext.io/go-does-not-need-a-java-style-gc-ac99b8d26c60">Go Does Not Need a Java Style GC</a><br><a target="_blank" rel="noopener" href="https://xargin.com/impl-of-go-gc/">Go 语言的 GC 实现分析</a><br><a target="_blank" rel="noopener" href="https://community.apinto.com/d/34057-golang-gc">一文弄懂 Golang GC、三色标记、混合写屏障机制</a><br><a target="_blank" rel="noopener" href="https://liangyaopei.github.io/2021/01/02/golang-gc-intro/">Golang垃圾回收(GC)介绍</a><br><a target="_blank" rel="noopener" href="https://groups.google.com/g/golang-dev/c/oUFIOm7IMxo">How does go GC identify GC roots</a><br><a target="_blank" rel="noopener" href="https://www.quora.com/What-is-a-garbage-collection-GC-root">What is a garbage collection (GC) root?</a><br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/eDd212DhjIRGpytBkgfzAg">关于Golang GC的一些误解–真的比Java算法更领先吗？</a><br><a target="_blank" rel="noopener" href="https://liqingqiya.github.io/golang/gc/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/%E5%86%99%E5%B1%8F%E9%9A%9C/2020/07/24/gc5.html">golang 垃圾回收（五）混合写屏障</a></p>
 
-    </div>
+  </div>
+</article>
 
-    
-    
-    
 
-    <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/golang/" rel="tag"># golang</a>
-          </div>
 
         
+          <div id="footer-post-container">
+  <div id="footer-post">
 
-          <div class="post-nav">
-            <div class="post-nav-item">
-                <a href="/golang-series-memory-allocation/" rel="prev" title="golang系列之-内存分配">
-                  <i class="fa fa-angle-left"></i> golang系列之-内存分配
-                </a>
-            </div>
-            <div class="post-nav-item">
-                <a href="/summary-of-reading-shadowsocks-libev-source-code/" rel="next" title="shadowsocks-libev源码阅读总结">
-                  shadowsocks-libev源码阅读总结 <i class="fa fa-angle-right"></i>
-                </a>
-            </div>
-          </div>
-    </footer>
-  </article>
-</div>
-
-
-
-
-
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li>
+        
+      </ul>
+    </div>
 
     
-  
-  <div class="comments giscus-container">
-  </div>
-  
-  
-</div>
-  </main>
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87%E5%AF%B9%E8%B1%A1"><span class="toc-number">1.1.</span> <span class="toc-text">目标对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.2.</span> <span class="toc-text">触发类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%92%E8%89%B2-%E5%88%86%E5%B7%A5"><span class="toc-number">1.3.</span> <span class="toc-text">角色&#x2F;分工</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%BF%90%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.4.</span> <span class="toc-text">完整运行流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#workType"><span class="toc-number">2.1.</span> <span class="toc-text">workType</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gcControllerState"><span class="toc-number">2.2.</span> <span class="toc-text">gcControllerState</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gcCPULimiterState"><span class="toc-number">2.3.</span> <span class="toc-text">gcCPULimiterState</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B8%85%E6%89%AB%E5%99%A8"><span class="toc-number">2.4.</span> <span class="toc-text">清扫器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">2.5.</span> <span class="toc-text">内存回收器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%86%B2%E5%8C%BA"><span class="toc-number">2.6.</span> <span class="toc-text">缓冲区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96"><span class="toc-number">2.7.</span> <span class="toc-text">其他</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91%E6%96%B9%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">触发方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E8%A7%A6%E5%8F%91"><span class="toc-number">3.1.</span> <span class="toc-text">时间触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A0%86%E5%A4%A7%E5%B0%8F%E8%A7%A6%E5%8F%91"><span class="toc-number">3.2.</span> <span class="toc-text">堆大小触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E8%A7%A6%E5%8F%91"><span class="toc-number">3.3.</span> <span class="toc-text">手动触发</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">完整流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC1%E9%98%B6%E6%AE%B5%EF%BC%9ASweep-Termination%EF%BC%88%E6%B8%85%E7%90%86%E7%BB%88%E6%AD%A2%EF%BC%89"><span class="toc-number">4.1.</span> <span class="toc-text">第1阶段：Sweep Termination（清理终止）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC2%E9%98%B6%E6%AE%B5%EF%BC%9AMark%EF%BC%88%E6%A0%87%E8%AE%B0%EF%BC%89"><span class="toc-number">4.2.</span> <span class="toc-text">第2阶段：Mark（标记）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC3%E9%98%B6%E6%AE%B5%EF%BC%9AMark-Termination%EF%BC%88%E6%A0%87%E8%AE%B0%E7%BB%88%E6%AD%A2%EF%BC%89"><span class="toc-number">4.3.</span> <span class="toc-text">第3阶段：Mark Termination（标记终止）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC4%E9%98%B6%E6%AE%B5%EF%BC%9ASweep%EF%BC%88%E6%B8%85%E7%90%86%EF%BC%89"><span class="toc-number">4.4.</span> <span class="toc-text">第4阶段：Sweep（清理）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C"><span class="toc-number">5.</span> <span class="toc-text">混合写屏障</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96%E5%87%BD%E6%95%B0"><span class="toc-number">6.</span> <span class="toc-text">相关依赖函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#GC%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">6.1.</span> <span class="toc-text">GC初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gcTrigger-GC%E8%A7%A6%E5%8F%91"><span class="toc-number">6.2.</span> <span class="toc-text">gcTrigger-GC触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%96%E7%95%8C%E5%81%9C%E6%AD%A2-%E6%81%A2%E5%A4%8D"><span class="toc-number">6.3.</span> <span class="toc-text">世界停止&#x2F;恢复</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%87%E8%AE%B0%E7%BA%BF%E7%A8%8B%E7%9B%B8%E5%85%B3"><span class="toc-number">6.4.</span> <span class="toc-text">标记线程相关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B8%85%E6%89%AB%E5%99%A8%E7%9B%B8%E5%85%B3"><span class="toc-number">6.5.</span> <span class="toc-text">清扫器相关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E5%99%A8%E7%9B%B8%E5%85%B3"><span class="toc-number">6.6.</span> <span class="toc-text">内存回收器相关</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#scavengerState-%E8%8A%82%E5%A5%8F%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="toc-number">6.6.1.</span> <span class="toc-text">scavengerState-节奏调度器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#scavengeIndex-%E5%9B%9E%E6%94%B6%E7%B4%A2%E5%BC%95"><span class="toc-number">6.6.2.</span> <span class="toc-text">scavengeIndex-回收索引</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9B%B8%E5%85%B3"><span class="toc-number">6.6.3.</span> <span class="toc-text">内存管理相关</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%86%B2%E5%8C%BA-1"><span class="toc-number">6.7.</span> <span class="toc-text">缓冲区</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E7%BC%93%E5%86%B2%E5%8C%BA"><span class="toc-number">6.7.1.</span> <span class="toc-text">任务缓冲区</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%99%E5%B1%8F%E9%9A%9C%E7%BC%93%E5%86%B2%E5%8C%BA"><span class="toc-number">6.7.2.</span> <span class="toc-text">写屏障缓冲区</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gcControllerState-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E8%8A%82%E5%A5%8F%E6%8E%A7%E5%88%B6"><span class="toc-number">6.8.</span> <span class="toc-text">gcControllerState-垃圾回收节奏控制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gcCPULimiterState-CPU%E9%99%90%E5%88%B6%E5%99%A8"><span class="toc-number">6.9.</span> <span class="toc-text">gcCPULimiterState-CPU限制器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GMP%E8%B0%83%E5%BA%A6%E7%9B%B8%E5%85%B3"><span class="toc-number">6.10.</span> <span class="toc-text">GMP调度相关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%88%E7%9B%B8%E5%85%B3"><span class="toc-number">6.11.</span> <span class="toc-text">栈相关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#bitmap%E6%93%8D%E4%BD%9C%E7%9B%B8%E5%85%B3"><span class="toc-number">6.12.</span> <span class="toc-text">bitmap操作相关</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-number">7.</span> <span class="toc-text">参考文档</span></a></li></ol>
+      </div>
+    
 
-  <footer class="footer">
-    <div class="footer-inner">
-
-  <div class="copyright">
-    &copy; 
-    <span itemprop="copyrightYear">2026</span>
-    <span class="with-love">
-      <i class="fa fa-heart"></i>
-    </span>
-    <span class="author" itemprop="copyrightHolder">y2k38</span>
-  </div>
-<div class="wordcount">
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-chart-line"></i>
-    </span>
-    <span title="站点总字数">176k</span>
-  </span>
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-coffee"></i>
-    </span>
-    <span title="站点阅读时长">10:41</span>
-  </span>
-</div>
-  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
-  </div>
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://y2k38.github.io/golang-series-garbage-collection/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://y2k38.github.io/golang-series-garbage-collection/&text=golang系列之-垃圾回收"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://y2k38.github.io/golang-series-garbage-collection/&title=golang系列之-垃圾回收"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://y2k38.github.io/golang-series-garbage-collection/&is_video=false&description=golang系列之-垃圾回收"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=golang系列之-垃圾回收&body=Check out this article: https://y2k38.github.io/golang-series-garbage-collection/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://y2k38.github.io/golang-series-garbage-collection/&title=golang系列之-垃圾回收"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://y2k38.github.io/golang-series-garbage-collection/&title=golang系列之-垃圾回收"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://y2k38.github.io/golang-series-garbage-collection/&title=golang系列之-垃圾回收"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://y2k38.github.io/golang-series-garbage-collection/&title=golang系列之-垃圾回收"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://y2k38.github.io/golang-series-garbage-collection/&name=golang系列之-垃圾回收&description=&lt;p&gt;go的垃圾回收原理官方说法是是三色标记法+混合写屏障，但是，理论上怎么说是一回事，具体实现又是另一回事了，或者说实现已经偏离文档描述。总的来说，GC这部份的内容要比GMP跟内存分配都要复杂的多且出人意料。当前go版本：1.24&lt;/p&gt;
+&lt;h2 id=&#34;前言&#34;&gt;&lt;a href=&#34;#前言&#34; class=&#34;headerlink&#34; title=&#34;前言&#34;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;h3 id=&#34;目标对象&#34;&gt;&lt;a href=&#34;#目标对象&#34; class=&#34;headerlink&#34; title=&#34;目标对象&#34;&gt;&lt;/a&gt;目标对象&lt;/h3&gt;&lt;p&gt;Go的GC并不扫描整个内存，只关注以下区域：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;heap上分配的对象（在mspan管理范围）&lt;/li&gt;
+&lt;li&gt;data&amp;#x2F;bss段的全局变量&lt;/li&gt;
+&lt;li&gt;栈上的引用（扫描stackRoots）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;触发类型&#34;&gt;&lt;a href=&#34;#触发类型&#34; class=&#34;headerlink&#34; title=&#34;触发类型&#34;&gt;&lt;/a&gt;触发类型&lt;/h3&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;触发类型&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;备注&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcTriggerHeap&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;堆大小触发，heap内存达到一个临界点触发（最常用）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcTriggerTime&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;时间触发，超时2min未执行GC则强制执行&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcTriggerCycle&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;手动触发，用户调用runtime.GC()&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;h3 id=&#34;角色-分工&#34;&gt;&lt;a href=&#34;#角色-分工&#34; class=&#34;headerlink&#34; title=&#34;角色&amp;#x2F;分工&#34;&gt;&lt;/a&gt;角色&amp;#x2F;分工&lt;/h3&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;角色&lt;/th&gt;
+&lt;th&gt;作用&lt;/th&gt;
+&lt;th&gt;工作阶段&lt;/th&gt;
+&lt;th&gt;备注&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;Mark Worker（标记工作线程）&lt;/td&gt;
+&lt;td&gt;遍历对象图，标记存活对象，防止被错误回收&lt;/td&gt;
+&lt;td&gt;标记阶段（Marking）&lt;/td&gt;
+&lt;td&gt;运行时创建多个并发 Mark Worker，加快标记速度&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Sweeper（清扫器）&lt;/td&gt;
+&lt;td&gt;清理未标记的对象，将其内存释放回空闲列表（mheap.free）&lt;/td&gt;
+&lt;td&gt;清扫阶段（Sweeping）&lt;/td&gt;
+&lt;td&gt;逐步清理，避免一次性 STW（Stop The World）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Scavenger（内存回收器）&lt;/td&gt;
+&lt;td&gt;释放长期未使用的堆内存，归还给OS以减少RSS&lt;/td&gt;
+&lt;td&gt;后台运行（定期触发）&lt;/td&gt;
+&lt;td&gt;主要针对大对象或空闲mspans，减少物理内存占用&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;标记工作线程&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;其中，标记工作线程的会根据工作模式进一步区分，如下&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;标记工作线程模式&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;备注&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcMarkWorkerNotWorker&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;默认，未运行&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcMarkWorkerDedicatedMode&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;专用标记任务，最高优先级，非抢占&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcMarkWorkerFractionalMode&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;比例标记任务，跟其他g共享时间，可被抢占&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;gcMarkWorkerIdleMode&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;空闲时执行的低优先级标记任务，需要p空闲&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;CPU限制&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;标记工作线程的CPU使用率被限制在25%（GOGC&amp;#x3D;100时），假设系统使用一个6核CPU，那么GC在标记阶段大约会使用1.5个CPU资源：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;1个CPU由Dedicated（专用模式）的标记工作线程持续占用，该线程不允许抢占，直到标记任务完成&lt;/li&gt;
+&lt;li&gt;0.5个CPU由Fractional（比例模式）的标记工作线程使用，该线程仅在由额外CPU资源可用时运行，并会根据系统负责动态调整自身的CPU使用率&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;完整运行流程&#34;&gt;&lt;a href=&#34;#完整运行流程&#34; class=&#34;headerlink&#34; title=&#34;完整运行流程&#34;&gt;&lt;/a&gt;完整运行流程&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Sweep Termination（清理终止）&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;STW（Stop The World），确保所有P都达到GC安全点&lt;/li&gt;
+&lt;li&gt;完成上一轮GC未完成的sweep（清扫），回收剩余的的mspan&lt;/li&gt;
+&lt;li&gt;准备GC统计数据，为新一轮的GC计算目标heap大小、触发阈值等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Mark（标记）&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;STW，切换GC状态&lt;ul&gt;
+&lt;li&gt;gcphase从_GCoff切换到_GCmark&lt;/li&gt;
+&lt;li&gt;开启写屏障（write barrier），允许Mutator协助GC标记，以维护三色标记不变性&lt;/li&gt;
+&lt;li&gt;启动GC后台线程，执行并发标记任务&lt;/li&gt;
+&lt;li&gt;根对象入队（包括栈、全局变量）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;恢复世界（Start The World），GC线程进入并发标记阶段&lt;ul&gt;
+&lt;li&gt;从根对象开始标记，遍历所有可达对象&lt;/li&gt;
+&lt;li&gt;扫描灰色对象（已发现但未完全扫描的对象）并进行扫描，将其置黑，并将其引用的对象入队为灰色&lt;/li&gt;
+&lt;li&gt;混合写屏障（Hybrid Write Barrier）确保一致性&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;完成标记&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Mark Termination（标记终止）&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;STW，切换GC状态&lt;ul&gt;
+&lt;li&gt;gcphase从_GCmark切换到_GCmarktermination&lt;/li&gt;
+&lt;li&gt;停止并发标记任务&lt;/li&gt;
+&lt;li&gt;执行终结器finalizer，如果有的话&lt;/li&gt;
+&lt;li&gt;清理mcache以确保没有悬挂对象&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Sweep（清理）&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;切换GC状态&lt;ul&gt;
+&lt;li&gt;gcphase从_GCmarktermination切换回_GCoff&lt;/li&gt;
+&lt;li&gt;关闭写屏障（Mutator不再协助GC标记）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;恢复世界（Start The World），进入并发清扫阶段&lt;ul&gt;
+&lt;li&gt;清理未被标记的对象&lt;/li&gt;
+&lt;li&gt;回收mspan到mheap或mcentral，部份回收到mcache&lt;/li&gt;
+&lt;li&gt;Mutator分配内存时，可能会触发增量清扫（Incremental Sweeping），加快回收过程&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;满足触发条件，启动下一轮GC&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;简单的说，标记然后清扫&lt;/p&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://y2k38.github.io/golang-series-garbage-collection/&t=golang系列之-垃圾回收"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
 
     </div>
-  </footer>
 
-  
-  <div class="toggle sidebar-toggle" role="button">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
   </div>
-  <div class="sidebar-dimmer"></div>
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2026
+    y2k38
   </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
 
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
+    </div>
+    <!-- styles -->
 
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
 
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
-<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
   
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
 
 
+<script src="/js/main.js"></script>
 
+<!-- search -->
 
+<!-- Baidu Analytics -->
 
+<!-- Cloudflare Analytics -->
 
-  
+<!-- Disqus Comments -->
 
-
-
-
-<script class="next-config" data-name="giscus" type="application/json">{"enable":true,"repo":"Y2k38/y2k38.github.io","repo_id":"R_kgDOMZGvZA","category":"Announcements","category_id":"DIC_kwDOMZGvZM4CirXX","mapping":"pathname","strict":0,"reactions_enabled":1,"emit_metadata":0,"theme":"preferred_color_scheme","lang":"zh-CN","crossorigin":"anonymous","input_position":"bottom","loading":"lazy"}</script>
-
-<script>
-document.addEventListener('page:loaded', () => {
-  if (!CONFIG.page.comments) return;
-
-  NexT.utils.loadComments('.giscus-container')
-    .then(() => NexT.utils.getScript('https://giscus.app/client.js', {
-      attributes: {
-        async                   : true,
-        crossOrigin             : 'anonymous',
-        'data-repo'             : CONFIG.giscus.repo,
-        'data-repo-id'          : CONFIG.giscus.repo_id,
-        'data-category'         : CONFIG.giscus.category,
-        'data-category-id'      : CONFIG.giscus.category_id,
-        'data-mapping'          : CONFIG.giscus.mapping,
-        'data-strict'           : CONFIG.giscus.strict,
-        'data-reactions-enabled': CONFIG.giscus.reactions_enabled,
-        'data-emit-metadata'    : CONFIG.giscus.emit_metadata,
-        'data-theme'            : CONFIG.giscus.theme,
-        'data-lang'             : CONFIG.giscus.lang,
-        'data-input-position'   : CONFIG.giscus.input_position,
-        'data-loading'          : CONFIG.giscus.loading
-      },
-      parentNode: document.querySelector('.giscus-container')
-    }));
-});
-</script>
+<!-- utterances Comments -->
 
 </body>
 </html>

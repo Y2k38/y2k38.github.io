@@ -1,1154 +1,568 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang=zh>
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
-
-<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
-
-    <meta name="description" content="个人笔记">
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="个人碎碎念，不定期更新 技能：精通Rust&#x2F;Elixir&#x2F;Python&#x2F;Javascript的HelloWorld写法">
 <meta property="og:type" content="website">
-<meta property="og:title" content="noname">
+<meta property="og:title" content="Y2k38&#39;s blog">
 <meta property="og:url" content="https://y2k38.github.io/page/5/index.html">
-<meta property="og:site_name" content="noname">
-<meta property="og:description" content="个人笔记">
+<meta property="og:site_name" content="Y2k38&#39;s blog">
+<meta property="og:description" content="个人碎碎念，不定期更新 技能：精通Rust&#x2F;Elixir&#x2F;Python&#x2F;Javascript的HelloWorld写法">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="y2k38">
 <meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Y2k38&#39;s blog</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
 
 
-<link rel="canonical" href="https://y2k38.github.io/page/5/">
+    <!-- Umami Analytics -->
 
 
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":true,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"page/5/index.html","title":""}</script>
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
 
-<script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>noname</title>
+<body class="max-width mx-auto px3 ltr">
+    
+    <div class="content index py4 h-card">
+        
+          <header id="header">
+  <a class="u-url u-uid" href="/">
   
-
-
-
-
-
-
-
-
-  <noscript>
-    <link rel="stylesheet" href="/css/noscript.css">
-  </noscript>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
-
-  <main class="main">
-    <div class="column">
-      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏" role="button">
+    
+      <img id="logo" alt class="u-logo" src="/images/logo.png" />
+    
+  
+    <div id="title">
+      <h1 class="p-name">Y2k38&#39;s blog</h1>
     </div>
+  </a>
+  <div id="nav">
+    <ul>
+      <li class="icon">
+        <a href="#" aria-label="目录"><i class="fa-solid fa-bars fa-2x"></i></a>
+      </li>
+      <!--
+     --><li><a href="/">首页</a></li><!--
+   --><!--
+     --><li><a href="/archives/">归档</a></li><!--
+   --><!--
+     --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+   -->
+    </ul>
   </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <h1 class="site-title">noname</h1>
-      <i class="logo-line"></i>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="搜索" role="button">
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
 </header>
-        
-  
-  <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
+        
+        <section id="about" class="p-note">
+  
+    <p>个人碎碎念，不定期更新<br>技能：精通Rust&#x2F;Elixir&#x2F;Python&#x2F;Javascript的HelloWorld写法</p>
+
+  
+  
+</section>
+
+<section id="writing">
+  <span class="h1"><a href="/archives/">文章</a></span>
+  
+  <ul class="post-list">
+    
+    
+      
+    
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2026-05-12T13:26:44.000Z" class="dt-published" itemprop="datePublished">2026-05-12</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/how-to-setup-hysteria-and-anytls-on-ubuntu-server/">如何在 Ubuntu 服务器上安装 Hysteria 2 和 AnyTLS 服务</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2026-04-11T05:41:47.000Z" class="dt-published" itemprop="datePublished">2026-04-11</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/how-to-setup-shadowsocks-rust-on-ubuntu-server/">如何在 Ubuntu 服务器上安装 Shadowsocks-Rust</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2026-04-10T06:43:09.000Z" class="dt-published" itemprop="datePublished">2026-04-10</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/how-to-use-samba-to-set-up-a-shared-server/">如何使用 Samba 搭建共享服务器</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-09-20T13:50:23.000Z" class="dt-published" itemprop="datePublished">2025-09-20</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/full-android-setup-on-raspberry-pi-with-lineageos/">在树莓派上使用 LineageOS 搭建完整的 Android 系统</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-04-20T08:55:02.000Z" class="dt-published" itemprop="datePublished">2025-04-20</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/summary-of-reading-shadowsocks-libev-source-code/">shadowsocks-libev源码阅读总结</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-04-06T02:58:06.000Z" class="dt-published" itemprop="datePublished">2025-04-06</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-garbage-collection/">golang系列之-垃圾回收</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-04-02T01:35:00.000Z" class="dt-published" itemprop="datePublished">2025-04-02</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-memory-allocation/">golang系列之-内存分配</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-03-30T05:12:29.000Z" class="dt-published" itemprop="datePublished">2025-03-30</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-bootstrap-and-gmp-model/">golang系列之-程序运行流程及GMP模型</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-03-01T01:57:28.000Z" class="dt-published" itemprop="datePublished">2025-03-01</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-timer-and-ticker/">golang系列之-定时器Timer和Ticker</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-27T00:48:14.000Z" class="dt-published" itemprop="datePublished">2025-02-27</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-netpoll/">golang系列之-netpoll</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-23T07:59:36.000Z" class="dt-published" itemprop="datePublished">2025-02-23</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-time/">golang系列之-time</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-21T11:38:32.000Z" class="dt-published" itemprop="datePublished">2025-02-21</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-channel/">golang系列之-channel</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-20T15:06:09.000Z" class="dt-published" itemprop="datePublished">2025-02-20</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-hashtriemap/">golang系列之-sync.Map(HashTrieMap)</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-20T01:45:01.000Z" class="dt-published" itemprop="datePublished">2025-02-20</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-map/">golang系列之-sync.Map</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-19T03:26:47.000Z" class="dt-published" itemprop="datePublished">2025-02-19</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-singleflight/">golang系列之-singleflight</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-18T09:12:21.000Z" class="dt-published" itemprop="datePublished">2025-02-18</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-rwmutex/">golang系列之-sync.RWMutex</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-18T01:28:12.000Z" class="dt-published" itemprop="datePublished">2025-02-18</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-mutex/">golang系列之-sync.Mutex</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-17T01:54:38.000Z" class="dt-published" itemprop="datePublished">2025-02-17</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-cond/">golang系列之-sync.Cond</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-16T12:48:45.000Z" class="dt-published" itemprop="datePublished">2025-02-16</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-waitgroup/">golang系列之-sync.Waitgroup</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-16T08:29:07.000Z" class="dt-published" itemprop="datePublished">2025-02-16</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-atomic/">golang系列之-sync/atomic</a>
+    
+
+
+</span>
+      </li>
+    
+  </ul>
+  
+</section>
+
+
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2026
+    y2k38
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+     -->
       </ul>
-
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <div class="post-toc-wrap sidebar-panel">
-        </div>
-        <!--/noindex-->
-
-        <div class="site-overview-wrap sidebar-panel">
-          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">y2k38</p>
-  <div class="site-description" itemprop="description">个人笔记</div>
-</div>
-<div class="site-state-wrap animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-        <a href="/archives/">
-          <span class="site-state-item-count">48</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-          <a href="/tags/">
-        <span class="site-state-item-count">40</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-
-        </div>
-      </div>
-    </div>
-
-    
-  </aside>
-
-
-    </div>
-
-    <div class="main-inner index posts-expand">
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/php-extension-writing-part3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/php-extension-writing-part3/" class="post-title-link" itemprop="url">PHP扩展开发 - Part 3</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-02-09 17:05:48" itemprop="dateCreated datePublished" datetime="2020-02-09T17:05:48+08:00">2020-02-09</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-03 10:07:06" itemprop="dateModified" datetime="2025-03-03T10:07:06+08:00">2025-03-03</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>本文将简单介绍资源类型、资源的创建、访问、销毁操作。不再建议使用资源类型，使用类更为合适</p>
-<h2 id="资源类型"><a href="#资源类型" class="headerlink" title="资源类型"></a>资源类型</h2><p><code>zval</code>可以表示大部分的PHP数据类型，但有一样不能很好的表示其结构：指针。由于不透明的结构、无法使用传统运算符进行操作等，使得指针在PHP的表示变得困难。因此PHP用一个特殊的标记表示指针：资源，为了使资源标记具有意义，必须先注册到zend engine才能使用。</p>
-<p>在头文件定义结构体<code>php_test_person</code>以及资源名称，放置在<code>#define</code>语句后，<code>PHP_MINIT_FUNCTION(test);</code>之前</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    zend_string *name;</span><br><span class="line">    zend_long age;</span><br><span class="line">&#125; php_test_person;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PHP_TEST_PERSON_RES_NAME <span class="string">&quot;Person Data&quot;</span></span></span><br></pre></td></tr></table></figure>
-
-<p>源文件定义<code>le_*</code>全局变量，MINIT阶段注册，用于获取资源类型、字面意义名称、析构函数</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> le_test_person;</span><br><span class="line"></span><br><span class="line">PHP_MINIT_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    le_test_person = zend_register_list_destructors_ex(<span class="literal">NULL</span>, <span class="literal">NULL</span>, PHP_TEST_PERSON_RES_NAME, module_number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/php-extension-writing-part3/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/php-extension-writing-part2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/php-extension-writing-part2/" class="post-title-link" itemprop="url">PHP扩展开发 - Part 2</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-02-01 22:53:16" itemprop="dateCreated datePublished" datetime="2020-02-01T22:53:16+08:00">2020-02-01</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-03 10:07:02" itemprop="dateModified" datetime="2025-03-03T10:07:02+08:00">2025-03-03</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.7k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>6 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>PHP扩展开发第二章，主要介绍函数参数获取、zval数据类型、数组及数组遍历以及$GLOBALS全局变量访问</p>
-<h2 id="函数参数"><a href="#函数参数" class="headerlink" title="函数参数"></a>函数参数</h2><p>扩展自定义函数不需要声明形参，Zend Engine会给每个函数传递一个参数列表<code>zend_execute_data *execute_data</code>，函数参数通过宏块<code>ZEND_PARSE_PARAMETERS_START</code>、<code>ZEND_PARSE_PARAMETERS_END</code>获取，当然，旧的方法<code>zend_parse_parameters</code>也可以使用，只是会更麻烦点</p>
-<p>下面示例函数将接收参数name以及打印的次数t_param并打印name</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">PHP_FUNCTION(test)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 参数1</span></span><br><span class="line">    zend_string *name;</span><br><span class="line">    <span class="comment">// 参数2</span></span><br><span class="line">    zend_long t_param = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> times = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 最低可接收1个参数，最多2个</span></span><br><span class="line">    ZEND_PARSE_PARAMETERS_START(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">        Z_PARAM_STR(name)</span><br><span class="line">        Z_PARAM_OPTIONAL</span><br><span class="line">        <span class="title function_">Z_PARAM_LONG</span><span class="params">(t_param)</span></span><br><span class="line">    <span class="title function_">ZEND_PARSE_PARAMETERS_END</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断是否有传递默认值</span></span><br><span class="line">    <span class="keyword">if</span> (ZEND_NUM_ARGS() == <span class="number">2</span>) &#123;</span><br><span class="line">        times = (<span class="type">int</span>) (t_param &lt; <span class="number">1</span> ? <span class="number">1</span> : t_param);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打印</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; times; i++) &#123;</span><br><span class="line">        php_printf(<span class="string">&quot;Hello %s&quot;</span>, ZSTR_VAL(name));</span><br><span class="line">    &#125;</span><br><span class="line">    RETURN_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>常用的有数据类型以及参数获取方法有下</p>
-<table>
-<thead>
-<tr>
-<th align="left">Variable Type</th>
-<th align="left">Macro</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">zend_bool</td>
-<td align="left">Z_PARAM_BOOL</td>
-</tr>
-<tr>
-<td align="left">zend_long</td>
-<td align="left">Z_PARAM_LONG</td>
-</tr>
-<tr>
-<td align="left">double</td>
-<td align="left">Z_PARAM_DOUBLE</td>
-</tr>
-<tr>
-<td align="left">zend_string *</td>
-<td align="left">Z_PARAM_STR</td>
-</tr>
-<tr>
-<td align="left">char *</td>
-<td align="left">Z_PARAM_STRING</td>
-</tr>
-<tr>
-<td align="left">zval *</td>
-<td align="left">Z_PARAM_RESOURCE</td>
-</tr>
-<tr>
-<td align="left">zval *</td>
-<td align="left">Z_PARAM_ARRAY</td>
-</tr>
-<tr>
-<td align="left">zval *</td>
-<td align="left">Z_PARAM_OBJECT</td>
-</tr>
-<tr>
-<td align="left">zval *</td>
-<td align="left">Z_PARAM_ZVAL</td>
-</tr>
-</tbody></table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/php-extension-writing-part2/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/how-to-generate-php-flamegraphs/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/how-to-generate-php-flamegraphs/" class="post-title-link" itemprop="url">生成火焰图分析php代码</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-01-23 11:31:25" itemprop="dateCreated datePublished" datetime="2020-01-23T11:31:25+08:00">2020-01-23</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-17 15:02:59" itemprop="dateModified" datetime="2024-08-17T15:02:59+08:00">2024-08-17</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>200</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>flamegraph是一款可视化工具，用户分析程序堆栈调用，x轴堆栈轨迹，y轴堆栈深度，x轴长度越长，占用更多cpu时间。下面简单介绍如何使用xdebug以及flamegraph生成火焰图</p>
-<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>配置xdebug参数</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">xdebug.trace_output_name</span> = xdebug.trace.%t.%s</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.trace_output_dir</span> = /tmp</span><br><span class="line"><span class="attr">xdebug.trace_enable_trigger_value</span> = <span class="string">&quot;&lt;secret key&gt;&quot;</span></span><br><span class="line"><span class="attr">xdebug.trace_format</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
-
-<p>下载flamegraph，<code>git clone https://github.com/brendangregg/FlameGraph.git</code>，放置在任意位置</p>
-<h2 id="flamegraph"><a href="#flamegraph" class="headerlink" title="flamegraph"></a>flamegraph</h2><p>获取堆栈数据</p>
-<p>请求页面&#x2F;接口url，在url后面增加<code>?XDEBUG_TRACE=&lt;secret key&gt;</code>，获取php堆栈数据 <code>curl http://youdomain.com?XDEBUG_TRACE=&lt;secret key&gt;</code>，如果是命令行命令，则在php命令后使用参数<code>php -d xdebug.auto_trace=1</code></p>
-<p>转换堆栈数据</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./stackcollapse-xdebug.php /tmp/xdebug.trace.1579703170._data_www_yii2_web_index_php.xt &gt; out.folded</span><br></pre></td></tr></table></figure>
-
-<p>生成火焰图</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./flamegraph.pl out.folded &gt; out.svg</span><br></pre></td></tr></table></figure>
-
-<p>示例</p>
-<p><img src="/images/yii2-flamegraph-example.svg" alt="yii2 flamegraph example"></p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://daniellockyer.com/php-flame-graphs/">How to generate PHP Flamegraphs</a><br><a target="_blank" rel="noopener" href="https://github.com/brendangregg/FlameGraph">Flame Graphs visualize profiled code</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/linux-monofonts-render-incorrectly/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/linux-monofonts-render-incorrectly/" class="post-title-link" itemprop="url">解决ubuntu系统monospace字体显示异常的问题</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-11-24 21:26:12" itemprop="dateCreated datePublished" datetime="2019-11-24T21:26:12+08:00">2019-11-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-17 15:01:09" itemprop="dateModified" datetime="2024-08-17T15:01:09+08:00">2024-08-17</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>519</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>很长的一段时间，被xubuntu下的一个monospace字体显示问题困扰着，在网上找了很多方法也没有解决问题，在一次误打误撞的情况下解决了，简单把自己问题的过程记录下来，希望给一些小伙伴们帮助</p>
-<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>xubuntu下monospace在浏览器以及vscode下显示异常，具体如下图所示</p>
-<p>浏览器chrome&#x2F;firefox下的monospace</p>
-<p><img src="/images/monofont_display_incorrect_in_browser.png" alt="monofont display incorrect in browser"></p>
-<p>vscode下的monospace</p>
-<p><img src="/images/monofont_display_incorrect_in_vscode.png" alt="monofont display incorrect in vscode"></p>
-<p>网上搜索结果大部分指示，是由于libfreetype6 2.8.1-2ubuntu2的一个bug导致，需要升级到最新的libfreetype2.9或者降级到libfreetype2.8.0，按照搜索的文档进行libfreetype的升级&#x2F;降级后，显示效果依旧，问题没有得到解决</p>
-<h2 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h2><p>在我放弃治疗后过了一段时间，突然想起，一直以来都忽略了验证linux的字体信息。首先，获取显示异常的字体font-family，如下图</p>
-<p><img src="/images/browser_get_font_family.png" alt="browser get font family"></p>
-<p>使用fc-match验证字体</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$ fc-match monospace</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match consolas</span><br><span class="line">DejaVuSansMono.ttf: <span class="string">&quot;DejaVu Sans Mono&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match Menlo</span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;PingFang SC&quot;</span></span><br><span class="line">DejaVuSans.ttf: <span class="string">&quot;DejaVu Sans&quot;</span> <span class="string">&quot;Book&quot;</span></span><br><span class="line"></span><br><span class="line">$ fc-match <span class="string">&quot;Microsoft YaHei&quot;</span></span><br><span class="line">NotoSansCJK-Regular.ttc: <span class="string">&quot;Noto Sans CJK SC&quot;</span> <span class="string">&quot;Regular&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>可以看到Menlo、”PingFang SC”、”Microsoft YaHei”的实际字体跟monospace并不一致，抱着死马当活马医的心态，编辑字体配置文件<code>~/.config/fontconfig/fonts.conf</code>，内容如下，</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&#x27;1.0&#x27;?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&#x27;fonts.dtd&#x27;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">alias</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">prefer</span>&gt;</span><span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span><span class="tag">&lt;/<span class="name">prefer</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>退出，重新登录，发现这个困扰了很久的问题终于解决，如下图</p>
-<p><img src="/images/monofont_the_correct_view.png" alt="monofont the correct view"></p>
-<p>vscode可以通过更改font-family恢复正常的显示效果</p>
-<p><strong>注意</strong></p>
-<p>ubuntu&#x2F;xubuntu、中文&#x2F;英文的系统默认的字体会有些许差异，以上的操作可能不一定生效，可以新增<code>~/.config/fontconfig/conf.d/00-menlo.conf</code></p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">fontconfig</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;fonts.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">fontconfig</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">alias</span> <span class="attr">binding</span>=<span class="string">&quot;same&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">family</span>&gt;</span>Menlo<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">accept</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">family</span>&gt;</span>DejaVu Sans Mono<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">accept</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">fontconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://github.com/adobe/brackets/issues/14290">[Ubuntu 18.04 LTS] Font not rendering properly</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/50114376/ubuntu-18-04-lts-font-not-rendering-properly">Ubuntu 18.04 LTS Font not rendering properly</a><br><a target="_blank" rel="noopener" href="https://superuser.com/questions/930572/why-doesnt-fc-match-respect-my-match-and-edit-rule-for-courier-when-it-does-for">Why doesn’t fc-match respect my match and edit rule for Courier when it does for Consolas?</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/vagrant-xdebug-not-working/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/vagrant-xdebug-not-working/" class="post-title-link" itemprop="url">记一次xdebug异常</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-09-05 18:54:25" itemprop="dateCreated datePublished" datetime="2019-09-05T18:54:25+08:00">2019-09-05</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-17 15:02:51" itemprop="dateModified" datetime="2024-08-17T15:02:51+08:00">2024-08-17</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>463</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>工欲善其事必先利其器，xdebug是php开发的一个杀手级利器，vagrant是一款非常便捷的虚拟机管理工具，两者搭配有时会出现一些奇怪的问题，近期在重新配置开发环境时，出现xdebug连不上的异常情况，花了些时间才找到问题并解决，记录下解决问题的过程，希望能帮助到一些小伙伴</p>
-<h2 id="问题及解决过程"><a href="#问题及解决过程" class="headerlink" title="问题及解决过程"></a>问题及解决过程</h2><h3 id="异常情况"><a href="#异常情况" class="headerlink" title="异常情况"></a>异常情况</h3><p>xdebug配置后，客户端多次请求，vscode均无任何反应。检查服务端、客户端配置，确认没有差错；监测网络数据，只有初次请求数据，无结果返回</p>
-<h3 id="客户端-服务器配置信息"><a href="#客户端-服务器配置信息" class="headerlink" title="客户端&#x2F;服务器配置信息"></a>客户端&#x2F;服务器配置信息</h3><p>服务器是vagrant + ubuntu 18.04 + PHP 7.4，客户端是Windows 10，编辑器是vscode</p>
-<p>初始xdebug配置如下</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[xdebug]</span></span><br><span class="line"><span class="attr">xdebug.remote_enable</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_autostart</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_port</span> = <span class="number">9001</span></span><br><span class="line"><span class="attr">xdebug.remote_handler</span> = <span class="string">&quot;dbgp&quot;</span></span><br><span class="line"><span class="attr">xdebug.remote_mode</span> = req</span><br><span class="line"><span class="attr">xdebug.remote_connect_back</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.overload_var_dump</span>=<span class="number">0</span></span><br></pre></td></tr></table></figure>
-
-<p>vscode配置launch.json如下</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.2.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;configurations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Listen for XDebug&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;php&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">9001</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;pathMappings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;/data/example&quot;</span><span class="punctuation">:</span> <span class="string">&quot;D:\\data\\example&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;log&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="开启xdebug日志监测"><a href="#开启xdebug日志监测" class="headerlink" title="开启xdebug日志监测"></a>开启xdebug日志监测</h3><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">xdebug.remote_log</span>=/tmp/xdebug.log</span><br></pre></td></tr></table></figure>
-
-<p>再次请求，获取日志数据如下</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[140114918627520] Log opened at 2019-09-04 11:49:00</span><br><span class="line">[140114918627520] I: Checking remote connect back address.</span><br><span class="line">[140114918627520] I: Checking header &#x27;HTTP_X_FORWARDED_FOR&#x27;.</span><br><span class="line">[140114918627520] I: Checking header &#x27;REMOTE_ADDR&#x27;.</span><br><span class="line">[140114918627520] I: Remote address found, connecting to 192.168.33.1:9001.</span><br><span class="line">[140114918627520] E: Time-out connecting to client (Waited: 200 ms). :-(</span><br><span class="line">[140114918627520] Log closed at 2019-09-04 11:49:00</span><br></pre></td></tr></table></figure>
-
-<p>日志显示服务端有正常向客户端9001端口发起连接，但客户端无响应导致超时，检查客户端防火墙无异常</p>
-<p>最后，在谷歌上找到一个类似的问题，发现问题与vagrant有关，具体问题描述见参考文档链接</p>
-<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">; 移除 xdebug.remote_connect_back = 1</span></span><br><span class="line"><span class="comment">; 添加</span></span><br><span class="line"><span class="attr">xdebug.remote_host</span>=<span class="number">10.0</span>.<span class="number">2.2</span></span><br></pre></td></tr></table></figure>
-
-<p>重启php-fpm，再次测试，vscode可连接xdebug，问题解决</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://danemacmillan.com/how-to-configure-xdebug-in-phpstorm-through-vagrant/">How to configure Xdebug in PhpStorm through Vagrant</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/24831707/xdebug-time-out-connecting-to-client-using-phpstorm-7-1-3-vagrant-virtualbo">xdebug Time-out connecting to client</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/php-extension-writing-part1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/php-extension-writing-part1/" class="post-title-link" itemprop="url">PHP扩展开发 - Part 1</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-09-03 11:09:06" itemprop="dateCreated datePublished" datetime="2019-09-03T11:09:06+08:00">2019-09-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-03 10:06:56" itemprop="dateModified" datetime="2025-03-03T10:06:56+08:00">2025-03-03</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.7k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>6 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>在网上找到几篇基于PHP5的扩展开发的文章，有些古老，与PHP7不完全兼容，自己做了些简单的翻译、修改。</p>
-<p>建议开发者先阅读<a target="_blank" rel="noopener" href="http://www.phpinternalsbook.com/">PHP Internals Book</a>这份在线文档，里面对PHP做了比较全面的讲解。由于PHP扩展开发的资料比较少，也鲜有PHP开发者触及到这块，编写扩展时如果遇到问题，最好是先查找PHP源代码是否有相关的使用案例，再通过网上论坛、QQ等方式寻求帮助。</p>
-<p>本文是PHP扩展开发系列的第一篇，主要介绍如何开发一个简单的PHP扩展、如何获取ini配置参数、如何配置全局变量</p>
-<p>前期准备：</p>
-<p>PHP编译选项加入<code>--enable-debug</code>以及<code>--enable-maintainer-zts</code>。<code>--enable-debug</code>生成额外的调试符号，并将优化等级设置为<code>-O0</code>，报告内存泄露等错误，使使用gdb进行debug时更为准确；<code>--enable-maintainer-zts</code>启用线程安全，开启<code>ZTS</code>宏定义，配置PHP为TSRM机制，用于编写调试多线程代码</p>
-<h2 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h2><h3 id="扩展目录结构"><a href="#扩展目录结构" class="headerlink" title="扩展目录结构"></a>扩展目录结构</h3><p>你可能会使用PHP源代码自带的脚本<code>ext/ext_skel.php</code>生成扩展骨架，但这里选择极简方式创建一个扩展，最基本的扩展只需要三个文件：配置文件<code>config.m4</code>，头文件<code>php_test.h</code>，源文件<code>test.c</code></p>
-<p><code>test</code>扩展目录结构</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">php-7.4.1</span><br><span class="line">└── ext</span><br><span class="line">    └── <span class="built_in">test</span></span><br><span class="line">        ├── config.m4</span><br><span class="line">        ├── php_test.h</span><br><span class="line">        └── test.c</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/php-extension-writing-part1/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/personal-blog-using-github-pages/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/personal-blog-using-github-pages/" class="post-title-link" itemprop="url">使用github pages搭建个人博客</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-09-02 18:18:20" itemprop="dateCreated datePublished" datetime="2019-09-02T18:18:20+08:00">2019-09-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-12 19:39:32" itemprop="dateModified" datetime="2024-08-12T19:39:32+08:00">2024-08-12</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>452</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>简单介绍如何使用github pages服务以及hexo搭建一个免费的个人博客</p>
-<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><h3 id="创建仓库"><a href="#创建仓库" class="headerlink" title="创建仓库"></a>创建仓库</h3><p>创建一个空的仓库，名字固定格式为“username.github.io”，这个名字也是博客的访问的域名</p>
-<h3 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli           <span class="comment"># 安装hexo命令行工具</span></span><br><span class="line">hexo init blog                    <span class="comment"># 创建blog项目</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> blog</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/theme-next/hexo-theme-next themes/next <span class="comment"># 安装next主题，可选</span></span><br><span class="line"></span><br><span class="line">npm install hexo-deployer-git --save <span class="comment"># 安装github发布工具</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><h3 id="配置hexo"><a href="#配置hexo" class="headerlink" title="配置hexo"></a>配置hexo</h3><p>修改_config.yml</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基础配置</span></span><br><span class="line"><span class="comment"># Hexo Configuration</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/configuration.html</span></span><br><span class="line"><span class="comment">## Source: https://github.com/hexojs/hexo/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Site</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">Y2k38&#x27;s</span> <span class="string">Blog</span></span><br><span class="line"><span class="attr">subtitle:</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">y2k38&#x27;s</span> <span class="string">blog</span></span><br><span class="line"><span class="attr">keywords:</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">y2k38</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="attr">timezone:</span> </span><br><span class="line"></span><br><span class="line"><span class="comment"># URL </span></span><br><span class="line"><span class="comment">## If your site is put in a subdirectory, set url as &#x27;http://yoursite.com/child&#x27; and root as &#x27;/child/&#x27;</span></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://y2k38.github.io</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">:year/:month/:day/:title/</span></span><br><span class="line"><span class="attr">permalink_defaults:</span></span><br><span class="line"></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 博客主题配置</span></span><br><span class="line"><span class="comment"># Extensions</span></span><br><span class="line"><span class="comment">## Plugins: https://hexo.io/plugins/</span></span><br><span class="line"><span class="comment">## Themes: https://hexo.io/themes/</span></span><br><span class="line"><span class="attr">theme:</span> <span class="string">next</span> <span class="comment"># 可选，若没有安装next主题，则忽略</span></span><br><span class="line"></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># github部署配置</span></span><br><span class="line"><span class="comment"># Deployment</span></span><br><span class="line"><span class="comment">## Docs: https://hexo.io/docs/deployment.html</span></span><br><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">https://github.com/Y2k38/y2k38.github.io.git</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">master</span> <span class="comment"># 注意，分支固定位master</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="发布github"><a href="#发布github" class="headerlink" title="发布github"></a>发布github</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo clean &amp;&amp; hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>完成</p>
-<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="添加gitalk评论系统"><a href="#添加gitalk评论系统" class="headerlink" title="添加gitalk评论系统"></a>添加gitalk评论系统</h3><blockquote>
-<p>[Deprecated] github要求校验方式改为personal access token，待gitalk作者及theme-next作者更新</p>
-</blockquote>
-<p>新建OAuth application获取id、secret，<a target="_blank" rel="noopener" href="https://github.com/settings/applications/new">https://github.com/settings/applications/new</a></p>
-<p><img src="/images/register_a_new_OAuth_application.png" alt="new oauth app"></p>
-<p>配置next主题 <code>themes/next/_config.yml</code></p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Gitalk</span></span><br><span class="line"><span class="comment"># Demo: https://gitalk.github.io</span></span><br><span class="line"><span class="comment"># For more information: https://github.com/gitalk/gitalk, https://github.com/emn178/js-md5</span></span><br><span class="line"><span class="attr">gitalk:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">github_id:</span> <span class="string">y2k38</span> <span class="comment"># GitHub repo owner</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">y2k38.github.io</span> <span class="comment"># Repository name to store issues</span></span><br><span class="line">  <span class="attr">client_id:</span> <span class="string">xxxxxxxxxxxxxxxx</span> <span class="comment"># GitHub Application Client ID</span></span><br><span class="line">  <span class="attr">client_secret:</span> <span class="string">yyyyyyyyyyyyyyyy</span> <span class="comment"># GitHub Application Client Secret</span></span><br><span class="line">  <span class="attr">admin_user:</span> <span class="string">Y2k38</span> <span class="comment"># GitHub repo owner and collaborators, only these guys can initialize gitHub issues</span></span><br><span class="line">  <span class="attr">distraction_free_mode:</span> <span class="literal">true</span> <span class="comment"># Facebook-like distraction free mode</span></span><br><span class="line">  <span class="comment"># Gitalk&#x27;s display language depends on user&#x27;s browser or system environment</span></span><br><span class="line">  <span class="comment"># If you want everyone visiting your site to see a uniform language, you can set a force language value</span></span><br><span class="line">  <span class="comment"># Available values: en | es-ES | fr | ru | zh-CN | zh-TW</span></span><br><span class="line">  <span class="attr">language:</span> <span class="string">zh-CN</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://pages.github.com/">GitHub Pages</a><br><a target="_blank" rel="noopener" href="https://gist.github.com/btfak/18938572f5df000ebe06fbd1872e4e39">How to use Hexo and deploy to GitHub Pages</a><br><a target="_blank" rel="noopener" href="https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line">Creating a personal access token for the command line</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/configure-nginx-with-https/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/configure-nginx-with-https/" class="post-title-link" itemprop="url">Nginx配置HTTPS访问</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-09-02 18:01:56" itemprop="dateCreated datePublished" datetime="2019-09-02T18:01:56+08:00">2019-09-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-03 10:02:40" itemprop="dateModified" datetime="2025-03-03T10:02:40+08:00">2025-03-03</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>982</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>简单介绍如何生成https服务所需要的证书、私钥以及部署，文档分别描述了开发时使用的self-signed证书以及线上使用的let’s encrypt免费证书的生成方法</p>
-<h2 id="自签名证书"><a href="#自签名证书" class="headerlink" title="自签名证书"></a>自签名证书</h2><h3 id="创建证书以及私钥"><a href="#创建证书以及私钥" class="headerlink" title="创建证书以及私钥"></a>创建证书以及私钥</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p><strong>req:</strong> 指定X.509证书签名请求(CSR)管理</p>
-</li>
-<li><p><strong>-x509:</strong> 生成self-sigend证书</p>
-</li>
-<li><p><strong>-nodes:</strong> 不使用密码</p>
-</li>
-<li><p><strong>-days 365:</strong> 证书有效期</p>
-</li>
-<li><p><strong>-newkey rsa:2048:</strong> 生成证书的同时生成私钥，rsa加密算法，2048位</p>
-</li>
-<li><p><strong>-keyout:</strong> 私钥的存储路径</p>
-</li>
-<li><p><strong>-out:</strong> 证书的存储路径</p>
-</li>
-</ul>
-<p>信息填写</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Country Name (2 letter code) [AU]:US</span><br><span class="line">State or Province Name (full name) [Some-State]:New York</span><br><span class="line">Locality Name (eg, city) []:New York City</span><br><span class="line">Organization Name (eg, company) [Internet Widgits Pty Ltd]:Bouncy Castles, Inc.</span><br><span class="line">Organizational Unit Name (eg, section) []:Ministry of Water Slides</span><br><span class="line">Common Name (e.g. server FQDN or YOUR name) []: example.com (or server_IP_address)</span><br><span class="line">Email Address []:admin@your_domain.com</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/configure-nginx-with-https/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-  <nav class="pagination">
-    <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/4/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span>
-  </nav>
-
-</div>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-inner">
-
-  <div class="copyright">
-    &copy; 
-    <span itemprop="copyrightYear">2026</span>
-    <span class="with-love">
-      <i class="fa fa-heart"></i>
-    </span>
-    <span class="author" itemprop="copyrightHolder">y2k38</span>
+    </nav>
   </div>
-<div class="wordcount">
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-chart-line"></i>
-    </span>
-    <span title="站点总字数">176k</span>
-  </span>
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-coffee"></i>
-    </span>
-    <span title="站点阅读时长">10:41</span>
-  </span>
-</div>
-  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
-  </div>
+</footer>
 
     </div>
-  </footer>
-
-  
-  <div class="toggle sidebar-toggle" role="button">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-  </div>
-  <div class="sidebar-dimmer"></div>
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
-  </div>
-
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
+    <!-- styles -->
 
 
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
-<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
 
-  
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
 
 
 
 
+<!-- clipboard -->
 
 
-  
+<script src="/js/main.js"></script>
 
+<!-- search -->
 
+<!-- Baidu Analytics -->
 
+<!-- Cloudflare Analytics -->
 
-<script class="next-config" data-name="giscus" type="application/json">{"enable":true,"repo":"Y2k38/y2k38.github.io","repo_id":"R_kgDOMZGvZA","category":"Announcements","category_id":"DIC_kwDOMZGvZM4CirXX","mapping":"pathname","strict":0,"reactions_enabled":1,"emit_metadata":0,"theme":"preferred_color_scheme","lang":"zh-CN","crossorigin":"anonymous","input_position":"bottom","loading":"lazy"}</script>
+<!-- Disqus Comments -->
 
-<script>
-document.addEventListener('page:loaded', () => {
-  if (!CONFIG.page.comments) return;
-
-  NexT.utils.loadComments('.giscus-container')
-    .then(() => NexT.utils.getScript('https://giscus.app/client.js', {
-      attributes: {
-        async                   : true,
-        crossOrigin             : 'anonymous',
-        'data-repo'             : CONFIG.giscus.repo,
-        'data-repo-id'          : CONFIG.giscus.repo_id,
-        'data-category'         : CONFIG.giscus.category,
-        'data-category-id'      : CONFIG.giscus.category_id,
-        'data-mapping'          : CONFIG.giscus.mapping,
-        'data-strict'           : CONFIG.giscus.strict,
-        'data-reactions-enabled': CONFIG.giscus.reactions_enabled,
-        'data-emit-metadata'    : CONFIG.giscus.emit_metadata,
-        'data-theme'            : CONFIG.giscus.theme,
-        'data-lang'             : CONFIG.giscus.lang,
-        'data-input-position'   : CONFIG.giscus.input_position,
-        'data-loading'          : CONFIG.giscus.loading
-      },
-      parentNode: document.querySelector('.giscus-container')
-    }));
-});
-</script>
+<!-- utterances Comments -->
 
 </body>
 </html>

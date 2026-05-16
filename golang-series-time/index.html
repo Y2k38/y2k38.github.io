@@ -1,29 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang=zh>
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
-
-<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
-
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
     <meta name="description" content="time涉及的内容较多，如生成&#x2F;存储时间、比较时间、获取时间信息、时区、夏令时等，本文仅介绍一些自己感兴趣的地方 日历计算基于格里高利历（公历），1年有365天（闰年有366天）。同时支持墙上时钟（wall clock）和单调时钟（monotonic clock），其中墙上时钟用于时间同步、报时（time-telling），单调时钟用于时间测量（time-measuring）。并不是所有">
 <meta property="og:type" content="article">
 <meta property="og:title" content="golang系列之-time">
 <meta property="og:url" content="https://y2k38.github.io/golang-series-time/index.html">
-<meta property="og:site_name" content="noname">
+<meta property="og:site_name" content="Y2k38&#39;s blog">
 <meta property="og:description" content="time涉及的内容较多，如生成&#x2F;存储时间、比较时间、获取时间信息、时区、夏令时等，本文仅介绍一些自己感兴趣的地方 日历计算基于格里高利历（公历），1年有365天（闰年有366天）。同时支持墙上时钟（wall clock）和单调时钟（monotonic clock），其中墙上时钟用于时间同步、报时（time-telling），单调时钟用于时间测量（time-measuring）。并不是所有">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-02-23T07:59:36.000Z">
@@ -31,190 +18,185 @@
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="golang">
 <meta name="twitter:card" content="summary">
-
-
-<link rel="canonical" href="https://y2k38.github.io/golang-series-time/">
-
-
-
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://y2k38.github.io/golang-series-time/","path":"golang-series-time/","title":"golang系列之-time"}</script>
-
-<script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>golang系列之-time | noname</title>
-  
-
-
-
-
-
-
-
-
-  <noscript>
-    <link rel="stylesheet" href="/css/noscript.css">
-  </noscript>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
-
-  <main class="main">
-    <div class="column">
-      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏" role="button">
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <p class="site-title">noname</p>
-      <i class="logo-line"></i>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="搜索" role="button">
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
-</header>
+    
+    
+      
         
-  
-  <aside class="sidebar">
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>golang系列之-time</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+     -->
       </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/golang-series-netpoll/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/golang-series-channel/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://y2k38.github.io/golang-series-time/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://y2k38.github.io/golang-series-time/&text=golang系列之-time"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://y2k38.github.io/golang-series-time/&title=golang系列之-time"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://y2k38.github.io/golang-series-time/&is_video=false&description=golang系列之-time"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=golang系列之-time&body=Check out this article: https://y2k38.github.io/golang-series-time/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://y2k38.github.io/golang-series-time/&title=golang系列之-time"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://y2k38.github.io/golang-series-time/&title=golang系列之-time"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://y2k38.github.io/golang-series-time/&title=golang系列之-time"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://y2k38.github.io/golang-series-time/&title=golang系列之-time"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://y2k38.github.io/golang-series-time/&name=golang系列之-time&description=&lt;p&gt;time涉及的内容较多，如生成&amp;#x2F;存储时间、比较时间、获取时间信息、时区、夏令时等，本文仅介绍一些自己感兴趣的地方&lt;/p&gt;
+&lt;p&gt;日历计算基于格里高利历（公历），1年有365天（闰年有366天）。同时支持墙上时钟（wall clock）和单调时钟（monotonic clock），其中墙上时钟用于时间同步、报时（time-telling），单调时钟用于时间测量（time-measuring）。并不是所有函数都支持单调时钟，如字符串编码&amp;#x2F;解码函数就会舍弃单调时钟数据&lt;/p&gt;
+&lt;p&gt;注意：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;时间精确度：纳秒&lt;/li&gt;
+&lt;li&gt;大部分都是线程安全，除了&lt;ul&gt;
+&lt;li&gt;GobDecode&lt;/li&gt;
+&lt;li&gt;UnmarshalBinary&lt;/li&gt;
+&lt;li&gt;UnmarshalJSON&lt;/li&gt;
+&lt;li&gt;UnmarshalText&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;有些系统会在进程休眠时停止单调时钟，会导致一些函数计算异常，如&lt;ul&gt;
+&lt;li&gt;Sub&lt;/li&gt;
+&lt;li&gt;Since&lt;/li&gt;
+&lt;li&gt;Until&lt;/li&gt;
+&lt;li&gt;Before&lt;/li&gt;
+&lt;li&gt;After&lt;/li&gt;
+&lt;li&gt;Add&lt;/li&gt;
+&lt;li&gt;Equal&lt;/li&gt;
+&lt;li&gt;Compare&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;字符串编码时，保存的是Location的offset，会导致dst-夏令时丢失，相关函数&lt;ul&gt;
+&lt;li&gt;GobEncode&lt;/li&gt;
+&lt;li&gt;MarshalBinary&lt;/li&gt;
+&lt;li&gt;AppendBinary&lt;/li&gt;
+&lt;li&gt;MarshalJSON&lt;/li&gt;
+&lt;li&gt;MarshalText&lt;/li&gt;
+&lt;li&gt;AppendText&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;字符串编码&amp;#x2F;解码时，会丢弃单调时钟信息&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;当前go版本：1.24&lt;/p&gt;
+&lt;h2 id=&#34;快速上手&#34;&gt;&lt;a href=&#34;#快速上手&#34; class=&#34;headerlink&#34; title=&#34;快速上手&#34;&gt;&lt;/a&gt;快速上手&lt;/h2&gt;&lt;figure class=&#34;highlight go&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;31&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;32&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;33&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;34&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;35&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;36&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;37&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;38&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;39&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;40&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;41&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;42&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;43&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;44&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;45&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;46&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;47&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;package&lt;/span&gt; main&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;import&lt;/span&gt; (&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;string&#34;&gt;&amp;quot;fmt&amp;quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;string&#34;&gt;&amp;quot;time&amp;quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;function&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;func&lt;/span&gt; &lt;span class=&#34;title&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;()&lt;/span&gt;&lt;/span&gt; &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p := fmt.Println&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// 当前时刻&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    now := time.Now()&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(now)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// 指定时刻&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    then := time.Date(&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;number&#34;&gt;2009&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;11&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;17&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;20&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;34&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;58&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;651387237&lt;/span&gt;, time.UTC)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Year())          &lt;span class=&#34;comment&#34;&gt;// 年&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Month())         &lt;span class=&#34;comment&#34;&gt;// 月&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Day())           &lt;span class=&#34;comment&#34;&gt;// 日&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Hour())          &lt;span class=&#34;comment&#34;&gt;// 时&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Minute())        &lt;span class=&#34;comment&#34;&gt;// 分&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Second())        &lt;span class=&#34;comment&#34;&gt;// 秒&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Nanosecond())    &lt;span class=&#34;comment&#34;&gt;// 纳秒&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Location())      &lt;span class=&#34;comment&#34;&gt;// 时区&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Weekday())       &lt;span class=&#34;comment&#34;&gt;// 星期&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// 判断两个时刻先后顺序&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Before(now))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.After(now))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Equal(now))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// 时长/时刻差值&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    diff := now.Sub(then)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(diff)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(diff.Hours())         &lt;span class=&#34;comment&#34;&gt;// 转换成总小时数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(diff.Minutes())       &lt;span class=&#34;comment&#34;&gt;// 转换成总分钟数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(diff.Seconds())       &lt;span class=&#34;comment&#34;&gt;// 转换成总秒数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(diff.Nanoseconds())   &lt;span class=&#34;comment&#34;&gt;// 转换成总纳秒数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Add(diff))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Add(-diff))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
 
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B"><span class="nav-number">1.</span> <span class="nav-text">快速上手</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E5%AD%98%E5%82%A8"><span class="nav-number">2.1.</span> <span class="nav-text">时间存储</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E6%97%B6%E9%97%B4%E5%AF%B9%E8%B1%A1Time"><span class="nav-number">3.</span> <span class="nav-text">获取时间对象Time</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BD%93%E5%89%8D%E6%97%B6%E5%88%BBNow"><span class="nav-number">3.1.</span> <span class="nav-text">当前时刻Now</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Unix%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E6%8D%A2"><span class="nav-number">3.2.</span> <span class="nav-text">Unix时间戳转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Date%E8%8E%B7%E5%8F%96%E6%8C%87%E5%AE%9A%E6%97%B6%E5%88%BB"><span class="nav-number">3.3.</span> <span class="nav-text">Date获取指定时刻</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A2%9E%E5%8A%A0%E6%97%B6%E9%95%BF%E8%8E%B7%E5%8F%96%E6%8C%87%E5%AE%9A%E6%97%B6%E5%88%BB"><span class="nav-number">3.4.</span> <span class="nav-text">增加时长获取指定时刻</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Add"><span class="nav-number">3.4.1.</span> <span class="nav-text">Add</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AddDate"><span class="nav-number">3.4.2.</span> <span class="nav-text">AddDate</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%BD%AC%E6%8D%A2%E6%88%90Time"><span class="nav-number">3.5.</span> <span class="nav-text">字符串转换成Time</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Parse"><span class="nav-number">3.5.1.</span> <span class="nav-text">Parse</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ParseInLocation"><span class="nav-number">3.5.2.</span> <span class="nav-text">ParseInLocation</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E4%B8%A4%E4%B8%AA%E6%97%B6%E5%88%BB%E7%9A%84%E5%B7%AE%E5%80%BC"><span class="nav-number">4.</span> <span class="nav-text">计算两个时刻的差值</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Sub"><span class="nav-number">4.1.</span> <span class="nav-text">Sub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Since"><span class="nav-number">4.2.</span> <span class="nav-text">Since</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Until"><span class="nav-number">4.3.</span> <span class="nav-text">Until</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AF%94%E8%BE%83%E4%B8%A4%E4%B8%AA%E6%97%B6%E5%88%BB%E7%9A%84%E5%85%88%E5%90%8E%E9%A1%BA%E5%BA%8F"><span class="nav-number">5.</span> <span class="nav-text">比较两个时刻的先后顺序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Before"><span class="nav-number">5.1.</span> <span class="nav-text">Before</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#After"><span class="nav-number">5.2.</span> <span class="nav-text">After</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Equal"><span class="nav-number">5.3.</span> <span class="nav-text">Equal</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IsZero"><span class="nav-number">5.4.</span> <span class="nav-text">IsZero</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Compare"><span class="nav-number">5.5.</span> <span class="nav-text">Compare</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%B6%E5%8C%BA"><span class="nav-number">6.</span> <span class="nav-text">时区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AC%E6%8D%A2%E6%97%B6%E5%8C%BA"><span class="nav-number">6.1.</span> <span class="nav-text">转换时区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Local"><span class="nav-number">6.1.1.</span> <span class="nav-text">Local</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UTC"><span class="nav-number">6.1.2.</span> <span class="nav-text">UTC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E6%97%B6%E5%8C%BA"><span class="nav-number">6.1.3.</span> <span class="nav-text">指定时区</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E6%8A%A5%E6%97%B6%E4%BF%A1%E6%81%AF"><span class="nav-number">7.</span> <span class="nav-text">获取报时信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96Unix%E6%97%B6%E9%97%B4%E6%88%B3"><span class="nav-number">7.1.</span> <span class="nav-text">获取Unix时间戳</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E5%8F%96%E6%97%A5%E6%9C%9F%E7%AD%89%E4%BF%A1%E6%81%AF"><span class="nav-number">7.2.</span> <span class="nav-text">提取日期等信息</span></a></li></ol></li></ol></div>
-        </div>
-        <!--/noindex-->
+&lt;p&gt;运行结果如下所示&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;23&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;go run main.go&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 2025-02-22 10:30:14.247195 +0800 CST m=+0.000103986  # 当前时刻&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 2009-11-17 20:34:58.651387237 +0000 UTC              # 指定时刻&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 2009                                                 # 年&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# November                                             # 月&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 17                                                   # 日&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 20                                                   # 时&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 34                                                   # 分&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 58                                                   # 秒&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 651387237                                            # 纳秒&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# UTC                                                  # 时区&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Tuesday                                              # 星期&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# true&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# false&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# false&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 133805h55m15.595807763s                              # 时长/时刻差值&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 133805.9209988355                                    # 总小时数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 8.028355259930129e+06                                # 总分钟数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 4.817013155958078e+08                                # 总秒数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 481701315595807763                                   # 总纳秒数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 2025-02-22 02:30:14.247195 +0000 UTC&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 1994-08-13 14:39:43.055579474 +0000 UTC&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://y2k38.github.io/golang-series-time/&t=golang系列之-time"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
 
-        <div class="site-overview-wrap sidebar-panel">
-          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">y2k38</p>
-  <div class="site-description" itemprop="description">个人笔记</div>
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B"><span class="toc-number">1.</span> <span class="toc-text">快速上手</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E5%AD%98%E5%82%A8"><span class="toc-number">2.1.</span> <span class="toc-text">时间存储</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E6%97%B6%E9%97%B4%E5%AF%B9%E8%B1%A1Time"><span class="toc-number">3.</span> <span class="toc-text">获取时间对象Time</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BD%93%E5%89%8D%E6%97%B6%E5%88%BBNow"><span class="toc-number">3.1.</span> <span class="toc-text">当前时刻Now</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Unix%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E6%8D%A2"><span class="toc-number">3.2.</span> <span class="toc-text">Unix时间戳转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Date%E8%8E%B7%E5%8F%96%E6%8C%87%E5%AE%9A%E6%97%B6%E5%88%BB"><span class="toc-number">3.3.</span> <span class="toc-text">Date获取指定时刻</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A2%9E%E5%8A%A0%E6%97%B6%E9%95%BF%E8%8E%B7%E5%8F%96%E6%8C%87%E5%AE%9A%E6%97%B6%E5%88%BB"><span class="toc-number">3.4.</span> <span class="toc-text">增加时长获取指定时刻</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Add"><span class="toc-number">3.4.1.</span> <span class="toc-text">Add</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#AddDate"><span class="toc-number">3.4.2.</span> <span class="toc-text">AddDate</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%BD%AC%E6%8D%A2%E6%88%90Time"><span class="toc-number">3.5.</span> <span class="toc-text">字符串转换成Time</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Parse"><span class="toc-number">3.5.1.</span> <span class="toc-text">Parse</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ParseInLocation"><span class="toc-number">3.5.2.</span> <span class="toc-text">ParseInLocation</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E4%B8%A4%E4%B8%AA%E6%97%B6%E5%88%BB%E7%9A%84%E5%B7%AE%E5%80%BC"><span class="toc-number">4.</span> <span class="toc-text">计算两个时刻的差值</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Sub"><span class="toc-number">4.1.</span> <span class="toc-text">Sub</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Since"><span class="toc-number">4.2.</span> <span class="toc-text">Since</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Until"><span class="toc-number">4.3.</span> <span class="toc-text">Until</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AF%94%E8%BE%83%E4%B8%A4%E4%B8%AA%E6%97%B6%E5%88%BB%E7%9A%84%E5%85%88%E5%90%8E%E9%A1%BA%E5%BA%8F"><span class="toc-number">5.</span> <span class="toc-text">比较两个时刻的先后顺序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Before"><span class="toc-number">5.1.</span> <span class="toc-text">Before</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#After"><span class="toc-number">5.2.</span> <span class="toc-text">After</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Equal"><span class="toc-number">5.3.</span> <span class="toc-text">Equal</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#IsZero"><span class="toc-number">5.4.</span> <span class="toc-text">IsZero</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Compare"><span class="toc-number">5.5.</span> <span class="toc-text">Compare</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%B6%E5%8C%BA"><span class="toc-number">6.</span> <span class="toc-text">时区</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2%E6%97%B6%E5%8C%BA"><span class="toc-number">6.1.</span> <span class="toc-text">转换时区</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Local"><span class="toc-number">6.1.1.</span> <span class="toc-text">Local</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#UTC"><span class="toc-number">6.1.2.</span> <span class="toc-text">UTC</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%87%E5%AE%9A%E6%97%B6%E5%8C%BA"><span class="toc-number">6.1.3.</span> <span class="toc-text">指定时区</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E6%8A%A5%E6%97%B6%E4%BF%A1%E6%81%AF"><span class="toc-number">7.</span> <span class="toc-text">获取报时信息</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96Unix%E6%97%B6%E9%97%B4%E6%88%B3"><span class="toc-number">7.1.</span> <span class="toc-text">获取Unix时间戳</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E5%8F%96%E6%97%A5%E6%9C%9F%E7%AD%89%E4%BF%A1%E6%81%AF"><span class="toc-number">7.2.</span> <span class="toc-text">提取日期等信息</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
 </div>
-<div class="site-state-wrap animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-        <a href="/archives/">
-          <span class="site-state-item-count">48</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-          <a href="/tags/">
-        <span class="site-state-item-count">40</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
 
-        </div>
-      </div>
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        golang系列之-time
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">y2k38</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-02-23T07:59:36.000Z" class="dt-published" itemprop="datePublished">2025-02-23</time>
+        
+      
     </div>
 
-    
-  </aside>
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/golang/" rel="tag">golang</a>
+    </div>
 
 
     </div>
-
-    <div class="main-inner post posts-expand">
-
-
+  </header>
   
 
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-time/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="golang系列之-time | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          golang系列之-time
-        </h1>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-02-23 15:59:36" itemprop="dateCreated datePublished" datetime="2025-02-23T15:59:36+08:00">2025-02-23</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-04-05 20:00:21" itemprop="dateModified" datetime="2025-04-05T20:00:21+08:00">2025-04-05</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>3.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>12 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody"><p>time涉及的内容较多，如生成&#x2F;存储时间、比较时间、获取时间信息、时区、夏令时等，本文仅介绍一些自己感兴趣的地方</p>
+  <div class="content e-content" itemprop="articleBody">
+    <p>time涉及的内容较多，如生成&#x2F;存储时间、比较时间、获取时间信息、时区、夏令时等，本文仅介绍一些自己感兴趣的地方</p>
 <p>日历计算基于格里高利历（公历），1年有365天（闰年有366天）。同时支持墙上时钟（wall clock）和单调时钟（monotonic clock），其中墙上时钟用于时间同步、报时（time-telling），单调时钟用于时间测量（time-measuring）。并不是所有函数都支持单调时钟，如字符串编码&#x2F;解码函数就会舍弃单调时钟数据</p>
 <p>注意：</p>
 <ol>
@@ -432,141 +414,177 @@
 <p>示例</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 两个时刻是否是同一天</span></span><br><span class="line">NewDate(t1.Date()) == NewDate(t2.Date())</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Date <span class="keyword">struct</span> &#123;</span><br><span class="line">    YearMonth</span><br><span class="line">    day <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewDate</span><span class="params">(year <span class="type">int</span>, month time.Month, day <span class="type">int</span>)</span></span> Date &#123;</span><br><span class="line">    <span class="keyword">return</span> Date&#123;</span><br><span class="line">        YearMonth: YearMonth&#123;</span><br><span class="line">            year:  year,</span><br><span class="line">            month: month,</span><br><span class="line">        &#125;,</span><br><span class="line">        day: day,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 获取当月开始和结束时刻</span></span><br><span class="line">startOfMonth := time.Date(t1.Year(), t1.Month(), <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, t1.Location())</span><br><span class="line">endOfMonth := startOfMonth.AddDate(<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>).Add(<span class="number">-1</span> * time.Second)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 获取当个星期的开始和结束时刻</span></span><br><span class="line"><span class="comment">// 从星期天开始计起</span></span><br><span class="line">tmp := t1.Truncate(<span class="number">7</span> * <span class="number">24</span> * time.Hour)</span><br><span class="line">startOfWeek := time.Date(tmp.Year(), tmp.Month(), tmp.Day(), <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, tmp.Location())</span><br><span class="line">endOfWeek := startOfWeek.AddDate(<span class="number">0</span>, <span class="number">0</span>, <span class="number">7</span>).Add(<span class="number">-1</span> * time.Second)</span><br></pre></td></tr></table></figure>
 
-    </div>
+  </div>
+</article>
 
-    
-    
-    
 
-    <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/golang/" rel="tag"># golang</a>
-          </div>
 
         
+          <div id="footer-post-container">
+  <div id="footer-post">
 
-          <div class="post-nav">
-            <div class="post-nav-item">
-                <a href="/golang-series-channel/" rel="prev" title="golang系列之-channel">
-                  <i class="fa fa-angle-left"></i> golang系列之-channel
-                </a>
-            </div>
-            <div class="post-nav-item">
-                <a href="/golang-series-netpoll/" rel="next" title="golang系列之-netpoll">
-                  golang系列之-netpoll <i class="fa fa-angle-right"></i>
-                </a>
-            </div>
-          </div>
-    </footer>
-  </article>
-</div>
-
-
-
-
-
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li>
+        
+      </ul>
+    </div>
 
     
-  
-  <div class="comments giscus-container">
-  </div>
-  
-  
-</div>
-  </main>
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B"><span class="toc-number">1.</span> <span class="toc-text">快速上手</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E5%AD%98%E5%82%A8"><span class="toc-number">2.1.</span> <span class="toc-text">时间存储</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E6%97%B6%E9%97%B4%E5%AF%B9%E8%B1%A1Time"><span class="toc-number">3.</span> <span class="toc-text">获取时间对象Time</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BD%93%E5%89%8D%E6%97%B6%E5%88%BBNow"><span class="toc-number">3.1.</span> <span class="toc-text">当前时刻Now</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Unix%E6%97%B6%E9%97%B4%E6%88%B3%E8%BD%AC%E6%8D%A2"><span class="toc-number">3.2.</span> <span class="toc-text">Unix时间戳转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Date%E8%8E%B7%E5%8F%96%E6%8C%87%E5%AE%9A%E6%97%B6%E5%88%BB"><span class="toc-number">3.3.</span> <span class="toc-text">Date获取指定时刻</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A2%9E%E5%8A%A0%E6%97%B6%E9%95%BF%E8%8E%B7%E5%8F%96%E6%8C%87%E5%AE%9A%E6%97%B6%E5%88%BB"><span class="toc-number">3.4.</span> <span class="toc-text">增加时长获取指定时刻</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Add"><span class="toc-number">3.4.1.</span> <span class="toc-text">Add</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#AddDate"><span class="toc-number">3.4.2.</span> <span class="toc-text">AddDate</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%BD%AC%E6%8D%A2%E6%88%90Time"><span class="toc-number">3.5.</span> <span class="toc-text">字符串转换成Time</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Parse"><span class="toc-number">3.5.1.</span> <span class="toc-text">Parse</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ParseInLocation"><span class="toc-number">3.5.2.</span> <span class="toc-text">ParseInLocation</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E4%B8%A4%E4%B8%AA%E6%97%B6%E5%88%BB%E7%9A%84%E5%B7%AE%E5%80%BC"><span class="toc-number">4.</span> <span class="toc-text">计算两个时刻的差值</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Sub"><span class="toc-number">4.1.</span> <span class="toc-text">Sub</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Since"><span class="toc-number">4.2.</span> <span class="toc-text">Since</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Until"><span class="toc-number">4.3.</span> <span class="toc-text">Until</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AF%94%E8%BE%83%E4%B8%A4%E4%B8%AA%E6%97%B6%E5%88%BB%E7%9A%84%E5%85%88%E5%90%8E%E9%A1%BA%E5%BA%8F"><span class="toc-number">5.</span> <span class="toc-text">比较两个时刻的先后顺序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Before"><span class="toc-number">5.1.</span> <span class="toc-text">Before</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#After"><span class="toc-number">5.2.</span> <span class="toc-text">After</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Equal"><span class="toc-number">5.3.</span> <span class="toc-text">Equal</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#IsZero"><span class="toc-number">5.4.</span> <span class="toc-text">IsZero</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Compare"><span class="toc-number">5.5.</span> <span class="toc-text">Compare</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%B6%E5%8C%BA"><span class="toc-number">6.</span> <span class="toc-text">时区</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2%E6%97%B6%E5%8C%BA"><span class="toc-number">6.1.</span> <span class="toc-text">转换时区</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Local"><span class="toc-number">6.1.1.</span> <span class="toc-text">Local</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#UTC"><span class="toc-number">6.1.2.</span> <span class="toc-text">UTC</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%87%E5%AE%9A%E6%97%B6%E5%8C%BA"><span class="toc-number">6.1.3.</span> <span class="toc-text">指定时区</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E6%8A%A5%E6%97%B6%E4%BF%A1%E6%81%AF"><span class="toc-number">7.</span> <span class="toc-text">获取报时信息</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96Unix%E6%97%B6%E9%97%B4%E6%88%B3"><span class="toc-number">7.1.</span> <span class="toc-text">获取Unix时间戳</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E5%8F%96%E6%97%A5%E6%9C%9F%E7%AD%89%E4%BF%A1%E6%81%AF"><span class="toc-number">7.2.</span> <span class="toc-text">提取日期等信息</span></a></li></ol></li></ol>
+      </div>
+    
 
-  <footer class="footer">
-    <div class="footer-inner">
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://y2k38.github.io/golang-series-time/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://y2k38.github.io/golang-series-time/&text=golang系列之-time"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://y2k38.github.io/golang-series-time/&title=golang系列之-time"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://y2k38.github.io/golang-series-time/&is_video=false&description=golang系列之-time"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=golang系列之-time&body=Check out this article: https://y2k38.github.io/golang-series-time/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://y2k38.github.io/golang-series-time/&title=golang系列之-time"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://y2k38.github.io/golang-series-time/&title=golang系列之-time"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://y2k38.github.io/golang-series-time/&title=golang系列之-time"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://y2k38.github.io/golang-series-time/&title=golang系列之-time"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://y2k38.github.io/golang-series-time/&name=golang系列之-time&description=&lt;p&gt;time涉及的内容较多，如生成&amp;#x2F;存储时间、比较时间、获取时间信息、时区、夏令时等，本文仅介绍一些自己感兴趣的地方&lt;/p&gt;
+&lt;p&gt;日历计算基于格里高利历（公历），1年有365天（闰年有366天）。同时支持墙上时钟（wall clock）和单调时钟（monotonic clock），其中墙上时钟用于时间同步、报时（time-telling），单调时钟用于时间测量（time-measuring）。并不是所有函数都支持单调时钟，如字符串编码&amp;#x2F;解码函数就会舍弃单调时钟数据&lt;/p&gt;
+&lt;p&gt;注意：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;时间精确度：纳秒&lt;/li&gt;
+&lt;li&gt;大部分都是线程安全，除了&lt;ul&gt;
+&lt;li&gt;GobDecode&lt;/li&gt;
+&lt;li&gt;UnmarshalBinary&lt;/li&gt;
+&lt;li&gt;UnmarshalJSON&lt;/li&gt;
+&lt;li&gt;UnmarshalText&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;有些系统会在进程休眠时停止单调时钟，会导致一些函数计算异常，如&lt;ul&gt;
+&lt;li&gt;Sub&lt;/li&gt;
+&lt;li&gt;Since&lt;/li&gt;
+&lt;li&gt;Until&lt;/li&gt;
+&lt;li&gt;Before&lt;/li&gt;
+&lt;li&gt;After&lt;/li&gt;
+&lt;li&gt;Add&lt;/li&gt;
+&lt;li&gt;Equal&lt;/li&gt;
+&lt;li&gt;Compare&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;字符串编码时，保存的是Location的offset，会导致dst-夏令时丢失，相关函数&lt;ul&gt;
+&lt;li&gt;GobEncode&lt;/li&gt;
+&lt;li&gt;MarshalBinary&lt;/li&gt;
+&lt;li&gt;AppendBinary&lt;/li&gt;
+&lt;li&gt;MarshalJSON&lt;/li&gt;
+&lt;li&gt;MarshalText&lt;/li&gt;
+&lt;li&gt;AppendText&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;字符串编码&amp;#x2F;解码时，会丢弃单调时钟信息&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;当前go版本：1.24&lt;/p&gt;
+&lt;h2 id=&#34;快速上手&#34;&gt;&lt;a href=&#34;#快速上手&#34; class=&#34;headerlink&#34; title=&#34;快速上手&#34;&gt;&lt;/a&gt;快速上手&lt;/h2&gt;&lt;figure class=&#34;highlight go&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;31&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;32&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;33&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;34&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;35&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;36&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;37&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;38&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;39&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;40&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;41&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;42&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;43&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;44&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;45&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;46&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;47&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;package&lt;/span&gt; main&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;import&lt;/span&gt; (&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;string&#34;&gt;&amp;quot;fmt&amp;quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;string&#34;&gt;&amp;quot;time&amp;quot;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;function&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;func&lt;/span&gt; &lt;span class=&#34;title&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;()&lt;/span&gt;&lt;/span&gt; &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p := fmt.Println&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// 当前时刻&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    now := time.Now()&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(now)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// 指定时刻&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    then := time.Date(&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;        &lt;span class=&#34;number&#34;&gt;2009&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;11&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;17&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;20&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;34&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;58&lt;/span&gt;, &lt;span class=&#34;number&#34;&gt;651387237&lt;/span&gt;, time.UTC)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Year())          &lt;span class=&#34;comment&#34;&gt;// 年&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Month())         &lt;span class=&#34;comment&#34;&gt;// 月&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Day())           &lt;span class=&#34;comment&#34;&gt;// 日&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Hour())          &lt;span class=&#34;comment&#34;&gt;// 时&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Minute())        &lt;span class=&#34;comment&#34;&gt;// 分&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Second())        &lt;span class=&#34;comment&#34;&gt;// 秒&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Nanosecond())    &lt;span class=&#34;comment&#34;&gt;// 纳秒&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Location())      &lt;span class=&#34;comment&#34;&gt;// 时区&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Weekday())       &lt;span class=&#34;comment&#34;&gt;// 星期&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// 判断两个时刻先后顺序&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Before(now))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.After(now))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Equal(now))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    &lt;span class=&#34;comment&#34;&gt;// 时长/时刻差值&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    diff := now.Sub(then)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(diff)&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(diff.Hours())         &lt;span class=&#34;comment&#34;&gt;// 转换成总小时数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(diff.Minutes())       &lt;span class=&#34;comment&#34;&gt;// 转换成总分钟数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(diff.Seconds())       &lt;span class=&#34;comment&#34;&gt;// 转换成总秒数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(diff.Nanoseconds())   &lt;span class=&#34;comment&#34;&gt;// 转换成总纳秒数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Add(diff))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    p(then.Add(-diff))&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
 
-  <div class="copyright">
-    &copy; 
-    <span itemprop="copyrightYear">2026</span>
-    <span class="with-love">
-      <i class="fa fa-heart"></i>
-    </span>
-    <span class="author" itemprop="copyrightHolder">y2k38</span>
-  </div>
-<div class="wordcount">
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-chart-line"></i>
-    </span>
-    <span title="站点总字数">176k</span>
-  </span>
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-coffee"></i>
-    </span>
-    <span title="站点阅读时长">10:41</span>
-  </span>
-</div>
-  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
-  </div>
+&lt;p&gt;运行结果如下所示&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;23&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;go run main.go&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 2025-02-22 10:30:14.247195 +0800 CST m=+0.000103986  # 当前时刻&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 2009-11-17 20:34:58.651387237 +0000 UTC              # 指定时刻&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 2009                                                 # 年&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# November                                             # 月&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 17                                                   # 日&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 20                                                   # 时&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 34                                                   # 分&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 58                                                   # 秒&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 651387237                                            # 纳秒&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# UTC                                                  # 时区&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# Tuesday                                              # 星期&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# true&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# false&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# false&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 133805h55m15.595807763s                              # 时长/时刻差值&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 133805.9209988355                                    # 总小时数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 8.028355259930129e+06                                # 总分钟数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 4.817013155958078e+08                                # 总秒数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 481701315595807763                                   # 总纳秒数&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 2025-02-22 02:30:14.247195 +0000 UTC&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;comment&#34;&gt;# 1994-08-13 14:39:43.055579474 +0000 UTC&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://y2k38.github.io/golang-series-time/&t=golang系列之-time"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
 
     </div>
-  </footer>
 
-  
-  <div class="toggle sidebar-toggle" role="button">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
   </div>
-  <div class="sidebar-dimmer"></div>
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2026
+    y2k38
   </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
 
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
+    </div>
+    <!-- styles -->
 
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
 
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
-<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
   
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
 
 
+<script src="/js/main.js"></script>
 
+<!-- search -->
 
+<!-- Baidu Analytics -->
 
+<!-- Cloudflare Analytics -->
 
-  
+<!-- Disqus Comments -->
 
-
-
-
-<script class="next-config" data-name="giscus" type="application/json">{"enable":true,"repo":"Y2k38/y2k38.github.io","repo_id":"R_kgDOMZGvZA","category":"Announcements","category_id":"DIC_kwDOMZGvZM4CirXX","mapping":"pathname","strict":0,"reactions_enabled":1,"emit_metadata":0,"theme":"preferred_color_scheme","lang":"zh-CN","crossorigin":"anonymous","input_position":"bottom","loading":"lazy"}</script>
-
-<script>
-document.addEventListener('page:loaded', () => {
-  if (!CONFIG.page.comments) return;
-
-  NexT.utils.loadComments('.giscus-container')
-    .then(() => NexT.utils.getScript('https://giscus.app/client.js', {
-      attributes: {
-        async                   : true,
-        crossOrigin             : 'anonymous',
-        'data-repo'             : CONFIG.giscus.repo,
-        'data-repo-id'          : CONFIG.giscus.repo_id,
-        'data-category'         : CONFIG.giscus.category,
-        'data-category-id'      : CONFIG.giscus.category_id,
-        'data-mapping'          : CONFIG.giscus.mapping,
-        'data-strict'           : CONFIG.giscus.strict,
-        'data-reactions-enabled': CONFIG.giscus.reactions_enabled,
-        'data-emit-metadata'    : CONFIG.giscus.emit_metadata,
-        'data-theme'            : CONFIG.giscus.theme,
-        'data-lang'             : CONFIG.giscus.lang,
-        'data-input-position'   : CONFIG.giscus.input_position,
-        'data-loading'          : CONFIG.giscus.loading
-      },
-      parentNode: document.querySelector('.giscus-container')
-    }));
-});
-</script>
+<!-- utterances Comments -->
 
 </body>
 </html>

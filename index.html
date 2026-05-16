@@ -1,1707 +1,568 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang=zh>
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
-
-<script class="next-config" data-name="main" type="application/json">{"hostname":"y2k38.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
-
-    <meta name="description" content="个人笔记">
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="个人碎碎念，不定期更新 技能：精通Rust&#x2F;Elixir&#x2F;Python&#x2F;Javascript的HelloWorld写法">
 <meta property="og:type" content="website">
-<meta property="og:title" content="noname">
+<meta property="og:title" content="Y2k38&#39;s blog">
 <meta property="og:url" content="https://y2k38.github.io/index.html">
-<meta property="og:site_name" content="noname">
-<meta property="og:description" content="个人笔记">
+<meta property="og:site_name" content="Y2k38&#39;s blog">
+<meta property="og:description" content="个人碎碎念，不定期更新 技能：精通Rust&#x2F;Elixir&#x2F;Python&#x2F;Javascript的HelloWorld写法">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="y2k38">
 <meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Y2k38&#39;s blog</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
 
 
-<link rel="canonical" href="https://y2k38.github.io/">
+    <!-- Umami Analytics -->
 
 
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":true,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"index.html","title":""}</script>
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
 
-<script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>noname</title>
+<body class="max-width mx-auto px3 ltr">
+    
+    <div class="content index py4 h-card">
+        
+          <header id="header">
+  <a class="u-url u-uid" href="/">
   
-
-
-
-
-
-
-
-
-  <noscript>
-    <link rel="stylesheet" href="/css/noscript.css">
-  </noscript>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
-
-  <main class="main">
-    <div class="column">
-      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏" role="button">
+    
+      <img id="logo" alt class="u-logo" src="/images/logo.png" />
+    
+  
+    <div id="title">
+      <h1 class="p-name">Y2k38&#39;s blog</h1>
     </div>
+  </a>
+  <div id="nav">
+    <ul>
+      <li class="icon">
+        <a href="#" aria-label="目录"><i class="fa-solid fa-bars fa-2x"></i></a>
+      </li>
+      <!--
+     --><li><a href="/">首页</a></li><!--
+   --><!--
+     --><li><a href="/archives/">归档</a></li><!--
+   --><!--
+     --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+   -->
+    </ul>
   </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <h1 class="site-title">noname</h1>
-      <i class="logo-line"></i>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger" aria-label="搜索" role="button">
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
 </header>
-        
-  
-  <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
+        
+        <section id="about" class="p-note">
+  
+    <p>个人碎碎念，不定期更新<br>技能：精通Rust&#x2F;Elixir&#x2F;Python&#x2F;Javascript的HelloWorld写法</p>
+
+  
+  
+</section>
+
+<section id="writing">
+  <span class="h1"><a href="/archives/">文章</a></span>
+  
+  <ul class="post-list">
+    
+    
+      
+    
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2026-05-12T13:26:44.000Z" class="dt-published" itemprop="datePublished">2026-05-12</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/how-to-setup-hysteria-and-anytls-on-ubuntu-server/">如何在 Ubuntu 服务器上安装 Hysteria 2 和 AnyTLS 服务</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2026-04-11T05:41:47.000Z" class="dt-published" itemprop="datePublished">2026-04-11</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/how-to-setup-shadowsocks-rust-on-ubuntu-server/">如何在 Ubuntu 服务器上安装 Shadowsocks-Rust</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2026-04-10T06:43:09.000Z" class="dt-published" itemprop="datePublished">2026-04-10</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/how-to-use-samba-to-set-up-a-shared-server/">如何使用 Samba 搭建共享服务器</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-09-20T13:50:23.000Z" class="dt-published" itemprop="datePublished">2025-09-20</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/full-android-setup-on-raspberry-pi-with-lineageos/">在树莓派上使用 LineageOS 搭建完整的 Android 系统</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-04-20T08:55:02.000Z" class="dt-published" itemprop="datePublished">2025-04-20</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/summary-of-reading-shadowsocks-libev-source-code/">shadowsocks-libev源码阅读总结</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-04-06T02:58:06.000Z" class="dt-published" itemprop="datePublished">2025-04-06</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-garbage-collection/">golang系列之-垃圾回收</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-04-02T01:35:00.000Z" class="dt-published" itemprop="datePublished">2025-04-02</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-memory-allocation/">golang系列之-内存分配</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-03-30T05:12:29.000Z" class="dt-published" itemprop="datePublished">2025-03-30</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-bootstrap-and-gmp-model/">golang系列之-程序运行流程及GMP模型</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-03-01T01:57:28.000Z" class="dt-published" itemprop="datePublished">2025-03-01</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-timer-and-ticker/">golang系列之-定时器Timer和Ticker</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-27T00:48:14.000Z" class="dt-published" itemprop="datePublished">2025-02-27</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-netpoll/">golang系列之-netpoll</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-23T07:59:36.000Z" class="dt-published" itemprop="datePublished">2025-02-23</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-time/">golang系列之-time</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-21T11:38:32.000Z" class="dt-published" itemprop="datePublished">2025-02-21</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-channel/">golang系列之-channel</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-20T15:06:09.000Z" class="dt-published" itemprop="datePublished">2025-02-20</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-hashtriemap/">golang系列之-sync.Map(HashTrieMap)</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-20T01:45:01.000Z" class="dt-published" itemprop="datePublished">2025-02-20</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-map/">golang系列之-sync.Map</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-19T03:26:47.000Z" class="dt-published" itemprop="datePublished">2025-02-19</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-singleflight/">golang系列之-singleflight</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-18T09:12:21.000Z" class="dt-published" itemprop="datePublished">2025-02-18</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-rwmutex/">golang系列之-sync.RWMutex</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-18T01:28:12.000Z" class="dt-published" itemprop="datePublished">2025-02-18</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-mutex/">golang系列之-sync.Mutex</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-17T01:54:38.000Z" class="dt-published" itemprop="datePublished">2025-02-17</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-cond/">golang系列之-sync.Cond</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-16T12:48:45.000Z" class="dt-published" itemprop="datePublished">2025-02-16</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-waitgroup/">golang系列之-sync.Waitgroup</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2025-02-16T08:29:07.000Z" class="dt-published" itemprop="datePublished">2025-02-16</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/golang-series-sync-atomic/">golang系列之-sync/atomic</a>
+    
+
+
+</span>
+      </li>
+    
+  </ul>
+  
+</section>
+
+
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2026
+    y2k38
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+     -->
       </ul>
-
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <div class="post-toc-wrap sidebar-panel">
-        </div>
-        <!--/noindex-->
-
-        <div class="site-overview-wrap sidebar-panel">
-          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">y2k38</p>
-  <div class="site-description" itemprop="description">个人笔记</div>
-</div>
-<div class="site-state-wrap animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-        <a href="/archives/">
-          <span class="site-state-item-count">48</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-          <a href="/tags/">
-        <span class="site-state-item-count">40</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-
-        </div>
-      </div>
-    </div>
-
-    
-  </aside>
-
-
-    </div>
-
-    <div class="main-inner index posts-expand">
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/how-to-setup-shadowsocks-rust-on-ubuntu-server/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/how-to-setup-shadowsocks-rust-on-ubuntu-server/" class="post-title-link" itemprop="url">如何在 Ubuntu 服务器上安装 Shadowsocks-Rust</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2026-04-11 13:41:47" itemprop="dateCreated datePublished" datetime="2026-04-11T13:41:47+08:00">2026-04-11</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-14 22:29:39" itemprop="dateModified" datetime="2026-04-14T22:29:39+08:00">2026-04-14</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>3.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>11 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>由于Unbinilium的<a target="_blank" rel="noopener" href="https://github.com/Unbinilium/Twist">Twist</a>脚本长时间不更新且已删库，想自己维护但确实不太会写shell脚本，只好把他脚本里的内容一步步写下来，当作日记，也方便自己日后使用。</p>
-<h2 id="前置准备"><a href="#前置准备" class="headerlink" title="前置准备"></a>前置准备</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在tmp目录操作</span></span><br><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建备份目录</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> /etc/twist</span><br><span class="line"><span class="comment"># 文件格式：filename.old-$(date +%Y%m%d%H%M%S)</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="built_in">sudo</span> apt upgrade</span><br><span class="line"></span><br><span class="line"><span class="comment"># wget、curl下载可执行文件，git下载仓库</span></span><br><span class="line"><span class="comment"># nginx用于伪装，fail2ban用来ban恶意IP</span></span><br><span class="line"><span class="comment"># 其他都是一些编译、运行依赖的，或者是一些实用工具</span></span><br><span class="line"><span class="built_in">sudo</span> apt install -y wget gawk grep curl sed git gcc swig gettext autoconf automake make libtool perl cpio xmlto asciidoc cron net-tools dnsutils rng-tools libc-ares-dev libev-dev openssl libssl-dev zlib1g-dev libpcre3-dev libevent-dev build-essential python3-dev python3-pip python3-setuptools python3-qrcode nginx fail2ban </span><br><span class="line"></span><br><span class="line"><span class="comment"># 检测并获取服务器的出口网卡名称</span></span><br><span class="line"><span class="comment"># ETH=&quot;$(route | grep &#x27;^default&#x27; | grep -o &#x27;[^ ]*$&#x27;)&quot;</span></span><br><span class="line">route | grep <span class="string">&#x27;^default&#x27;</span> | grep -o <span class="string">&#x27;[^ ]*$&#x27;</span></span><br><span class="line"><span class="comment"># eth0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 没有就再执行</span></span><br><span class="line"><span class="comment"># ETH=&quot;$(ip -4 route list 0/0 | grep -Po &#x27;(?&lt;=dev )(\S+)&#x27;)&quot;</span></span><br><span class="line">ip -4 route list 0/0 | grep -Po <span class="string">&#x27;(?&lt;=dev )(\S+)&#x27;</span></span><br><span class="line"><span class="comment"># eth0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看eth0网卡当前状态</span></span><br><span class="line"><span class="built_in">cat</span> /sys/class/net/eth0/operstate</span><br><span class="line"><span class="comment"># up/down</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取服务器公网IPv4地址</span></span><br><span class="line">dig @resolver1.opendns.com -t A -4 myip.opendns.com +short</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看是否有IPv6地址</span></span><br><span class="line">ip -6 addr show eth0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取服务器公网IPv6地址</span></span><br><span class="line">curl -s diagnostic.opendns.com/myip</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取mtu数值</span></span><br><span class="line"><span class="built_in">cat</span> /sys/class/net/eth0/mtu</span><br><span class="line"><span class="comment"># 一般是1500，如果没有输出，后面就把mtu设置为1492</span></span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/how-to-setup-shadowsocks-rust-on-ubuntu-server/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/how-to-use-samba-to-set-up-a-shared-server/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/how-to-use-samba-to-set-up-a-shared-server/" class="post-title-link" itemprop="url">如何使用 Samba 搭建共享服务器</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2026-04-10 14:43:09" itemprop="dateCreated datePublished" datetime="2026-04-10T14:43:09+08:00">2026-04-10</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-11 23:19:59" itemprop="dateModified" datetime="2026-04-11T23:19:59+08:00">2026-04-11</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>工作依赖Win7共享文件夹，经常抽风死机，需要人工手动重启。想要将其迁移至Ubuntu。</p>
-<p>后话：实践证明，ntfs挂载方式+wps linux办公会很慢，不合适。另外，wps linux居然不支持emoji</p>
-<h2 id="安装Samba"><a href="#安装Samba" class="headerlink" title="安装Samba"></a>安装Samba</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install samba</span><br></pre></td></tr></table></figure>
-
-<h2 id="创建共享目录"><a href="#创建共享目录" class="headerlink" title="创建共享目录"></a>创建共享目录</h2><h3 id="找到磁盘"><a href="#找到磁盘" class="headerlink" title="找到磁盘"></a>找到磁盘</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> fdisk -l</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果是Linux的ext4文件系统</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Disk /dev/sda：931.51 GiB，1000204886016 字节，1953525168 个扇区</span></span><br><span class="line"><span class="comment"># 磁盘型号：WDC WD10SPZX-22Z</span></span><br><span class="line"><span class="comment"># 单元：扇区 / 1 * 512 = 512 字节</span></span><br><span class="line"><span class="comment"># 扇区大小(逻辑/物理)：512 字节 / 4096 字节</span></span><br><span class="line"><span class="comment"># I/O 大小(最小/最佳)：4096 字节 / 4096 字节</span></span><br><span class="line"><span class="comment"># 磁盘标签类型：gpt</span></span><br><span class="line"><span class="comment"># 磁盘标识符：F22FBE2A-71CB-4618-B90B-C7E4928AFDE5</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设备        起点       末尾       扇区   大小 类型</span></span><br><span class="line"><span class="comment"># /dev/sda1   2048 1953523711 1953521664 931.5G Linux 文件系统</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果是Windows的NTFS文件系统</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Disk /dev/sda：931.51 GiB，1000204886016 字节，1953525168 个扇区</span></span><br><span class="line"><span class="comment"># 磁盘型号：WDC WD10SPZX-22Z</span></span><br><span class="line"><span class="comment"># 单元：扇区 / 1 * 512 = 512 字节</span></span><br><span class="line"><span class="comment"># 扇区大小(逻辑/物理)：512 字节 / 4096 字节</span></span><br><span class="line"><span class="comment"># I/O 大小(最小/最佳)：4096 字节 / 4096 字节</span></span><br><span class="line"><span class="comment"># 磁盘标签类型：dos</span></span><br><span class="line"><span class="comment"># 磁盘标识符：0xd88aa425</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设备       启动  起点       末尾       扇区   大小 Id 类型</span></span><br><span class="line"><span class="comment"># /dev/sda1        2048 1953523711 1953521664 931.5G  f W95 扩展 (LBA)</span></span><br><span class="line"><span class="comment"># /dev/sda5        4096 1953523711 1953519616 931.5G  7 HPFS/NTFS/exFAT</span></span><br></pre></td></tr></table></figure>
-
-<p>记录该设备ID</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/how-to-use-samba-to-set-up-a-shared-server/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/full-android-setup-on-raspberry-pi-with-lineageos/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/full-android-setup-on-raspberry-pi-with-lineageos/" class="post-title-link" itemprop="url">在树莓派上使用 LineageOS 搭建完整的 Android 系统</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-09-20 21:50:23" itemprop="dateCreated datePublished" datetime="2025-09-20T21:50:23+08:00">2025-09-20</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-11 13:48:09" itemprop="dateModified" datetime="2026-04-11T13:48:09+08:00">2026-04-11</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>557</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>简单讲解下树莓派5安装Android的过程</p>
-<h2 id="安装LineageOS"><a href="#安装LineageOS" class="headerlink" title="安装LineageOS"></a>安装LineageOS</h2><h3 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h3><p>从KonstaKANG下载当前最新版的<a target="_blank" rel="noopener" href="https://konstakang.com/devices/rpi5/LineageOS22/">LineageOS 22.2 (Android 15) for Raspberry Pi 5</a></p>
-<p><img src="/images/konstakang-lineageos.png" alt="KonstaKANG-LineageOS"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/full-android-setup-on-raspberry-pi-with-lineageos/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/summary-of-reading-shadowsocks-libev-source-code/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/summary-of-reading-shadowsocks-libev-source-code/" class="post-title-link" itemprop="url">shadowsocks-libev源码阅读总结</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-04-20 16:55:02" itemprop="dateCreated datePublished" datetime="2025-04-20T16:55:02+08:00">2025-04-20</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-04-11 13:48:39" itemprop="dateModified" datetime="2026-04-11T13:48:39+08:00">2026-04-11</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="数据协议"><a href="#数据协议" class="headerlink" title="数据协议"></a>数据协议</h2><h3 id="socks5"><a href="#socks5" class="headerlink" title="socks5"></a>socks5</h3><h4 id="握手阶段"><a href="#握手阶段" class="headerlink" title="握手阶段"></a>握手阶段</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//    client send</span></span><br><span class="line"><span class="comment">// </span></span><br><span class="line"><span class="comment">//    +----+----------+----------+</span></span><br><span class="line"><span class="comment">//    |VER | NMETHODS | METHODS  |</span></span><br><span class="line"><span class="comment">//    +----+----------+----------+</span></span><br><span class="line"><span class="comment">//    | 1  |    1     | 1 to 255 |</span></span><br><span class="line"><span class="comment">//    +----+----------+----------+</span></span><br><span class="line"><span class="comment">// </span></span><br></pre></td></tr></table></figure>
-
-<p>客户端发起握手请求，数据格式如上图所示，具体如下</p>
-<ul>
-<li>VER：固定0x05，表示socks5协议</li>
-<li>NMETHODS：表示支持认证的方法数量，也是后面的METHODS字段占用的字节数</li>
-<li>METHODS：认证方法列表，一个协议占用一个字节，其中一些常见的协议如下<ul>
-<li>0x00：不需要认证</li>
-<li>0x01：GSSAPI</li>
-<li>0x02：用户名、密码认证</li>
-<li>0x03~0x7F：保留</li>
-<li>0x80~0xFE：私有</li>
-<li>0xFF：无可接受的方法</li>
-</ul>
-</li>
-</ul>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// </span></span><br><span class="line"><span class="comment">//    server send</span></span><br><span class="line"><span class="comment">//    +----+--------+</span></span><br><span class="line"><span class="comment">//    |VER | METHOD |</span></span><br><span class="line"><span class="comment">//    +----+--------+</span></span><br><span class="line"><span class="comment">//    | 1  |   1    |</span></span><br><span class="line"><span class="comment">//    +----+--------+</span></span><br><span class="line"><span class="comment">//</span></span><br></pre></td></tr></table></figure>
-
-<p>服务端响应内容如上图所示，具体如下</p>
-<ul>
-<li>VER：固定0x01</li>
-<li>METHOD：认证方法，在shadowsocks源码里，选择0x00-不需要认证</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/summary-of-reading-shadowsocks-libev-source-code/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-garbage-collection/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/golang-series-garbage-collection/" class="post-title-link" itemprop="url">golang系列之-垃圾回收</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-04-06 10:58:06" itemprop="dateCreated datePublished" datetime="2025-04-06T10:58:06+08:00">2025-04-06</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-04-07 15:43:46" itemprop="dateModified" datetime="2025-04-07T15:43:46+08:00">2025-04-07</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>36k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2:11</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>go的垃圾回收原理官方说法是是三色标记法+混合写屏障，但是，理论上怎么说是一回事，具体实现又是另一回事了，或者说实现已经偏离文档描述。总的来说，GC这部份的内容要比GMP跟内存分配都要复杂的多且出人意料。当前go版本：1.24</p>
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h3 id="目标对象"><a href="#目标对象" class="headerlink" title="目标对象"></a>目标对象</h3><p>Go的GC并不扫描整个内存，只关注以下区域：</p>
-<ol>
-<li>heap上分配的对象（在mspan管理范围）</li>
-<li>data&#x2F;bss段的全局变量</li>
-<li>栈上的引用（扫描stackRoots）</li>
-</ol>
-<h3 id="触发类型"><a href="#触发类型" class="headerlink" title="触发类型"></a>触发类型</h3><table>
-<thead>
-<tr>
-<th align="left">触发类型</th>
-<th align="left">备注</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">gcTriggerHeap</td>
-<td align="left">堆大小触发，heap内存达到一个临界点触发（最常用）</td>
-</tr>
-<tr>
-<td align="left">gcTriggerTime</td>
-<td align="left">时间触发，超时2min未执行GC则强制执行</td>
-</tr>
-<tr>
-<td align="left">gcTriggerCycle</td>
-<td align="left">手动触发，用户调用runtime.GC()</td>
-</tr>
-</tbody></table>
-<h3 id="角色-分工"><a href="#角色-分工" class="headerlink" title="角色&#x2F;分工"></a>角色&#x2F;分工</h3><table>
-<thead>
-<tr>
-<th>角色</th>
-<th>作用</th>
-<th>工作阶段</th>
-<th>备注</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Mark Worker（标记工作线程）</td>
-<td>遍历对象图，标记存活对象，防止被错误回收</td>
-<td>标记阶段（Marking）</td>
-<td>运行时创建多个并发 Mark Worker，加快标记速度</td>
-</tr>
-<tr>
-<td>Sweeper（清扫器）</td>
-<td>清理未标记的对象，将其内存释放回空闲列表（mheap.free）</td>
-<td>清扫阶段（Sweeping）</td>
-<td>逐步清理，避免一次性 STW（Stop The World）</td>
-</tr>
-<tr>
-<td>Scavenger（内存回收器）</td>
-<td>释放长期未使用的堆内存，归还给OS以减少RSS</td>
-<td>后台运行（定期触发）</td>
-<td>主要针对大对象或空闲mspans，减少物理内存占用</td>
-</tr>
-</tbody></table>
-<p><strong>标记工作线程</strong></p>
-<p>其中，标记工作线程的会根据工作模式进一步区分，如下</p>
-<table>
-<thead>
-<tr>
-<th align="left">标记工作线程模式</th>
-<th align="left">备注</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">gcMarkWorkerNotWorker</td>
-<td align="left">默认，未运行</td>
-</tr>
-<tr>
-<td align="left">gcMarkWorkerDedicatedMode</td>
-<td align="left">专用标记任务，最高优先级，非抢占</td>
-</tr>
-<tr>
-<td align="left">gcMarkWorkerFractionalMode</td>
-<td align="left">比例标记任务，跟其他g共享时间，可被抢占</td>
-</tr>
-<tr>
-<td align="left">gcMarkWorkerIdleMode</td>
-<td align="left">空闲时执行的低优先级标记任务，需要p空闲</td>
-</tr>
-</tbody></table>
-<p><strong>CPU限制</strong></p>
-<p>标记工作线程的CPU使用率被限制在25%（GOGC&#x3D;100时），假设系统使用一个6核CPU，那么GC在标记阶段大约会使用1.5个CPU资源：</p>
-<ol>
-<li>1个CPU由Dedicated（专用模式）的标记工作线程持续占用，该线程不允许抢占，直到标记任务完成</li>
-<li>0.5个CPU由Fractional（比例模式）的标记工作线程使用，该线程仅在由额外CPU资源可用时运行，并会根据系统负责动态调整自身的CPU使用率</li>
-</ol>
-<h3 id="完整运行流程"><a href="#完整运行流程" class="headerlink" title="完整运行流程"></a>完整运行流程</h3><ol>
-<li><p>Sweep Termination（清理终止）</p>
-<ul>
-<li>STW（Stop The World），确保所有P都达到GC安全点</li>
-<li>完成上一轮GC未完成的sweep（清扫），回收剩余的的mspan</li>
-<li>准备GC统计数据，为新一轮的GC计算目标heap大小、触发阈值等</li>
-</ul>
-</li>
-<li><p>Mark（标记）</p>
-<ul>
-<li>STW，切换GC状态<ul>
-<li>gcphase从_GCoff切换到_GCmark</li>
-<li>开启写屏障（write barrier），允许Mutator协助GC标记，以维护三色标记不变性</li>
-<li>启动GC后台线程，执行并发标记任务</li>
-<li>根对象入队（包括栈、全局变量）</li>
-</ul>
-</li>
-<li>恢复世界（Start The World），GC线程进入并发标记阶段<ul>
-<li>从根对象开始标记，遍历所有可达对象</li>
-<li>扫描灰色对象（已发现但未完全扫描的对象）并进行扫描，将其置黑，并将其引用的对象入队为灰色</li>
-<li>混合写屏障（Hybrid Write Barrier）确保一致性</li>
-</ul>
-</li>
-<li>完成标记</li>
-</ul>
-</li>
-<li><p>Mark Termination（标记终止）</p>
-<ul>
-<li>STW，切换GC状态<ul>
-<li>gcphase从_GCmark切换到_GCmarktermination</li>
-<li>停止并发标记任务</li>
-<li>执行终结器finalizer，如果有的话</li>
-<li>清理mcache以确保没有悬挂对象</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Sweep（清理）</p>
-<ul>
-<li>切换GC状态<ul>
-<li>gcphase从_GCmarktermination切换回_GCoff</li>
-<li>关闭写屏障（Mutator不再协助GC标记）</li>
-</ul>
-</li>
-<li>恢复世界（Start The World），进入并发清扫阶段<ul>
-<li>清理未被标记的对象</li>
-<li>回收mspan到mheap或mcentral，部份回收到mcache</li>
-<li>Mutator分配内存时，可能会触发增量清扫（Incremental Sweeping），加快回收过程</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>满足触发条件，启动下一轮GC</p>
-</li>
-</ol>
-<p>简单的说，标记然后清扫</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/golang-series-garbage-collection/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-memory-allocation/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/golang-series-memory-allocation/" class="post-title-link" itemprop="url">golang系列之-内存分配</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-04-02 09:35:00" itemprop="dateCreated datePublished" datetime="2025-04-02T09:35:00+08:00">2025-04-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-04-10 17:16:01" itemprop="dateModified" datetime="2025-04-10T17:16:01+08:00">2025-04-10</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>28k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1:41</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>golang的内存分配机制最初是基于TCMalloc，演化至今已经有了很大差异。其原理是：slab + tiling algorithm + 层级内存分配。本文仅介绍如何通过mallocgc分配内存，不涉及栈内存分配管理、手动内存管理等内容。当前go版本：1.24</p>
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h3 id="slab-tiling"><a href="#slab-tiling" class="headerlink" title="slab + tiling"></a>slab + tiling</h3><p>内存分配基本单位-mspan（即slab），内部再划分更小的块（即tiling）</p>
-<p>小对象（&lt;&#x3D;32KB）按预定义的sizeclass分成不同的mspan，每个mspan最低有8KB，切割成指定大小的块。而大对象（&gt;32KB）的sizeclass&#x3D;0，不限制大小，mspan不分块。如下</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// mspann -&gt; sizeclass=0  -&gt; nKB  -&gt; | &lt;-----   nKB   -----&gt; |</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// mspanx -&gt; sizeclass=1  -&gt; 8KB  -&gt; | 8B  | 8B  | ... | 8B  |</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// mspany -&gt; sizeclass=5  -&gt; 8KB  -&gt; | 48B | 48B | ... | 48B |</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// mspanz -&gt; sizeclass=65 -&gt; 80KB</span></span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
-
-<p>如<code>make([]int, 5)</code>，创建一块40B大小的内存区域，经过计算这个内存块会从sizeclass&#x3D;5的mspan分配（该mspan的每个元素大小为48B）</p>
-<h3 id="层级内存分配"><a href="#层级内存分配" class="headerlink" title="层级内存分配"></a>层级内存分配</h3><p>参考TCMalloc，内存分配时主要分为3级：mcache、mcentral、mheap</p>
-<ol>
-<li>mcache为线程缓存，每个p都有一个，所有的内存分配&#x2F;回收都是先通过mcache，访问不需要加锁</li>
-<li>mcentral负责向mheap申请分配内存、管理mspan，按spanclass分组，嵌入到mheap结构体，全局唯一</li>
-<li>mheap负责从系统申请内存进行分配管理，一般情况下访问都要加锁，全局唯一</li>
-</ol>
-<p>执行mallocgc分配内存时，mheap、mcentral、mcache的关系如下</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//  mallocgc</span></span><br><span class="line"><span class="comment">//     |</span></span><br><span class="line"><span class="comment">//     |    (&lt;=32KB)</span></span><br><span class="line"><span class="comment">//     |--&gt; p.mcache.alloc[spanclass] --&gt; mheap.central[spanclass] --&gt; mheap</span></span><br><span class="line"><span class="comment">//     |</span></span><br><span class="line"><span class="comment">//     |    (&gt;32KB)</span></span><br><span class="line"><span class="comment">//     |--&gt; mheap</span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>如果对象&lt;&#x3D;32KB<ul>
-<li>从p的mcache找一个空闲的mspan分配一段内存&#x2F;地址空间</li>
-<li>如果mspan没有空闲空间，从mcentral申请一个新的&#x2F;重用一个已清扫的mspan</li>
-<li>如果mcentral也没有可用mspan，通过mheap跟OS申请一段内存，初始化一个mspan返回</li>
-</ul>
-</li>
-<li>如果对象&gt;32KB<ul>
-<li>通过mheap跟OS申请一段内存，初始化一个mspan返回</li>
-</ul>
-</li>
-</ul>
-<h3 id="系统内存状态"><a href="#系统内存状态" class="headerlink" title="系统内存状态"></a>系统内存状态</h3><p>这里需要了解系统内存的几个状态，以及go内部是如何从系统分配、释放内存的</p>
-<table>
-<thead>
-<tr>
-<th>状态</th>
-<th>含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>None</strong></td>
-<td>默认状态，未映射，地址空间未被保留或使用</td>
-</tr>
-<tr>
-<td><strong>Reserved</strong></td>
-<td>已保留，但未提交，即地址空间已经被申请，但尚未向操作系统请求实际物理内存</td>
-</tr>
-<tr>
-<td><strong>Prepared</strong></td>
-<td>已提交但未使用，已经向操作系统申请了物理内存，但可能未完全初始化</td>
-</tr>
-<tr>
-<td><strong>Ready</strong></td>
-<td>可用状态，内存已初始化，可用于分配</td>
-</tr>
-</tbody></table>
-<p>状态转换函数</p>
-<table>
-<thead>
-<tr>
-<th align="left">函数</th>
-<th align="left">主要作用</th>
-<th align="left">是否分配物理内存</th>
-<th align="left">是否映射虚拟内存</th>
-<th align="left">内存状态转换</th>
-<th align="left">备注</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><code>sysAlloc</code></td>
-<td align="left"><strong>直接申请内存</strong></td>
-<td align="left">✅ 是</td>
-<td align="left">✅ 是</td>
-<td align="left">None -&gt; Ready</td>
-<td align="left">可能会触发 <code>mmap</code></td>
-</tr>
-<tr>
-<td align="left"><code>sysReserve</code></td>
-<td align="left"><strong>保留虚拟地址空间，但不映射</strong></td>
-<td align="left">❌ 否</td>
-<td align="left">✅ 是</td>
-<td align="left">None -&gt; Reserved</td>
-<td align="left">预留地址，后续 <code>sysMap</code></td>
-</tr>
-<tr>
-<td align="left"><code>sysMap</code></td>
-<td align="left"><strong>将预留的虚拟地址映射为实际物理内存</strong></td>
-<td align="left">✅ 是</td>
-<td align="left">✅ 是</td>
-<td align="left">Reserved -&gt; Prepared</td>
-<td align="left">只有 <code>sysReserve</code> 过的地址能 <code>sysMap</code></td>
-</tr>
-<tr>
-<td align="left"><code>sysUsed</code></td>
-<td align="left"><strong>标记某段地址正在使用</strong></td>
-<td align="left">✅ 是</td>
-<td align="left">✅ 是</td>
-<td align="left">Prepared -&gt; Ready</td>
-<td align="left">可能会触发 <code>madvise</code> 让物理页生效</td>
-</tr>
-<tr>
-<td align="left"><code>sysUnused</code></td>
-<td align="left"><strong>标记某段地址未使用</strong>，可以回收物理内存</td>
-<td align="left">⚠️ 可能</td>
-<td align="left">❌ 否</td>
-<td align="left">Ready -&gt; Prepared</td>
-<td align="left"><code>MADV_DONTNEED</code>，内存仍属于进程</td>
-</tr>
-<tr>
-<td align="left"><code>sysFault</code></td>
-<td align="left"><strong>让一段地址变成不可访问</strong></td>
-<td align="left">❌ 否</td>
-<td align="left">✅ 是</td>
-<td align="left">Ready -&gt; Reserved</td>
-<td align="left"><code>mprotect(PROT_NONE)</code>，用于调试</td>
-</tr>
-<tr>
-<td align="left"><code>sysFree</code></td>
-<td align="left"><strong>释放虚拟内存，归还给 OS</strong></td>
-<td align="left">✅ 是</td>
-<td align="left">✅ 是</td>
-<td align="left">-&gt; None</td>
-<td align="left"><code>munmap</code>，这段内存不能再用</td>
-</tr>
-</tbody></table>
-<p><strong>我对Go内存分配的理解</strong></p>
-<ol>
-<li>内存管理的本质是地址空间的组织和维护</li>
-<li>Go的内存策略：尽量保留虚拟地址，按需释放物理页</li>
-<li>Go会一次性申请64MB内存（Reserved-虚拟地址空间），但并不是立即分配物理页，而是在需要分配时使用sysMap + sysUsed使一小部份内存可用（Reserved-&gt;Prepared-&gt;Ready）</li>
-</ol>
-<h3 id="GC助攻"><a href="#GC助攻" class="headerlink" title="GC助攻"></a>GC助攻</h3><p>为了防止内存分配速度过快，导致GC跟不上，分配时会判断是否需要协助GC标记&#x2F;清扫。每次都要判断是否需要协助标记，而清扫只发生在获取新的mspan和大对象分配场景下</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/golang-series-memory-allocation/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-bootstrap-and-gmp-model/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/golang-series-bootstrap-and-gmp-model/" class="post-title-link" itemprop="url">golang系列之-程序运行流程及GMP模型</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-03-30 13:12:29" itemprop="dateCreated datePublished" datetime="2025-03-30T13:12:29+08:00">2025-03-30</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-04-06 08:10:31" itemprop="dateModified" datetime="2025-04-06T08:10:31+08:00">2025-04-06</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>26k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1:34</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>本文仅介绍程序运行流程以及GMP如何寻找g并运行，其他如抢占、死锁、信号处理、profiling等内容不打算深入。当前go版本：1.24</p>
-<h2 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h2><p>先讲几个概念</p>
-<p><strong>进程、线程、协程</strong></p>
-<ol>
-<li>进程：程序的一个实例，也是操作系统的一个task，操作系统的资源分配最小单位</li>
-<li>线程：一种概念，操作系统调度的最小单位，一个进程可以包含多个线程，线程之间共享内存、文件描述符等资源。不同操作系统的实现并不一致，linux下进程与线程的结构都是task_structure，也就是说他们是一样的，不同线程之间用指针指向同一份资源如内存空间实现共享。</li>
-<li>协程：也称为用户态线程，由应用程序自行实现&#x2F;调度，一般情况下是协作式的，由开发者决定task何时让出cpu，go支持抢占式调度</li>
-</ol>
-<p><strong>线程与协程的映射模型</strong></p>
-<ol>
-<li>1:1模型，每个用户线程对应一个内核线程，如在c中pthread创建的线程，此时也可以理解为用户态线程就是内核态线程</li>
-<li>1:N模型，一个内核线程对应多个用户线程，无法充分利用多核的并行性，现已淘汰</li>
-<li>M:N模型，多个用户线程对应多个内核线程，实现较复杂，使用者较少，go是其中一个</li>
-</ol>
-<p><strong>GMP模型</strong></p>
-<p>go早期的M:N模型遇到一些性能问题，如锁竞争激烈、线程创建&#x2F;销毁频繁、CPU缓存失效等，为了解决这些问题引入了P。在GMP模型中</p>
-<ol>
-<li>G-goroutine，用户态线程</li>
-<li>M-machine，系统线程相关</li>
-<li>P-processor，缓存、调度上下文等，其数量一般与CPU核心数量一致。P的出现使得调度变得本地化，避免全局锁竞争，提升了CPU缓存命中率等，最终使得go的并发调度更加高效</li>
-</ol>
-<h2 id="go程序的运行流程"><a href="#go程序的运行流程" class="headerlink" title="go程序的运行流程"></a>go程序的运行流程</h2><p>go程序启动时的入口是<code>_rt0_amd64</code>，该函数是汇编代码，具体如下</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// src/runtime/asm_amd64.s</span><br><span class="line">// 系统入口点</span><br><span class="line">TEXT _rt0_amd64(SB),NOSPLIT,$-8</span><br><span class="line">    MOVQ    0(SP), DI    // argc</span><br><span class="line">    LEAQ    8(SP), SI    // argv</span><br><span class="line">    JMP    runtime·rt0_go(SB)</span><br></pre></td></tr></table></figure>
-
-<p><code>runtime·rt0_go</code>也是汇编代码，比较长，主要逻辑如下</p>
-<ol>
-<li>g0、m0双向绑定（g0、m0是全局变量，静态编译，因此指针已知，放在src&#x2F;runtime&#x2F;proc.go）</li>
-<li>runtime·args      - 复制命令行参数（args函数放在src&#x2F;runtime&#x2F;runtime1.go）</li>
-<li>runtime·osinit    - 系统初始化（osinit函数放在src&#x2F;runtime&#x2F;os_linux.go）</li>
-<li>runtime·schedinit - 调度器初始化（schedinit函数放在src&#x2F;runtime&#x2F;proc.go）</li>
-<li>runtime·mainPC    - 纪录runtime·main的地址（main函数放在src&#x2F;runtime&#x2F;proc.go，其内部调用main_main，也就是用户自己编写的main函数）</li>
-<li>runtime·newproc   - 创建G用于运行runtime·main，放到p的runq里，等待调度</li>
-<li>runtime·mstart    - 运行runtime·mstart（汇编函数，实际调用的是runtime·mstart0，放在src&#x2F;runtime&#x2F;proc.go，内部进行栈初始化、信号注册等，最后运行调度函数schedule）</li>
-</ol>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/golang-series-bootstrap-and-gmp-model/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-timer-and-ticker/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/golang-series-timer-and-ticker/" class="post-title-link" itemprop="url">golang系列之-定时器Timer和Ticker</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-03-01 09:57:28" itemprop="dateCreated datePublished" datetime="2025-03-01T09:57:28+08:00">2025-03-01</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-03-08 17:54:24" itemprop="dateModified" datetime="2025-03-08T17:54:24+08:00">2025-03-08</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>8.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>29 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Timer-一次性定时器，Ticker-周期性定时器。从1.23版本开始，将异步实现改为同步实现，但你仍然可以使用AfterFunc创建异步定时器，或者通过改变asynctimerchan变量启用异步实现</p>
-<p>asynctimerchan变量可选项如下</p>
-<table>
-<thead>
-<tr>
-<th align="left">asynctimerchan</th>
-<th align="left">description</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">0</td>
-<td align="left">同步实现，从1.23版本开始启用</td>
-</tr>
-<tr>
-<td align="left">1</td>
-<td align="left">旧版异步实现</td>
-</tr>
-<tr>
-<td align="left">2</td>
-<td align="left">同1，异步实现，但修复了1的问题，debug用</td>
-</tr>
-</tbody></table>
-<p>定时器的精确度因系统不同而不同，具体如下</p>
-<table>
-<thead>
-<tr>
-<th align="left">OS</th>
-<th align="left">resolution</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">Unix</td>
-<td align="left">~1ms</td>
-</tr>
-<tr>
-<td align="left">&gt;&#x3D; Windows 1803</td>
-<td align="left">~0.5ms</td>
-</tr>
-<tr>
-<td align="left">&lt; Windows 1803</td>
-<td align="left">~16ms</td>
-</tr>
-</tbody></table>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>深入了解源代码前，先了解其功能如何使用</p>
-<h3 id="Timer-一次性定时器"><a href="#Timer-一次性定时器" class="headerlink" title="Timer-一次性定时器"></a>Timer-一次性定时器</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// 定时器1</span></span><br><span class="line">    timer1 := time.NewTimer(<span class="number">2</span> * time.Second)</span><br><span class="line"></span><br><span class="line">    &lt;-timer1.C</span><br><span class="line">    fmt.Println(<span class="string">&quot;Timer 1 fired&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 定时器2</span></span><br><span class="line">    timer2 := time.NewTimer(time.Second)</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &lt;-timer2.C</span><br><span class="line">        fmt.Println(<span class="string">&quot;Timer 2 fired&quot;</span>)</span><br><span class="line">    &#125;()</span><br><span class="line">    stop2 := timer2.Stop()</span><br><span class="line">    <span class="keyword">if</span> stop2 &#123;</span><br><span class="line">        fmt.Println(<span class="string">&quot;Timer 2 stopped&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 定时器3</span></span><br><span class="line">    time.Sleep(<span class="number">2</span> * time.Second)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上述示例代码运行效果如下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">go run main.go</span><br><span class="line"></span><br><span class="line"><span class="comment"># Timer 1 fired</span></span><br><span class="line"><span class="comment"># Timer 2 stopped</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="Ticker-周期性定时器"><a href="#Ticker-周期性定时器" class="headerlink" title="Ticker-周期性定时器"></a>Ticker-周期性定时器</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// 每500ms执行一次</span></span><br><span class="line">    ticker := time.NewTicker(<span class="number">500</span> * time.Millisecond)</span><br><span class="line">    done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">bool</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> &#123;</span><br><span class="line">            <span class="keyword">select</span> &#123;</span><br><span class="line">            <span class="keyword">case</span> &lt;-done:</span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">            <span class="keyword">case</span> t := &lt;-ticker.C:</span><br><span class="line">                fmt.Println(<span class="string">&quot;Tick at&quot;</span>, t)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 挂起休眠1600ms</span></span><br><span class="line">    time.Sleep(<span class="number">1600</span> * time.Millisecond)</span><br><span class="line">    <span class="comment">// 停止定时器</span></span><br><span class="line">    ticker.Stop()</span><br><span class="line">    done &lt;- <span class="literal">true</span></span><br><span class="line">    fmt.Println(<span class="string">&quot;Ticker stopped&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上述示例代码运行效果如下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">go run main.go</span><br><span class="line"></span><br><span class="line"><span class="comment"># Tick at 2025-02-27 10:41:07.875146141 +0800 CST m=+0.500099485</span></span><br><span class="line"><span class="comment"># Tick at 2025-02-27 10:41:08.37515345 +0800 CST m=+1.000100767</span></span><br><span class="line"><span class="comment"># Tick at 2025-02-27 10:41:08.875159521 +0800 CST m=+1.500100789</span></span><br><span class="line"><span class="comment"># Ticker stopped</span></span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/golang-series-timer-and-ticker/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-netpoll/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/golang-series-netpoll/" class="post-title-link" itemprop="url">golang系列之-netpoll</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-02-27 08:48:14" itemprop="dateCreated datePublished" datetime="2025-02-27T08:48:14+08:00">2025-02-27</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-04-05 20:00:21" itemprop="dateModified" datetime="2025-04-05T20:00:21+08:00">2025-04-05</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>18 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>netpoll是golang用来处理网络I&#x2F;O事件的底层机制，主要通过操作系统的I&#x2F;O多路复用机制如Linux的epoll、BSD的kqueue、Windows的IOCP等来实现</p>
-<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>核心的数据结构是pollDesc，用于存储与文件描述符相关的事件数据，一般被放入如epoll的epoll_event.data来传递信息</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> pollDesc <span class="keyword">struct</span> &#123;</span><br><span class="line">    _          sys.NotInHeap    <span class="comment">// 放置转换成interface&#123;&#125;时申请heap内存</span></span><br><span class="line">    link       *pollDesc        <span class="comment">// next指针，用于pollcache链表</span></span><br><span class="line">    fd         <span class="type">uintptr</span>          <span class="comment">// 文件描述符</span></span><br><span class="line">    fdseq      atomic.Uintptr   <span class="comment">// 计数器，类似时间戳，确保过期的消息不会被处理，只在获取/放回cache时改变</span></span><br><span class="line">    atomicInfo atomic.Uint32    <span class="comment">// 5个状态位+fdseq（这两个数据有位交叉冲突，没搞懂）</span></span><br><span class="line">    rg         atomic.Uintptr   <span class="comment">// 读状态，读G的地址也作为一种状态</span></span><br><span class="line">    wg         atomic.Uintptr   <span class="comment">// 写状态，写G的地址也作为一种状态</span></span><br><span class="line">    lock       mutex            <span class="comment">// 锁，保护下列字段</span></span><br><span class="line">    closing    <span class="type">bool</span>             <span class="comment">// 是否被移除出netpoll</span></span><br><span class="line">    rrun       <span class="type">bool</span>             <span class="comment">// rt-读定时器是否在运行</span></span><br><span class="line">    wrun       <span class="type">bool</span>             <span class="comment">// wt-写定时器是否在运行</span></span><br><span class="line">    user       <span class="type">uint32</span>           <span class="comment">// cookie，linux/bsd应该没用到</span></span><br><span class="line">    rseq       <span class="type">uintptr</span>          <span class="comment">// 读计数器，类似fdseq，只有获取/放回cache以及设置deadline时改变</span></span><br><span class="line">    rt         timer            <span class="comment">// 读定时器</span></span><br><span class="line">    rd         <span class="type">int64</span>            <span class="comment">// 读过期时刻，-1为已过期</span></span><br><span class="line">    wseq       <span class="type">uintptr</span>          <span class="comment">// 写计数器，类似fdseq，只有获取/放回cache以及设置deadline时改变</span></span><br><span class="line">    wt         timer            <span class="comment">// 写定时器</span></span><br><span class="line">    wd         <span class="type">int64</span>            <span class="comment">// 写过期时刻，-1为已过期</span></span><br><span class="line">    self       *pollDesc        <span class="comment">// 当前实例指针</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// pollDesc缓存，重复使用，避免反复申请内存</span></span><br><span class="line"><span class="keyword">type</span> pollCache <span class="keyword">struct</span> &#123;</span><br><span class="line">    lock  mutex                 <span class="comment">// 锁</span></span><br><span class="line">    first *pollDesc             <span class="comment">// 链表头部指针，pollDesc指针都从头部写入 new -&gt; old -&gt; ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>pollDesc部份字段讲解如下</p>
-<ol>
-<li><code>atomicInfo</code>是一个无符号32位整型数，每位用途如下</li>
-</ol>
-<table>
-<thead>
-<tr>
-<th align="left">16bit</th>
-<th align="left">11bit</th>
-<th align="left">1bit</th>
-<th align="left">1bit</th>
-<th align="left">1bit</th>
-<th align="left">1bit</th>
-<th align="left">1bit</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">fdseq</td>
-<td align="left">unused</td>
-<td align="left">pollFDSeq</td>
-<td align="left">pollExpiredWriteDeadline</td>
-<td align="left">pollExpiredReadDeadline</td>
-<td align="left">pollEventErr</td>
-<td align="left">pollClosing</td>
-</tr>
-</tbody></table>
-<p><em>注意</em>：fdseq占据20位数据，但在atomicInfo里，fdseq要向左移位16位，看起来是数据丢失了，没搞明白。同样有问题的还有taggedPointerPack</p>
-<ol start="2">
-<li><code>rg</code>和<code>wg</code>的状态列表如下</li>
-</ol>
-<table>
-<thead>
-<tr>
-<th align="left">state_name</th>
-<th align="left">state_val</th>
-<th align="left">description</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">pdNil</td>
-<td align="left">0</td>
-<td align="left">默认值</td>
-</tr>
-<tr>
-<td align="left">pdReady</td>
-<td align="left">1</td>
-<td align="left">io可读，下一个状态是pdNil</td>
-</tr>
-<tr>
-<td align="left">pdWait</td>
-<td align="left">2</td>
-<td align="left">准备挂起，下一个状态是G pointer-挂起，pdReady-io可读，pdNil-超时&#x2F;关闭</td>
-</tr>
-<tr>
-<td align="left">G pointer</td>
-<td align="left">0xabc</td>
-<td align="left">goroutine指针-挂起，下一个状态是pdReady-io可读，pdNil-超时&#x2F;关闭</td>
-</tr>
-</tbody></table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/golang-series-netpoll/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://y2k38.github.io/golang-series-time/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="y2k38">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="noname">
-      <meta itemprop="description" content="个人笔记">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | noname">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/golang-series-time/" class="post-title-link" itemprop="url">golang系列之-time</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-02-23 15:59:36" itemprop="dateCreated datePublished" datetime="2025-02-23T15:59:36+08:00">2025-02-23</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-04-05 20:00:21" itemprop="dateModified" datetime="2025-04-05T20:00:21+08:00">2025-04-05</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>3.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>12 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>time涉及的内容较多，如生成&#x2F;存储时间、比较时间、获取时间信息、时区、夏令时等，本文仅介绍一些自己感兴趣的地方</p>
-<p>日历计算基于格里高利历（公历），1年有365天（闰年有366天）。同时支持墙上时钟（wall clock）和单调时钟（monotonic clock），其中墙上时钟用于时间同步、报时（time-telling），单调时钟用于时间测量（time-measuring）。并不是所有函数都支持单调时钟，如字符串编码&#x2F;解码函数就会舍弃单调时钟数据</p>
-<p>注意：</p>
-<ol>
-<li>时间精确度：纳秒</li>
-<li>大部分都是线程安全，除了<ul>
-<li>GobDecode</li>
-<li>UnmarshalBinary</li>
-<li>UnmarshalJSON</li>
-<li>UnmarshalText</li>
-</ul>
-</li>
-<li>有些系统会在进程休眠时停止单调时钟，会导致一些函数计算异常，如<ul>
-<li>Sub</li>
-<li>Since</li>
-<li>Until</li>
-<li>Before</li>
-<li>After</li>
-<li>Add</li>
-<li>Equal</li>
-<li>Compare</li>
-</ul>
-</li>
-<li>字符串编码时，保存的是Location的offset，会导致dst-夏令时丢失，相关函数<ul>
-<li>GobEncode</li>
-<li>MarshalBinary</li>
-<li>AppendBinary</li>
-<li>MarshalJSON</li>
-<li>MarshalText</li>
-<li>AppendText</li>
-</ul>
-</li>
-<li>字符串编码&#x2F;解码时，会丢弃单调时钟信息</li>
-</ol>
-<p>当前go版本：1.24</p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    p := fmt.Println</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当前时刻</span></span><br><span class="line">    now := time.Now()</span><br><span class="line">    p(now)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 指定时刻</span></span><br><span class="line">    then := time.Date(</span><br><span class="line">        <span class="number">2009</span>, <span class="number">11</span>, <span class="number">17</span>, <span class="number">20</span>, <span class="number">34</span>, <span class="number">58</span>, <span class="number">651387237</span>, time.UTC)</span><br><span class="line">    p(then)</span><br><span class="line"></span><br><span class="line">    p(then.Year())          <span class="comment">// 年</span></span><br><span class="line">    p(then.Month())         <span class="comment">// 月</span></span><br><span class="line">    p(then.Day())           <span class="comment">// 日</span></span><br><span class="line">    p(then.Hour())          <span class="comment">// 时</span></span><br><span class="line">    p(then.Minute())        <span class="comment">// 分</span></span><br><span class="line">    p(then.Second())        <span class="comment">// 秒</span></span><br><span class="line">    p(then.Nanosecond())    <span class="comment">// 纳秒</span></span><br><span class="line">    p(then.Location())      <span class="comment">// 时区</span></span><br><span class="line"></span><br><span class="line">    p(then.Weekday())       <span class="comment">// 星期</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断两个时刻先后顺序</span></span><br><span class="line">    p(then.Before(now))</span><br><span class="line">    p(then.After(now))</span><br><span class="line">    p(then.Equal(now))</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 时长/时刻差值</span></span><br><span class="line">    diff := now.Sub(then)</span><br><span class="line">    p(diff)</span><br><span class="line"></span><br><span class="line">    p(diff.Hours())         <span class="comment">// 转换成总小时数</span></span><br><span class="line">    p(diff.Minutes())       <span class="comment">// 转换成总分钟数</span></span><br><span class="line">    p(diff.Seconds())       <span class="comment">// 转换成总秒数</span></span><br><span class="line">    p(diff.Nanoseconds())   <span class="comment">// 转换成总纳秒数</span></span><br><span class="line"></span><br><span class="line">    p(then.Add(diff))</span><br><span class="line">    p(then.Add(-diff))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>运行结果如下所示</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">go run main.go</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2025-02-22 10:30:14.247195 +0800 CST m=+0.000103986  # 当前时刻</span></span><br><span class="line"><span class="comment"># 2009-11-17 20:34:58.651387237 +0000 UTC              # 指定时刻</span></span><br><span class="line"><span class="comment"># 2009                                                 # 年</span></span><br><span class="line"><span class="comment"># November                                             # 月</span></span><br><span class="line"><span class="comment"># 17                                                   # 日</span></span><br><span class="line"><span class="comment"># 20                                                   # 时</span></span><br><span class="line"><span class="comment"># 34                                                   # 分</span></span><br><span class="line"><span class="comment"># 58                                                   # 秒</span></span><br><span class="line"><span class="comment"># 651387237                                            # 纳秒</span></span><br><span class="line"><span class="comment"># UTC                                                  # 时区</span></span><br><span class="line"><span class="comment"># Tuesday                                              # 星期</span></span><br><span class="line"><span class="comment"># true</span></span><br><span class="line"><span class="comment"># false</span></span><br><span class="line"><span class="comment"># false</span></span><br><span class="line"><span class="comment"># 133805h55m15.595807763s                              # 时长/时刻差值</span></span><br><span class="line"><span class="comment"># 133805.9209988355                                    # 总小时数</span></span><br><span class="line"><span class="comment"># 8.028355259930129e+06                                # 总分钟数</span></span><br><span class="line"><span class="comment"># 4.817013155958078e+08                                # 总秒数</span></span><br><span class="line"><span class="comment"># 481701315595807763                                   # 总纳秒数</span></span><br><span class="line"><span class="comment"># 2025-02-22 02:30:14.247195 +0000 UTC</span></span><br><span class="line"><span class="comment"># 1994-08-13 14:39:43.055579474 +0000 UTC</span></span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/golang-series-time/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
-  </nav>
-
-</div>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-inner">
-
-  <div class="copyright">
-    &copy; 
-    <span itemprop="copyrightYear">2026</span>
-    <span class="with-love">
-      <i class="fa fa-heart"></i>
-    </span>
-    <span class="author" itemprop="copyrightHolder">y2k38</span>
+    </nav>
   </div>
-<div class="wordcount">
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-chart-line"></i>
-    </span>
-    <span title="站点总字数">176k</span>
-  </span>
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-coffee"></i>
-    </span>
-    <span title="站点阅读时长">10:41</span>
-  </span>
-</div>
-  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
-  </div>
+</footer>
 
     </div>
-  </footer>
-
-  
-  <div class="toggle sidebar-toggle" role="button">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-  </div>
-  <div class="sidebar-dimmer"></div>
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
-  </div>
-
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
+    <!-- styles -->
 
 
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
-<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
 
-  
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
 
 
 
 
+<!-- clipboard -->
 
 
-  
+<script src="/js/main.js"></script>
 
+<!-- search -->
 
+<!-- Baidu Analytics -->
 
+<!-- Cloudflare Analytics -->
 
-<script class="next-config" data-name="giscus" type="application/json">{"enable":true,"repo":"Y2k38/y2k38.github.io","repo_id":"R_kgDOMZGvZA","category":"Announcements","category_id":"DIC_kwDOMZGvZM4CirXX","mapping":"pathname","strict":0,"reactions_enabled":1,"emit_metadata":0,"theme":"preferred_color_scheme","lang":"zh-CN","crossorigin":"anonymous","input_position":"bottom","loading":"lazy"}</script>
+<!-- Disqus Comments -->
 
-<script>
-document.addEventListener('page:loaded', () => {
-  if (!CONFIG.page.comments) return;
-
-  NexT.utils.loadComments('.giscus-container')
-    .then(() => NexT.utils.getScript('https://giscus.app/client.js', {
-      attributes: {
-        async                   : true,
-        crossOrigin             : 'anonymous',
-        'data-repo'             : CONFIG.giscus.repo,
-        'data-repo-id'          : CONFIG.giscus.repo_id,
-        'data-category'         : CONFIG.giscus.category,
-        'data-category-id'      : CONFIG.giscus.category_id,
-        'data-mapping'          : CONFIG.giscus.mapping,
-        'data-strict'           : CONFIG.giscus.strict,
-        'data-reactions-enabled': CONFIG.giscus.reactions_enabled,
-        'data-emit-metadata'    : CONFIG.giscus.emit_metadata,
-        'data-theme'            : CONFIG.giscus.theme,
-        'data-lang'             : CONFIG.giscus.lang,
-        'data-input-position'   : CONFIG.giscus.input_position,
-        'data-loading'          : CONFIG.giscus.loading
-      },
-      parentNode: document.querySelector('.giscus-container')
-    }));
-});
-</script>
+<!-- utterances Comments -->
 
 </body>
 </html>
