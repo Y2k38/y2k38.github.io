@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Sing-box安装GitHub下载地址： sing-box-1.14.0-linux-amd64.tar.gz 安装步骤如下 1234567891011121314151617181920212223242526# 1. 下载curl -LO https:&#x2F;&#x2F;github.com&#x2F;SagerNet&#x2F;sing-box&#x2F;releases&#x2F;download&#x2F;v1.14.0&#x2F;sing-box-1.14.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代理 App 选型尝试：Sing-box VS Mihomo">
+<meta property="og:url" content="https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/index.html">
+<meta property="og:site_name" content="Y2k38&#39;s blog">
+<meta property="og:description" content="Sing-box安装GitHub下载地址： sing-box-1.14.0-linux-amd64.tar.gz 安装步骤如下 1234567891011121314151617181920212223242526# 1. 下载curl -LO https:&#x2F;&#x2F;github.com&#x2F;SagerNet&#x2F;sing-box&#x2F;releases&#x2F;download&#x2F;v1.14.0&#x2F;sing-box-1.14.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-09-05T02:12:17.000Z">
+<meta property="article:modified_time" content="2026-09-05T15:21:37.661Z">
+<meta property="article:author" content="y2k38">
+<meta property="article:tag" content="sing-box">
+<meta property="article:tag" content="mihomo">
+<meta property="article:tag" content="vless">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>代理 App 选型尝试：Sing-box VS Mihomo</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/ubuntu-soft-router-from-scratch-mihomo-zashboard-setup-guide/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&text=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&title=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&is_video=false&description=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=代理 App 选型尝试：Sing-box VS Mihomo&body=Check out this article: https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&title=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&title=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&title=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&title=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&name=代理 App 选型尝试：Sing-box VS Mihomo&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&t=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Sing-box"><span class="toc-number">1.</span> <span class="toc-text">Sing-box</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-number">1.1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE"><span class="toc-number">1.2.</span> <span class="toc-text">配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E7%9B%91%E6%8E%A7"><span class="toc-number">1.3.</span> <span class="toc-text">流量监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Systemd-%E9%85%8D%E7%BD%AE"><span class="toc-number">1.4.</span> <span class="toc-text">Systemd 配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Mihomo"><span class="toc-number">2.</span> <span class="toc-text">Mihomo</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-1"><span class="toc-number">2.1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-1"><span class="toc-number">2.2.</span> <span class="toc-text">配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E7%9B%91%E6%8E%A7-1"><span class="toc-number">2.3.</span> <span class="toc-text">流量监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Systemd-%E9%85%8D%E7%BD%AE-1"><span class="toc-number">2.4.</span> <span class="toc-text">Systemd 配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nftables-%E9%85%8D%E7%BD%AE"><span class="toc-number">3.</span> <span class="toc-text">Nftables 配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        代理 App 选型尝试：Sing-box VS Mihomo
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">y2k38</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-09-05T02:12:17.000Z" class="dt-published" itemprop="datePublished">2026-09-05</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/mihomo/" rel="tag">mihomo</a>, <a class="p-category" href="/tags/sing-box/" rel="tag">sing-box</a>, <a class="p-category" href="/tags/vless/" rel="tag">vless</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Sing-box"><a href="#Sing-box" class="headerlink" title="Sing-box"></a>Sing-box</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>GitHub下载地址： <a target="_blank" rel="noopener" href="https://github.com/SagerNet/sing-box/releases/download/v1.14.0/sing-box-1.14.0-linux-amd64.tar.gz">sing-box-1.14.0-linux-amd64.tar.gz</a></p>
+<p>安装步骤如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 下载</span></span><br><span class="line">curl -LO https://github.com/SagerNet/sing-box/releases/download/v1.14.0/sing-box-1.14.0-linux-amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 校验</span></span><br><span class="line"><span class="built_in">sha256sum</span> sing-box-1.14.0-linux-amd64.tar.gz</span><br><span class="line"><span class="comment"># sha256:2375de6999f4f56ab46b4fc5ddf26a6aba1d3e61a0f4e7ddec2f4690457d5f63</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 解压缩</span></span><br><span class="line">tar zxf sing-box-1.14.0-linux-amd64.tar.gz </span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 查看</span></span><br><span class="line">tree sing-box-1.14.0-linux-amd64</span><br><span class="line"><span class="comment"># sing-box-1.14.0-linux-amd64</span></span><br><span class="line"><span class="comment"># ├── libcronet.so</span></span><br><span class="line"><span class="comment"># ├── LICENSE</span></span><br><span class="line"><span class="comment"># └── sing-box</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 或使用install安装到指定位置</span></span><br><span class="line"><span class="built_in">mv</span> sing-box-1.14.0-linux-amd64/sing-box /usr/local/bin/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6. 查看版本信息</span></span><br><span class="line">sing-box version</span><br><span class="line"><span class="comment"># Environment: go1.26.7 linux/amd64</span></span><br><span class="line"><span class="comment"># Tags: with_gvisor,with_quic,with_dhcp,with_wireguard,with_utls,with_acme,with_clash_api,with_tailscale,with_ccm,with_ocm,with_cloudflared,with_naive_outbound,with_usbip,with_openvpn,with_openconnect,badlinkname,tfogo_checklinkname0,with_purego</span></span><br><span class="line"><span class="comment"># Revision: 0b8995879f29a9b98ee027bc17b75e101445b238</span></span><br><span class="line"><span class="comment"># CGO: disabled</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>编辑配置文件 <code>/etc/sing-box/config.json</code></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;log&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;level&quot;</span><span class="punctuation">:</span> <span class="string">&quot;info&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timestamp&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;inbounds&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;vless&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;tag&quot;</span><span class="punctuation">:</span> <span class="string">&quot;vless-reality-in&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;listen&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.0.0.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;listen_port&quot;</span><span class="punctuation">:</span> <span class="number">30002</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;users&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;user1&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;uuid&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;uuidgen&gt;&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;flow&quot;</span><span class="punctuation">:</span> <span class="string">&quot;xtls-rprx-vision&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;tls&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;enabled&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;server_name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;www.microsoft.com&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;min_version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1.3&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;reality&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;enabled&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;handshake&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;server&quot;</span><span class="punctuation">:</span> <span class="string">&quot;www.microsoft.com&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;server_port&quot;</span><span class="punctuation">:</span> <span class="number">443</span></span><br><span class="line">          <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;private_key&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;sing-box generate reality-keypair&gt;&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;short_id&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">            <span class="string">&quot;&lt;openssl rand -hex 8&gt;&quot;</span></span><br><span class="line">          <span class="punctuation">]</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;outbounds&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;direct&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;tag&quot;</span><span class="punctuation">:</span> <span class="string">&quot;direct&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;block&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;tag&quot;</span><span class="punctuation">:</span> <span class="string">&quot;block&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;route&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;rules&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;ip_cidr&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">          <span class="string">&quot;127.0.0.0/8&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;::1/128&quot;</span></span><br><span class="line">        <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;outbound&quot;</span><span class="punctuation">:</span> <span class="string">&quot;direct&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;ip_cidr&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">          <span class="string">&quot;169.254.169.254/32&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;10.0.0.0/8&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;172.16.0.0/12&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;192.168.0.0/16&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;100.64.0.0/10&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;fc00::/7&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;fe80::/10&quot;</span></span><br><span class="line">        <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;outbound&quot;</span><span class="punctuation">:</span> <span class="string">&quot;block&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;final&quot;</span><span class="punctuation">:</span> <span class="string">&quot;direct&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;experimental&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;clash_api&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;external_controller&quot;</span><span class="punctuation">:</span> <span class="string">&quot;127.0.0.1:10002&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;secret&quot;</span><span class="punctuation">:</span> <span class="string">&quot;your_api_secret_here&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>启动测试：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查配置</span></span><br><span class="line">sing-box check -c /etc/sing-box/config.json</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动</span></span><br><span class="line">/usr/local/bin/sing-box run -D /etc/sing-box/</span><br></pre></td></tr></table></figure>
+
+<h3 id="流量监控"><a href="#流量监控" class="headerlink" title="流量监控"></a>流量监控</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 通过api获取流量信息</span></span><br><span class="line">curl http://127.0.0.1:10002/traffic</span><br><span class="line"><span class="comment"># &#123;&quot;up&quot;:1200,&quot;down&quot;:1682164&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Systemd-配置"><a href="#Systemd-配置" class="headerlink" title="Systemd 配置"></a>Systemd 配置</h3><p>编辑<code>/etc/systemd/system/sing-box.service</code></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[Unit]</span></span><br><span class="line"><span class="attr">Description</span>=Sing-box Service</span><br><span class="line"><span class="attr">After</span>=network-<span class="literal">on</span>line.target</span><br><span class="line"><span class="attr">Wants</span>=network-<span class="literal">on</span>line.target</span><br><span class="line"></span><br><span class="line"><span class="section">[Service]</span></span><br><span class="line"><span class="attr">Type</span>=simple</span><br><span class="line"><span class="attr">User</span>=vagrant</span><br><span class="line"><span class="attr">Group</span>=vagrant</span><br><span class="line"><span class="attr">ExecStart</span>=/usr/local/bin/sing-box run -D /etc/sing-box/</span><br><span class="line"><span class="attr">Restart</span>=<span class="literal">on</span>-failure</span><br><span class="line"><span class="attr">LimitNOFILE</span>=<span class="number">512000</span></span><br><span class="line"></span><br><span class="line"><span class="section">[Install]</span></span><br><span class="line"><span class="attr">WantedBy</span>=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>安装并设置开机启动</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl daemon-reload</span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> --now sing-box.service</span><br><span class="line"><span class="built_in">sudo</span> systemctl status sing-box.service</span><br></pre></td></tr></table></figure>
+
+<h2 id="Mihomo"><a href="#Mihomo" class="headerlink" title="Mihomo"></a>Mihomo</h2><h3 id="安装-1"><a href="#安装-1" class="headerlink" title="安装"></a>安装</h3><p>GitHub下载地址： <a target="_blank" rel="noopener" href="https://github.com/MetaCubeX/mihomo/releases/download/v1.19.30/mihomo-linux-amd64-v3-v1.19.30.gz">mihomo-linux-amd64-v3-v1.19.30.gz</a></p>
+<p>安装步骤如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 下载</span></span><br><span class="line">curl -LO https://github.com/MetaCubeX/mihomo/releases/download/v1.19.30/mihomo-linux-amd64-v3-v1.19.30.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 校验</span></span><br><span class="line"><span class="built_in">sha256sum</span> mihomo-linux-amd64-v3-v1.19.30.gz</span><br><span class="line"><span class="comment"># sha256:2c3d87ea31a8b420285fa4c1dedd9fb2356fe289b609edac1c671c00738a1544</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 解压缩</span></span><br><span class="line">gzip -d mihomo-linux-amd64-v3-v1.19.30.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 修改权限、名称并安装到指定位置，也可以使用install安装</span></span><br><span class="line"><span class="built_in">chmod</span> +x mihomo-linux-amd64-v3-v1.19.30</span><br><span class="line"><span class="built_in">mv</span> mihomo-linux-amd64-v3-v1.19.30 /usr/local/bin/mihomo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 查看版本信息</span></span><br><span class="line">mihomo -v</span><br><span class="line"><span class="comment"># Mihomo Meta v1.19.30 linux amd64 with go1.26.6 Sun Aug 16 10:02:25 UTC 2026</span></span><br><span class="line"><span class="comment"># Use tags: with_gvisor</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置-1"><a href="#配置-1" class="headerlink" title="配置"></a>配置</h3><p>编辑配置文件 <code>/etc/mihomo/config.yaml</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">mode:</span> <span class="string">direct</span></span><br><span class="line"><span class="attr">log-level:</span> <span class="string">info</span></span><br><span class="line"><span class="attr">external-controller:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:10002</span></span><br><span class="line"><span class="attr">secret:</span> <span class="string">&quot;your_api_secret_here&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">dns:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">enhanced-mode:</span> <span class="string">redir-host</span></span><br><span class="line">  <span class="attr">default-nameserver:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="number">1.1</span><span class="number">.1</span><span class="number">.1</span></span><br><span class="line">    <span class="bullet">-</span> <span class="number">8.8</span><span class="number">.8</span><span class="number">.8</span></span><br><span class="line">    <span class="comment"># - 2606:4700:4700::1111</span></span><br><span class="line">    <span class="comment"># - 2001:4860:4860::8888</span></span><br><span class="line">  <span class="attr">nameserver:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">https://1.1.1.1/dns-query</span></span><br><span class="line">    <span class="comment"># - &quot;https://[2606:4700:4700::1111]/dns-query&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">https://8.8.8.8/dns-query</span></span><br><span class="line">    <span class="comment"># - &quot;https://[2001:4860:4860::8888]/dns-query&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">listeners:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">&quot;vless-reality-in&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">vless</span></span><br><span class="line">    <span class="attr">server:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">30002</span></span><br><span class="line">    <span class="attr">users:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">user1:</span> <span class="number">1</span></span><br><span class="line">        <span class="attr">uuid:</span> <span class="string">&lt;uuidgen&gt;</span></span><br><span class="line">        <span class="attr">flow:</span> <span class="string">xtls-rprx-vision</span></span><br><span class="line">    <span class="attr">reality-config:</span></span><br><span class="line">      <span class="attr">dest:</span> <span class="string">www.microsoft.com:443</span></span><br><span class="line">      <span class="attr">private-key:</span> <span class="string">&lt;mihomo</span> <span class="string">generate</span> <span class="string">reality-keypair&gt;</span></span><br><span class="line">      <span class="attr">short-id:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&lt;openssl</span> <span class="string">rand</span> <span class="string">-hex</span> <span class="number">8</span><span class="string">&gt;</span></span><br><span class="line"><span class="string">      server-names:</span></span><br><span class="line"><span class="string">        - www.microsoft.com</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line">  <span class="comment"># 1. Allow local loopback traffic</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">IP-CIDR,127.0.0.0/8,DIRECT,no-resolve</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">IP-CIDR6,::1/128,DIRECT,no-resolve</span></span><br><span class="line">  <span class="comment"># 2. Block Cloud Provider Metadata API (Security enforcement)</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">IP-CIDR,169.254.169.254/32,REJECT,no-resolve</span></span><br><span class="line">  <span class="comment"># 3. Block Private IPv4 / Internal VPC subnets</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">GEOIP,private,REJECT,no-resolve</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">IP-CIDR,10.0.0.0/8,REJECT,no-resolve</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">IP-CIDR,172.16.0.0/12,REJECT,no-resolve</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">IP-CIDR,192.168.0.0/16,REJECT,no-resolve</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">IP-CIDR,100.64.0.0/10,REJECT,no-resolve</span></span><br><span class="line">  <span class="comment"># 4. Block Private IPv6 subnets</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">IP-CIDR6,fc00::/7,REJECT,no-resolve</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">IP-CIDR6,fe80::/10,REJECT,no-resolve</span></span><br><span class="line">  <span class="comment"># 5. Route all other outbound traffic directly</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">MATCH,DIRECT</span></span><br></pre></td></tr></table></figure>
+
+<p>启动测试：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动</span></span><br><span class="line">/usr/local/bin/mihomo -d /etc/mihomo</span><br></pre></td></tr></table></figure>
+
+<h3 id="流量监控-1"><a href="#流量监控-1" class="headerlink" title="流量监控"></a>流量监控</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 通过api获取流量信息</span></span><br><span class="line">curl http://127.0.0.1:10002/traffic</span><br><span class="line"><span class="comment"># &#123;&quot;up&quot;:569,&quot;down&quot;:8819,&quot;upTotal&quot;:2878,&quot;downTotal&quot;:4197581&#125;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>测试了好几次，sing-box跟mihomo都可以配置多用户，但无法获取用户级别的流量信息，放弃</p>
+</blockquote>
+<h3 id="Systemd-配置-1"><a href="#Systemd-配置-1" class="headerlink" title="Systemd 配置"></a>Systemd 配置</h3><p>编辑<code>/etc/systemd/system/mihomo.service</code></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[Unit]</span></span><br><span class="line"><span class="attr">Description</span>=Mihomo Service</span><br><span class="line"><span class="attr">After</span>=network-<span class="literal">on</span>line.target</span><br><span class="line"><span class="attr">Wants</span>=network-<span class="literal">on</span>line.target</span><br><span class="line"></span><br><span class="line"><span class="section">[Service]</span></span><br><span class="line"><span class="attr">Type</span>=simple</span><br><span class="line"><span class="attr">User</span>=vagrant</span><br><span class="line"><span class="attr">Group</span>=vagrant</span><br><span class="line"><span class="attr">ExecStart</span>=/usr/local/bin/mihomo -d /etc/mihomo</span><br><span class="line"><span class="attr">Restart</span>=<span class="literal">on</span>-failure</span><br><span class="line"><span class="attr">LimitNOFILE</span>=<span class="number">512000</span></span><br><span class="line"></span><br><span class="line"><span class="section">[Install]</span></span><br><span class="line"><span class="attr">WantedBy</span>=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>安装并设置开机启动</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl daemon-reload</span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> --now mihomo.service</span><br><span class="line"><span class="built_in">sudo</span> systemctl status mihomo.service</span><br></pre></td></tr></table></figure>
+
+<h2 id="Nftables-配置"><a href="#Nftables-配置" class="headerlink" title="Nftables 配置"></a>Nftables 配置</h2><p>把配置写到<code>/etc/nftables.d/my_custom.conf</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/sbin/nft -f</span><br><span class="line"></span><br><span class="line">table inet my_custom_table</span><br><span class="line">delete table inet my_custom_table</span><br><span class="line"></span><br><span class="line">table inet my_custom_table &#123;</span><br><span class="line">    chain input &#123;</span><br><span class="line">        type filter hook input priority filter; policy accept;</span><br><span class="line"></span><br><span class="line">        tcp dport 30002 meta mark set 2 counter accept comment &quot;input-tcp-30002&quot;</span><br><span class="line">        udp dport 30002 meta mark set 2 counter accept comment &quot;input-udp-30002&quot;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    chain output &#123;</span><br><span class="line">        type filter hook output priority filter; policy accept;</span><br><span class="line"></span><br><span class="line">        tcp sport 30002 meta mark set 2 counter accept comment &quot;output-tcp-30002&quot;</span><br><span class="line">        udp sport 30002 meta mark set 2 counter accept comment &quot;output-udp-30002&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试验证</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># dry-run测试</span></span><br><span class="line"><span class="built_in">sudo</span> nft -c -f /etc/nftables.d/my_custom.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生效</span></span><br><span class="line"><span class="built_in">sudo</span> nft -f /etc/nftables.d/my_custom.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看已有规则</span></span><br><span class="line"><span class="built_in">sudo</span> nft -a list ruleset</span><br></pre></td></tr></table></figure>
+
+<p>可以考虑放到<code>/etc/nftables.conf</code></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">include &quot;/etc/nftables.d/*.conf&quot;</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我发现虽然sing-box、mihomo、shadowsocks-rust都可以支持单端口多用户，但是流量却只能做到进程级别，如果生产环境要使用，最好还是用户-端口单一映射管理</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Sing-box"><span class="toc-number">1.</span> <span class="toc-text">Sing-box</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-number">1.1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE"><span class="toc-number">1.2.</span> <span class="toc-text">配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E7%9B%91%E6%8E%A7"><span class="toc-number">1.3.</span> <span class="toc-text">流量监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Systemd-%E9%85%8D%E7%BD%AE"><span class="toc-number">1.4.</span> <span class="toc-text">Systemd 配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Mihomo"><span class="toc-number">2.</span> <span class="toc-text">Mihomo</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-1"><span class="toc-number">2.1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-1"><span class="toc-number">2.2.</span> <span class="toc-text">配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E7%9B%91%E6%8E%A7-1"><span class="toc-number">2.3.</span> <span class="toc-text">流量监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Systemd-%E9%85%8D%E7%BD%AE-1"><span class="toc-number">2.4.</span> <span class="toc-text">Systemd 配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nftables-%E9%85%8D%E7%BD%AE"><span class="toc-number">3.</span> <span class="toc-text">Nftables 配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&text=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&title=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&is_video=false&description=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=代理 App 选型尝试：Sing-box VS Mihomo&body=Check out this article: https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&title=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&title=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&title=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&title=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&name=代理 App 选型尝试：Sing-box VS Mihomo&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://y2k38.github.io/production-proxy-selection-sing-box-vs-mihomo/&t=代理 App 选型尝试：Sing-box VS Mihomo"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2026
+    y2k38
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
