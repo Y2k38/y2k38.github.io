@@ -14,7 +14,7 @@
 <meta property="og:description" content="Sing-box安装GitHub下载地址： sing-box-1.14.0-linux-amd64.tar.gz 安装步骤如下 1234567891011121314151617181920212223242526# 1. 下载curl -LO https:&#x2F;&#x2F;github.com&#x2F;SagerNet&#x2F;sing-box&#x2F;releases&#x2F;download&#x2F;v1.14.0&#x2F;sing-box-1.14.">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-09-05T02:12:17.000Z">
-<meta property="article:modified_time" content="2026-09-06T09:53:52.076Z">
+<meta property="article:modified_time" content="2026-09-12T15:32:17.524Z">
 <meta property="article:author" content="y2k38">
 <meta property="article:tag" content="sing-box">
 <meta property="article:tag" content="mihomo">
@@ -205,7 +205,7 @@
 
 <p>可以考虑放到<code>/etc/nftables.conf</code></p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">include &quot;/etc/nftables.d/*.conf&quot;</span><br></pre></td></tr></table></figure>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我发现虽然sing-box、mihomo、shadowsocks-rust都可以支持单端口多用户，但是流量却只能做到进程级别，如果生产环境要使用，最好还是用户-端口单一映射管理</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我发现虽然sing-box、mihomo、shadowsocks-rust都可以支持单端口多用户，但是流量却只能做到进程级别，如果生产环境要使用，最好还是用户-端口单一映射管理。sing-box的文档写的跟狗屎一样，mihomo可以使用我需要的shadowsocks、anytls、hy2、vless协议，可以完全转向mihomo</p>
 
   </div>
 </article>
