@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="下载 下载Garage  1curl -LO https:&#x2F;&#x2F;garagehq.deuxfleurs.fr&#x2F;_releases&#x2F;v2.5.0&#x2F;x86_64-unknown-linux-musl&#x2F;garage   安装Garage  123chmod +x .&#x2F;garagesudo mv .&#x2F;garage &#x2F;usr&#x2F;local&#x2F;bin  配置 创建存储目录  12sudo mkdir -p &#x2F;var">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 Garage 构建轻量级自托管 S3 对象存储">
+<meta property="og:url" content="https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/index.html">
+<meta property="og:site_name" content="Y2k38&#39;s blog">
+<meta property="og:description" content="下载 下载Garage  1curl -LO https:&#x2F;&#x2F;garagehq.deuxfleurs.fr&#x2F;_releases&#x2F;v2.5.0&#x2F;x86_64-unknown-linux-musl&#x2F;garage   安装Garage  123chmod +x .&#x2F;garagesudo mv .&#x2F;garage &#x2F;usr&#x2F;local&#x2F;bin  配置 创建存储目录  12sudo mkdir -p &#x2F;var">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-20T10:57:09.000Z">
+<meta property="article:modified_time" content="2026-11-20T10:57:09.813Z">
+<meta property="article:author" content="y2k38">
+<meta property="article:tag" content="Garage">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>使用 Garage 构建轻量级自托管 S3 对象存储</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/production-proxy-selection-sing-box-vs-mihomo/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&text=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&title=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&is_video=false&description=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=使用 Garage 构建轻量级自托管 S3 对象存储&body=Check out this article: https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&title=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&title=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&title=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&title=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&name=使用 Garage 构建轻量级自托管 S3 对象存储&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&t=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD"><span class="toc-number">1.</span> <span class="toc-text">下载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">3.</span> <span class="toc-text">启动服务器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%AF%B9%E7%8A%B6%E6%80%81"><span class="toc-number">4.</span> <span class="toc-text">核对状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E9%85%8Dlayout"><span class="toc-number">5.</span> <span class="toc-text">分配layout</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E5%AD%98%E5%82%A8%E6%A1%B6%E8%B7%9F%E8%AE%BF%E9%97%AE%E5%87%AD%E8%AF%81"><span class="toc-number">6.</span> <span class="toc-text">创建存储桶跟访问凭证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8s3%E5%B7%A5%E5%85%B7%E9%AA%8C%E8%AF%81"><span class="toc-number">7.</span> <span class="toc-text">用s3工具验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx%E5%BC%80%E6%94%BEbucket"><span class="toc-number">8.</span> <span class="toc-text">Nginx开放bucket</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        使用 Garage 构建轻量级自托管 S3 对象存储
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">y2k38</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-11-20T10:57:09.000Z" class="dt-published" itemprop="datePublished">2026-11-20</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Garage/" rel="tag">Garage</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://garagehq.deuxfleurs.fr/download/">下载Garage</a></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -LO https://garagehq.deuxfleurs.fr/_releases/v2.5.0/x86_64-unknown-linux-musl/garage</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>安装Garage</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">chmod</span> +x ./garage</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mv</span> ./garage /usr/local/bin</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><ol>
+<li>创建存储目录</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /var/lib/garage/meta /var/lib/garage/data</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chown</span> -R <span class="variable">$USER</span>:<span class="variable">$USER</span> /var/lib/garage</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>创建配置文件</li>
+</ol>
+<p>配置文件路径默认是<code>/etc/garage.toml</code>，可以改成其他路径，设置好环境变量<code>GARAGE_CONFIG_FILE</code>，或者每次执行命令添加<code>-c /path/to/garage.toml</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> GARAGE_CONFIG_FILE=/etc/garage.toml</span><br></pre></td></tr></table></figure>
+
+<p>配置内容如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/garage.toml &gt;/dev/null &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">metadata_dir = &quot;/var/lib/garage/meta&quot;</span></span><br><span class="line"><span class="string">data_dir = &quot;/var/lib/garage/data&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 单机测试/起步可用 sqlite；多节点且 replication_factor &gt;= 2 推荐 lmdb</span></span><br><span class="line"><span class="string">db_engine = &quot;sqlite&quot;</span></span><br><span class="line"><span class="string"># 副本数不能超过节点数；单机/测试用 1，生产多节点常用 3（需对应节点与 zone 规划）</span></span><br><span class="line"><span class="string">replication_factor = 1</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 若改用 lmdb，开启自动元数据快照。注意：lmdb 不可跨 CPU 架构迁移</span></span><br><span class="line"><span class="string"># db_engine = &quot;lmdb&quot;</span></span><br><span class="line"><span class="string"># metadata_auto_snapshot_interval = &quot;6h&quot;</span></span><br><span class="line"><span class="string"># compression_level = 2</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 节点间 RPC 通信监听地址（默认 3901），仅用于集群内部节点通信与数据同步，勿直接暴露公网</span></span><br><span class="line"><span class="string">rpc_bind_addr = &quot;[::]:3901&quot;</span></span><br><span class="line"><span class="string"># 单机可填 127.0.0.1:3901；多节点集群必须填其他节点能连上的本机 IP/域名:3901</span></span><br><span class="line"><span class="string">rpc_public_addr = &quot;127.0.0.1:3901&quot;</span></span><br><span class="line"><span class="string"># 集群内所有节点必须使用相同的 rpc_secret</span></span><br><span class="line"><span class="string">rpc_secret = &quot;$(openssl rand -hex 32)&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># S3 标准协议端点（供后端 SDK、CLI 工具、预签名上传及对象管理使用）</span></span><br><span class="line"><span class="string">[s3_api]</span></span><br><span class="line"><span class="string">s3_region = &quot;garage&quot;</span></span><br><span class="line"><span class="string">api_bind_addr = &quot;[::]:3900&quot;</span></span><br><span class="line"><span class="string">root_domain = &quot;.s3.mydomain.com&quot;</span></span><br><span class="line"><span class="string"># 本地测试可用 http://127.0.0.1:3900，nginx用 https://s3.mydomain.com</span></span><br><span class="line"><span class="string">public_endpoint = &quot;http://127.0.0.1:3900&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># S3 静态网站/公开 Bucket 直访端点（无需 S3 签名，浏览器可直接访问）</span></span><br><span class="line"><span class="string">[s3_web]</span></span><br><span class="line"><span class="string">bind_addr = &quot;[::]:3902&quot;</span></span><br><span class="line"><span class="string">root_domain = &quot;.cdn.mydomain.com&quot;</span></span><br><span class="line"><span class="string">index = &quot;index.html&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 运维管理与监控接口，用于集群状态查询、健康检查与指标采集，切勿直接暴露公网</span></span><br><span class="line"><span class="string"># 各节点均可开启（保持一致的 token，便于本地/内网管理与监控；切勿直接暴露公网）</span></span><br><span class="line"><span class="string">[admin]</span></span><br><span class="line"><span class="string">api_bind_addr = &quot;[::]:3903&quot;</span></span><br><span class="line"><span class="string">admin_token = &quot;$(openssl rand -base64 32)&quot;</span></span><br><span class="line"><span class="string">metrics_token = &quot;$(openssl rand -base64 32)&quot;</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="启动服务器"><a href="#启动服务器" class="headerlink" title="启动服务器"></a>启动服务器</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># export GARAGE_CONFIG_FILE=/etc/garage.toml</span></span><br><span class="line">garage server</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.232638Z  INFO garage::server: Loading configuration from /etc/garage.toml...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.235128Z  INFO garage::server: Initializing Garage main data store...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.243008Z  INFO garage_model::garage: Opening database...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.248581Z  INFO garage_db::sqlite_adapter: Opening Sqlite database at: /var/lib/garage/meta/db.sqlite</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.261430Z  INFO garage_model::garage: Initializing RPC...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.261555Z  INFO garage_model::garage: Initialize background variable system...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.261571Z  INFO garage_model::garage: Initialize membership management system...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.261632Z  INFO garage_rpc::system: Generating new node key pair.</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.263862Z  INFO garage_rpc::system: Node ID of this node: 5c81343aa6d99fde</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.264452Z  INFO garage_rpc::layout::manager: No valid previous cluster layout stored (IO error: No such file or directory (os error 2)), starting fresh.</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.264859Z  INFO garage_rpc::layout::helper: ack_until updated to 0</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.266518Z  INFO garage_model::garage: Initialize block manager...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.272119Z  INFO garage_model::garage: Initialize admin_token_table...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.273241Z  INFO garage_model::garage: Initialize bucket_table...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.274183Z  INFO garage_model::garage: Initialize bucket_alias_table...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.275431Z  INFO garage_model::garage: Initialize key_table_table...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.276746Z  INFO garage_model::garage: Initialize block_ref_table...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.279925Z  INFO garage_model::garage: Initialize version_table...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.282167Z  INFO garage_model::garage: Initialize multipart upload counter table...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.285473Z  INFO garage_model::garage: Initialize multipart upload table...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.287074Z  INFO garage_model::garage: Initialize object counter table...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.288194Z  INFO garage_model::garage: Initialize object_table...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.289329Z  INFO garage_model::garage: Load lifecycle worker state...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.289438Z  INFO garage_model::garage: Initialize K2V counter table...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.290522Z  INFO garage_model::garage: Initialize K2V subscription manager...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.290554Z  INFO garage_model::garage: Initialize K2V item table...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.291615Z  INFO garage_model::garage: Initialize K2V RPC handler...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.291907Z  INFO garage::server: Initializing background runner...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.291987Z  INFO garage::server: Spawning Garage workers...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.292175Z  INFO garage_model::s3::lifecycle_worker: Starting lifecycle worker for 2026-11-20</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.292187Z  INFO garage::server: Initialize Admin API server and metrics collector...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.294265Z  INFO garage_model::s3::lifecycle_worker: Lifecycle worker finished for 2026-11-20, objects expired: 0, mpu aborted: 0</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.409184Z  INFO garage::server: Launching internal Garage cluster communications...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.409250Z  INFO garage::server: Initializing S3 API server...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.409259Z  INFO garage::server: Launching Admin API server...</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.409352Z  INFO garage_api_common::generic_server: Admin API server listening on http://[::]:3903</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.412065Z  INFO garage_api_common::generic_server: S3 API server listening on http://[::]:3900</span></span><br><span class="line"><span class="comment"># 2026-11-20T03:16:02.425717Z  INFO garage_net::netapp: Listening on [::]:3901</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="核对状态"><a href="#核对状态" class="headerlink" title="核对状态"></a>核对状态</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看节点ID（记下前几位或完整ID）</span></span><br><span class="line">garage status</span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== HEALTHY NODES ====</span></span><br><span class="line"><span class="comment"># ID                Hostname         Address         Tags  Zone  Capacity          DataAvail  ResyncQueue  Version</span></span><br><span class="line"><span class="comment"># 5c81343aa6d99fde  DESKTOP-97FP0NF  127.0.0.1:3901              NO ROLE ASSIGNED             0            v2.5.0</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="分配layout"><a href="#分配layout" class="headerlink" title="分配layout"></a>分配layout</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 暂存角色分配</span></span><br><span class="line">garage layout assign 5c81343aa6d99fde -z dc1 -c 10G</span><br><span class="line"></span><br><span class="line"><span class="comment"># Role changes are staged but not yet committed.</span></span><br><span class="line"><span class="comment"># Use `garage layout show` to view staged role changes,</span></span><br><span class="line"><span class="comment"># and `garage layout apply` to enact staged changes.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 检查暂存变更是否正确</span></span><br><span class="line">garage layout show</span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== CURRENT CLUSTER LAYOUT ====</span></span><br><span class="line"><span class="comment"># No nodes currently have a role in the cluster.</span></span><br><span class="line"><span class="comment"># See `garage status` to view available nodes.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Current cluster layout version: 0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== STAGED ROLE CHANGES ====</span></span><br><span class="line"><span class="comment"># ID                Tags  Zone  Capacity</span></span><br><span class="line"><span class="comment"># 5c81343aa6d99fde  []    dc1   9.3 GiB</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== NEW CLUSTER LAYOUT AFTER APPLYING CHANGES ====</span></span><br><span class="line"><span class="comment"># ID                Tags  Zone  Capacity  Usable capacity</span></span><br><span class="line"><span class="comment"># 5c81343aa6d99fde  []    dc1   9.3 GiB   9.3 GiB (100.0%)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Zone redundancy: maximum</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== COMPUTATION OF A NEW PARTITION ASSIGNATION ====</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Partitions are replicated 1 times on at least 1 distinct zones.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Optimal partition size:                     37.3 MiB</span></span><br><span class="line"><span class="comment"># Usable capacity / total cluster capacity:   9.3 GiB / 9.3 GiB (100.0 %)</span></span><br><span class="line"><span class="comment"># Effective capacity (replication factor 1):  9.3 GiB</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># dc1                 Tags  Partitions        Capacity  Usable capacity</span></span><br><span class="line"><span class="comment">#   5c81343aa6d99fde  []    256 (256 new)     9.3 GiB   9.3 GiB (100.0%)</span></span><br><span class="line"><span class="comment">#   TOTAL                   256 (256 unique)  9.3 GiB   9.3 GiB (100.0%)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># To enact the staged role changes, type:</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#     garage layout apply --version 1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># You can also revert all proposed changes with: garage layout revert</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 正式提交生效第1版 layout</span></span><br><span class="line">garage layout apply --version 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== COMPUTATION OF A NEW PARTITION ASSIGNATION ====</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Partitions are replicated 1 times on at least 1 distinct zones.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Optimal partition size:                     37.3 MiB</span></span><br><span class="line"><span class="comment"># Usable capacity / total cluster capacity:   9.3 GiB / 9.3 GiB (100.0 %)</span></span><br><span class="line"><span class="comment"># Effective capacity (replication factor 1):  9.3 GiB</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># dc1                 Tags  Partitions        Capacity  Usable capacity</span></span><br><span class="line"><span class="comment">#   5c81343aa6d99fde  []    256 (256 new)     9.3 GiB   9.3 GiB (100.0%)</span></span><br><span class="line"><span class="comment">#   TOTAL                   256 (256 unique)  9.3 GiB   9.3 GiB (100.0%)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># New cluster layout with updated role assignment has been applied in cluster.</span></span><br><span class="line"><span class="comment"># Data will now be moved around between nodes accordingly.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 再次检查状态，确认角色、Zone、Capacity 已生效</span></span><br><span class="line">garage status</span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== HEALTHY NODES ====</span></span><br><span class="line"><span class="comment"># ID                Hostname         Address         Tags  Zone  Capacity  DataAvail          ResyncQueue  Version</span></span><br><span class="line"><span class="comment"># 5c81343aa6d99fde  DESKTOP-97FP0NF  127.0.0.1:3901  []    dc1   9.3 GiB   902.3 GiB (89.6%)  0            v2.5.0</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="创建存储桶跟访问凭证"><a href="#创建存储桶跟访问凭证" class="headerlink" title="创建存储桶跟访问凭证"></a>创建存储桶跟访问凭证</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 创建key，用于管理需要的bucket</span></span><br><span class="line">garage key create myapp-dev-s3-key</span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== ACCESS KEY INFORMATION ====</span></span><br><span class="line"><span class="comment"># Key ID:              GKeafdc50fbd87ccbf1c2d6785</span></span><br><span class="line"><span class="comment"># Key name:            myapp-dev-s3-key</span></span><br><span class="line"><span class="comment"># Secret key:          c1f92a47d29336d0a73b38cb46848c22bdd85d39588bf59975fc2b9b2884561d</span></span><br><span class="line"><span class="comment"># Created:             2026-11-20 11:32:59.338 +08:00</span></span><br><span class="line"><span class="comment"># Validity:            valid</span></span><br><span class="line"><span class="comment"># Expiration:          never</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Can create buckets:  false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== BUCKETS FOR THIS KEY ====</span></span><br><span class="line"><span class="comment"># Permissions  ID  Global aliases  Local aliases</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 创建bucket</span></span><br><span class="line">garage bucket create myapp-public-dev</span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== BUCKET INFORMATION ====</span></span><br><span class="line"><span class="comment"># Bucket:          4e91cd11b498980ab52b8dafb20289077b05b14205e5905be73413d1751c5859</span></span><br><span class="line"><span class="comment"># Created:         2026-11-20 11:27:37.236 +08:00</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Size:            0 B (0 B)</span></span><br><span class="line"><span class="comment"># Objects:         0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Website access:  false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Global alias:    myapp-public-dev</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== KEYS FOR THIS BUCKET ====</span></span><br><span class="line"><span class="comment"># Permissions  Access key    Local aliases</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 授予权限</span></span><br><span class="line">garage bucket allow --<span class="built_in">read</span> --write --owner myapp-public-dev --key myapp-dev-s3-key</span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== BUCKET INFORMATION ====</span></span><br><span class="line"><span class="comment"># Bucket:          4e91cd11b498980ab52b8dafb20289077b05b14205e5905be73413d1751c5859</span></span><br><span class="line"><span class="comment"># Created:         2026-11-20 11:27:37.236 +08:00</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Size:            0 B (0 B)</span></span><br><span class="line"><span class="comment"># Objects:         0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Website access:  false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Global alias:    myapp-public-dev</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== KEYS FOR THIS BUCKET ====</span></span><br><span class="line"><span class="comment"># Permissions  Access key                                        Local aliases</span></span><br><span class="line"><span class="comment"># RWO          GKeafdc50fbd87ccbf1c2d6785  myapp-dev-s3-key</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 授权直接访问</span></span><br><span class="line">garage bucket website --allow myapp-public-dev</span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== BUCKET INFORMATION ====</span></span><br><span class="line"><span class="comment"># Bucket:            4e91cd11b498980ab52b8dafb20289077b05b14205e5905be73413d1751c5859</span></span><br><span class="line"><span class="comment"># Created:           2026-11-20 11:27:37.236 +08:00</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Size:              0 B (0 B)</span></span><br><span class="line"><span class="comment"># Objects:           0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Website access:    true</span></span><br><span class="line"><span class="comment">#   index document:  index.html</span></span><br><span class="line"><span class="comment">#   error document:  (not defined)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Global alias:      myapp-public-dev</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ==== KEYS FOR THIS BUCKET ====</span></span><br><span class="line"><span class="comment"># Permissions  Access key                                        Local aliases</span></span><br><span class="line"><span class="comment"># RWO          GKeafdc50fbd87ccbf1c2d6785  myapp-dev-s3-key</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 结果同上</span></span><br><span class="line">garage bucket info myapp-public-dev</span><br></pre></td></tr></table></figure>
+
+<h2 id="用s3工具验证"><a href="#用s3工具验证" class="headerlink" title="用s3工具验证"></a>用s3工具验证</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 填入myapp-dev-s3-key的Key ID跟Secret key</span></span><br><span class="line"><span class="built_in">export</span> AWS_ACCESS_KEY_ID=<span class="string">&quot;GKeafdc50fbd87ccbf1c2d6785&quot;</span></span><br><span class="line"><span class="built_in">export</span> AWS_SECRET_ACCESS_KEY=<span class="string">&quot;c1f92a47d29336d0a73b38cb46848c22bdd85d39588bf59975fc2b9b2884561d&quot;</span></span><br><span class="line"><span class="built_in">export</span> AWS_DEFAULT_REGION=<span class="string">&quot;garage&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;hello garage cluster&quot;</span> &gt; /tmp/hello.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 上传</span></span><br><span class="line">aws --endpoint-url http://127.0.0.1:3900 s3 <span class="built_in">cp</span> /tmp/hello.txt s3://myapp-public-dev/module-test/2026/11/u000001/6c98f490d246c63d7de26fec6ab2311d.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下载</span></span><br><span class="line">aws --endpoint-url http://127.0.0.1:3900 s3 <span class="built_in">cp</span> s3://myapp-public-dev/module-test/2026/11/u000001/6c98f490d246c63d7de26fec6ab2311d.txt /tmp/hello-down.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 对比验证</span></span><br><span class="line"><span class="built_in">cat</span> /tmp/hello-down.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 需要开启s3_web</span></span><br><span class="line">curl -i http://127.0.0.1:3902/myapp-public-dev/module-test/2026/11/u000001/6c98f490d246c63d7de26fec6ab2311d.txt</span><br></pre></td></tr></table></figure>
+
+<h2 id="Nginx开放bucket"><a href="#Nginx开放bucket" class="headerlink" title="Nginx开放bucket"></a>Nginx开放bucket</h2><p>编辑nginx配置文件<code>vi /etc/nginx/conf.d/myapp-public-dev.cdn.mydomain.com</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name myapp-public-dev.cdn.mydomain.com;</span><br><span class="line"></span><br><span class="line">    location / &#123;</span><br><span class="line">        proxy_pass http://127.0.0.1:3902;</span><br><span class="line"></span><br><span class="line">        proxy_set_header Host $host;</span><br><span class="line">        proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line"></span><br><span class="line">        proxy_http_version 1.1;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">curl -i http://myapp-public-dev.cdn.mydomain.com/module-test/2026/11/u000001/6c98f490d246c63d7de26fec6ab2311d.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># HTTP/1.1 200 OK</span></span><br><span class="line"><span class="comment"># Server: nginx/1.24.0 (Ubuntu)</span></span><br><span class="line"><span class="comment"># Date: Fri, 20 Nov 2026 06:38:34 GMT</span></span><br><span class="line"><span class="comment"># Content-Type: text/plain</span></span><br><span class="line"><span class="comment"># Content-Length: 21</span></span><br><span class="line"><span class="comment"># Connection: keep-alive</span></span><br><span class="line"><span class="comment"># last-modified: Fri, 20 Nov 2026 03:52:10 GMT</span></span><br><span class="line"><span class="comment"># accept-ranges: bytes</span></span><br><span class="line"><span class="comment"># etag: &quot;23502dee82c1244624b0fb1b99bf98ba&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># hello garage cluster</span></span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD"><span class="toc-number">1.</span> <span class="toc-text">下载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">3.</span> <span class="toc-text">启动服务器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%AF%B9%E7%8A%B6%E6%80%81"><span class="toc-number">4.</span> <span class="toc-text">核对状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E9%85%8Dlayout"><span class="toc-number">5.</span> <span class="toc-text">分配layout</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E5%AD%98%E5%82%A8%E6%A1%B6%E8%B7%9F%E8%AE%BF%E9%97%AE%E5%87%AD%E8%AF%81"><span class="toc-number">6.</span> <span class="toc-text">创建存储桶跟访问凭证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8s3%E5%B7%A5%E5%85%B7%E9%AA%8C%E8%AF%81"><span class="toc-number">7.</span> <span class="toc-text">用s3工具验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx%E5%BC%80%E6%94%BEbucket"><span class="toc-number">8.</span> <span class="toc-text">Nginx开放bucket</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&text=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&title=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&is_video=false&description=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=使用 Garage 构建轻量级自托管 S3 对象存储&body=Check out this article: https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&title=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&title=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&title=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&title=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&name=使用 Garage 构建轻量级自托管 S3 对象存储&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://y2k38.github.io/building-a-lightweight-self-hosted-s3-object-store-with-garage/&t=使用 Garage 构建轻量级自托管 S3 对象存储"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2026
+    y2k38
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/Y2k38">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
